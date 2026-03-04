@@ -1,14 +1,14 @@
 import 'package:dermalyze/core/constants/app_assets.dart';
 import 'package:dermalyze/core/constants/app_colors.dart';
 import 'package:dermalyze/core/routes/app_routes.dart';
+import 'package:dermalyze/features/Login2/Data/repositories/login_repository_impl.dart';
+import 'package:dermalyze/features/Login2/presentation/bloc/login_bloc.dart';
+import 'package:dermalyze/features/Login2/presentation/bloc/login_event.dart';
+import 'package:dermalyze/features/Login2/presentation/bloc/login_state.dart';
 import 'package:dermalyze/features/auth/view/login/register_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:dermalyze/features/login/presentation/bloc/login_bloc.dart';
-import 'package:dermalyze/features/login/presentation/bloc/login_event.dart';
-import 'package:dermalyze/features/login/presentation/bloc/login_state.dart';
-import 'package:dermalyze/features/login/data/repositories/login_repository_impl.dart';
 
 const TextStyle kTitleTextStyle = TextStyle(
   fontSize: 24,

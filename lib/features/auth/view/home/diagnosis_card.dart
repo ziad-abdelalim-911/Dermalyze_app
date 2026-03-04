@@ -1,5 +1,4 @@
 import 'package:dermalyze/features/auth/view/disease_details_view/disease_details_view.dart';
-import 'package:dermalyze/features/auth/view/login/Patient_SignUp.dart';
 import 'package:flutter/material.dart';
 
 class DiagnosisCard extends StatelessWidget {

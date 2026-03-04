@@ -1,7 +1,7 @@
 import 'package:dermalyze/core/network/api_exception.dart';
 import 'package:dermalyze/core/network/api_service.dart';
-import 'package:dermalyze/features/login/data/models/login_response_model.dart';
-import 'package:dermalyze/features/login/domain/repositories/login_repository.dart';
+import 'package:dermalyze/features/Login2/Data/models/login_response_model.dart';
+import 'package:dermalyze/features/Login2/domain/repositories/login_repository.dart';
 
 class LoginRepositoryImpl implements LoginRepository {
   final ApiService _apiService = ApiService();

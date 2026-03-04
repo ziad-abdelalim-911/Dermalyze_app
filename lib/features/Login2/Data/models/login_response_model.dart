@@ -1,6 +1,7 @@
 
 
-import 'package:dermalyze/features/login/data/models/user_model.dart';
+
+import 'package:dermalyze/features/Login2/Data/models/user_model.dart';
 
 class LoginResponseModel {
   final String token;
