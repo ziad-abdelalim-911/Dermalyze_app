@@ -11,54 +11,49 @@ class AuthPages extends StatefulWidget {
 }
 
 class _AuthPagesState extends State<AuthPages> {
-
   final PageController _controller = PageController();
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-    body: SafeArea(
-    child: Column(
-    children: [
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: PageView(
+                controller: _controller,
+                children: const [
+                  SignupView(), // ← شاشتك الأولى
+                  LoginView(), // ← مثال لشاشة تانية (ممكن تضيف أي صفحة بدلها)
+                ],
+              ),
+            ),
 
-    Expanded(
-    child: PageView(
-    controller: _controller,
-    children: const [
-    SignupView(),   // ← شاشتك الأولى
-    LoginView(),    // ← مثال لشاشة تانية (ممكن تضيف أي صفحة بدلها)
-    ],
-    ),
-    ),
-
-    Padding(
-    padding: const EdgeInsets.only(bottom: 24),
-    child: SmoothPageIndicator(
-    controller: _controller,
-    count: 2,
-    effect: ExpandingDotsEffect(
-    dotHeight: 10,
-    dotWidth: 10,
-    spacing: 8,
-    expansionFactor: 3,
-    dotColor: Colors.grey.withOpacity(0.3),
-    activeDotColor: Colors.blue,
-    ),
-    onDotClicked: (index) {
-    _controller.animateToPage(
-    index,
-    duration: const Duration(milliseconds: 300),
-    curve: Curves.easeInOut,
+            Padding(
+              padding: const EdgeInsets.only(bottom: 24),
+              child: SmoothPageIndicator(
+                controller: _controller,
+                count: 2,
+                effect: ExpandingDotsEffect(
+                  dotHeight: 10,
+                  dotWidth: 10,
+                  spacing: 8,
+                  expansionFactor: 3,
+                  dotColor: Colors.grey.withOpacity(0.3),
+                  activeDotColor: Colors.blue,
+                ),
+                onDotClicked: (index) {
+                  _controller.animateToPage(
+                    index,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
     );
-    },
-    ),
-    ),
-    ],
-    ),
-    ),
-    );
-    }
-    }
-
-
+  }
+}
