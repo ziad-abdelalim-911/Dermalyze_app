@@ -13,17 +13,27 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-    
-
       debugShowCheckedModeBanner: false,
 
       title: 'Dermalyze',
 
-      theme: ThemeData(primaryColor: AppColors.primaryColor),
+      theme: ThemeData(
+        primaryColor: AppColors.primaryColor,
+      ),
 
       initialRoute: AppRoutes.splash,
 
       onGenerateRoute: AppRouter.generateRoute,
+
+      onUnknownRoute: (settings) {
+        return MaterialPageRoute(
+          builder: (_) => const Scaffold(
+            body: Center(
+              child: Text("Page Not Found"),
+            ),
+          ),
+        );
+      },
     );
   }
 }

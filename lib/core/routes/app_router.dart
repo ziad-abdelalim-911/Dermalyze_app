@@ -33,7 +33,7 @@ class AppRouter {
       case AppRoutes.login:
         return MaterialPageRoute(builder: (_) => const LoginView());
         
-      case AppRoutes.Signup:
+      case AppRoutes.signup:
         return MaterialPageRoute(builder: (_) => const SignupView());
 
       case AppRoutes.register:

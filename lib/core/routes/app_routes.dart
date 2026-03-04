@@ -22,5 +22,5 @@ class AppRoutes {
   static const notifications = "/notifications";
   static const medicationList = "/medicationList";
   static const diseaseDetails = "/diseaseDetails";
-  static const Signup = "/signup";
+  static const signup = "/signup";
 }
