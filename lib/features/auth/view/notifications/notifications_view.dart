@@ -18,14 +18,20 @@ class NotificationsView extends StatelessWidget {
             child: Row(
               children: [
                 /// back button
-                Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF1F5F9),
-                    borderRadius: BorderRadius.circular(12),
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+
+                  child: Container(
+                    width: 40,
+                    height: 40,
+
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+
+                    child: const Icon(Icons.arrow_back),
                   ),
-                  child: const Icon(Icons.arrow_back),
                 ),
 
                 const SizedBox(width: 12),
@@ -59,11 +65,7 @@ class NotificationsView extends StatelessWidget {
                 /// mark all read
                 Row(
                   children: const [
-                    Icon(
-                      Icons.check,
-                      color: Color(0xFF10B981),
-                      size: 18,
-                    ),
+                    Icon(Icons.check, color: Color(0xFF10B981), size: 18),
 
                     SizedBox(width: 6),
 
@@ -198,9 +200,7 @@ class NotificationsView extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: const Color(0xFFE6F7F5),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: const Color(0xFF2DD4BF),
-                    ),
+                    border: Border.all(color: const Color(0xFF2DD4BF)),
                   ),
 
                   child: const Column(
@@ -213,9 +213,7 @@ class NotificationsView extends StatelessWidget {
 
                       SizedBox(height: 8),
 
-                      Text(
-                        "• Tap any notification to mark it as read",
-                      ),
+                      Text("• Tap any notification to mark it as read"),
                       Text(
                         "• High priority alerts require immediate attention",
                       ),
@@ -233,7 +231,7 @@ class NotificationsView extends StatelessWidget {
 }
 
 Widget notificationCard({
-  required String icon, 
+  required String icon,
   required Color iconColor,
   required String title,
   required String subtitle,
@@ -250,17 +248,12 @@ Widget notificationCard({
       borderRadius: BorderRadius.circular(16),
 
       border: Border.all(
-        color: isUnread
-            ? const Color(0xFF2DD4BF)
-            : Colors.transparent,
+        color: isUnread ? const Color(0xFF2DD4BF) : Colors.transparent,
         width: 1.5,
       ),
 
       boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(.05),
-          blurRadius: 10,
-        ),
+        BoxShadow(color: Colors.black.withOpacity(.05), blurRadius: 10),
       ],
     ),
 
@@ -295,9 +288,7 @@ Widget notificationCard({
                   Expanded(
                     child: Text(
                       title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ),
 
@@ -307,10 +298,7 @@ Widget notificationCard({
 
               const SizedBox(height: 4),
 
-              Text(
-                subtitle,
-                style: const TextStyle(color: Colors.grey),
-              ),
+              Text(subtitle, style: const TextStyle(color: Colors.grey)),
 
               const SizedBox(height: 6),
 
@@ -342,7 +330,6 @@ Widget notificationCard({
   );
 }
 
-
 /// ================= PRIORITY BADGE =================
 
 Widget priorityBadge(String priority) {
@@ -373,9 +360,6 @@ Widget priorityBadge(String priority) {
       borderRadius: BorderRadius.circular(20),
     ),
 
-    child: Text(
-      priority,
-      style: TextStyle(color: text, fontSize: 12),
-    ),
+    child: Text(priority, style: TextStyle(color: text, fontSize: 12)),
   );
 }

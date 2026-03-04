@@ -5,7 +5,6 @@ import 'package:dermalyze/features/Login2/Data/repositories/login_repository_imp
 import 'package:dermalyze/features/Login2/presentation/bloc/login_bloc.dart';
 import 'package:dermalyze/features/Login2/presentation/bloc/login_event.dart';
 import 'package:dermalyze/features/Login2/presentation/bloc/login_state.dart';
-import 'package:dermalyze/features/auth/view/login/register_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
