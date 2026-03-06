@@ -1,6 +1,7 @@
 import 'package:dermalyze/core/constants/app_colors.dart';
 import 'package:dermalyze/core/routes/app_router.dart';
 import 'package:dermalyze/core/routes/app_routes.dart';
+import 'package:dermalyze/features/auth/view/patients/screens/add_new_patient_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -17,23 +18,20 @@ class MyApp extends StatelessWidget {
 
       title: 'Dermalyze',
 
-      theme: ThemeData(
-        primaryColor: AppColors.primaryColor,
-      ),
+      theme: ThemeData(primaryColor: AppColors.primaryColor),
 
-      initialRoute: AppRoutes.splash,
+      // initialRoute: AppRoutes.splash,
 
-      onGenerateRoute: AppRouter.generateRoute,
+      // onGenerateRoute: AppRouter.generateRoute,
 
-      onUnknownRoute: (settings) {
-        return MaterialPageRoute(
-          builder: (_) => const Scaffold(
-            body: Center(
-              child: Text("Page Not Found"),
-            ),
-          ),
-        );
-      },
+      home: AddNewPatientScreen(),
+
+      // onUnknownRoute: (settings) {
+      //   return MaterialPageRoute(
+      //     builder: (_) =>
+      //         const Scaffold(body: Center(child: Text("Page Not Found"))),
+      //   );
+      // },
     );
   }
 }
