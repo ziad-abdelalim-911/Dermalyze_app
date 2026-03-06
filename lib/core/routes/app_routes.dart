@@ -23,4 +23,5 @@ class AppRoutes {
   static const medicationList = "/medicationList";
   static const diseaseDetails = "/diseaseDetails";
   static const signup = "/signup";
+  static const addNewPatient = "/addNewPatient";
 }

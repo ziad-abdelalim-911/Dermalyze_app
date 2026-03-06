@@ -4,14 +4,13 @@ import 'package:dermalyze/features/auth/view/login/register_view.dart';
 import 'package:dermalyze/features/auth/view/login/signup_view.dart';
 import 'package:dermalyze/features/auth/view/navigation/custom_bottom_nav_bar.dart';
 import 'package:dermalyze/features/auth/view/on_boarding/on_boarding_view.dart';
+import 'package:dermalyze/features/auth/view/patients/screens/add_new_patient_screen.dart';
 import 'package:dermalyze/splash.dart';
 import 'package:flutter/material.dart';
 
 /// AUTH
 import '../../features/auth/view/login/login_view.dart';
 import '../../features/auth/view/forgot_password/forgot_password_view.dart';
-
-/// NAVIGATION
 
 /// FEATURES
 import '../../features/auth/view/ProgressReport_view/progress_report_view.dart';
@@ -32,7 +31,7 @@ class AppRouter {
 
       case AppRoutes.login:
         return MaterialPageRoute(builder: (_) => const LoginView());
-        
+
       case AppRoutes.signup:
         return MaterialPageRoute(builder: (_) => const SignupView());
 
@@ -62,6 +61,9 @@ class AppRouter {
 
       case AppRoutes.diseaseDetails:
         return MaterialPageRoute(builder: (_) => const DiseaseDetailsView());
+
+      case AppRoutes.addNewPatient:
+        return MaterialPageRoute(builder: (_) => const AddNewPatientScreen());
 
       default:
         return MaterialPageRoute(builder: (_) => const CustomBottomNavBar());
