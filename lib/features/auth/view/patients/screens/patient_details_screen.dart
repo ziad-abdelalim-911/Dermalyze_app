@@ -4,7 +4,8 @@ import 'package:dermalyze/features/auth/view/patients/widgets/followup_image_car
 import 'package:dermalyze/features/auth/view/patients/widgets/patient_info_card.dart';
 import 'package:dermalyze/features/auth/view/patients/widgets/prescribed_medications_card.dart';
 import 'package:dermalyze/features/auth/view/patients/widgets/progress_timeline_card.dart';
-
+import 'package:dermalyze/features/auth/view/patients/widgets/schedule_followup_bottom_sheet.dart';
+import 'package:dermalyze/features/auth/view/patients/widgets/update_status_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 
 class PatientDetailsScreen extends StatefulWidget {
@@ -90,7 +91,7 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomButtons(),
+      bottomNavigationBar: _buildBottomButtons(context),
     );
   }
 
@@ -122,7 +123,7 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
     );
   }
 
-  Widget _buildBottomButtons() {
+  Widget _buildBottomButtons(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
       decoration: BoxDecoration(
@@ -143,7 +144,23 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
               height: 48,
               child: OutlinedButton(
                 onPressed: () {
-                  // TODO: navigate to schedule follow-up
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(24)),
+                    ),
+                    builder: (_) => Padding(
+                      padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(context).viewInsets.bottom,
+                      ),
+                      child: const ScheduleFollowupBottomSheet(
+                        patientName: 'Shawkat',
+                        diagnosis: 'Atopic Dermatitis',
+                      ),
+                    ),
+                  );
                 },
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: AppColors.Turqouoise, width: 1.5),
@@ -169,7 +186,17 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
               height: 48,
               child: ElevatedButton(
                 onPressed: () {
-                  // TODO: update status logic
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(24)),
+                    ),
+                    builder: (_) => const UpdateStatusBottomSheet(
+                      patientName: 'Shawkat',
+                    ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.SkyBlue,
