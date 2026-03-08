@@ -282,8 +282,10 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                     criticalCases: '5',
                     onAllPatients: () =>
                         Navigator.pushNamed(context, AppRoutes.allPatients),
-                    onCritical: () =>
-                        Navigator.pushNamed(context, AppRoutes.allPatients),
+                    onCritical: () => Navigator.pushNamed(
+                      context,
+                      AppRoutes.criticalPatients,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   ClinicalResourcesCard(
