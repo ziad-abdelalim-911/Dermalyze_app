@@ -2,7 +2,6 @@ import 'package:dermalyze/core/constants/app_colors.dart';
 import 'package:dermalyze/core/routes/app_routes.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/widgets/add_patient_banner.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/widgets/clinical_resources_card.dart';
-import 'package:dermalyze/features/auth/view/home/doctor/widgets/doctor_home_header.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/widgets/patient_list_card.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/widgets/patient_search_bar.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/widgets/quick_actions_card.dart';
@@ -19,7 +18,6 @@ class DoctorHomeScreen extends StatefulWidget {
 class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
   final _searchController = TextEditingController();
 
-  // Mock Data
   final _stats = const [
     StatItem(
       label: 'Total Patients',
@@ -50,11 +48,11 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
   final List<PatientListItem> _patients = const [
     PatientListItem(
       name: 'Sarah Johnson',
-      diagnosis: '',
+      diagnosis: 'Atopic Dermatitis',
       qualityBadge: 'Medium',
       statusBadge: 'improving',
-      recoveryRate: 0.65,
-      lastVisit: '',
+      recoveryRate: 0.68,
+      lastVisit: '2 days ago',
     ),
     PatientListItem(
       name: 'Michael Chen',
@@ -130,25 +128,111 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
       backgroundColor: const Color(0xFFF0F4F8),
       body: Column(
         children: [
-          // Header with Stats
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              DoctorHomeHeader(
-                doctorName: 'Shawkat',
-                onNotification: () =>
-                    Navigator.pushNamed(context, AppRoutes.notifications),
-                onSettings: () {},
+          // Header + Stats
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              gradient: AppColors.primaryGradient2,
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(28),
+                bottomRight: Radius.circular(28),
               ),
-              Positioned(
-                bottom: -60,
-                left: 16,
-                right: 16,
-                child: StatsGridCard(stats: _stats),
+            ),
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Top Row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Welcome, Dr.',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.85),
+                                fontSize: 13,
+                              ),
+                            ),
+                            const Text(
+                              'Shawkat',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Stack(
+                              children: [
+                                Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: IconButton(
+                                    onPressed: () => Navigator.pushNamed(
+                                        context, AppRoutes.notifications),
+                                    icon: const Icon(
+                                      Icons.notifications_outlined,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 6,
+                                  right: 6,
+                                  child: Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: const BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(width: 10),
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: IconButton(
+                                onPressed: () {},
+                                icon: const Icon(
+                                  Icons.settings_outlined,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    // Stats Grid
+                    StatsGridCard(stats: _stats),
+                  ],
+                ),
               ),
-            ],
+            ),
           ),
-          const SizedBox(height: 60),
           // Scrollable Content
           Expanded(
             child: SingleChildScrollView(
@@ -166,7 +250,6 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                     onChanged: _onSearch,
                   ),
                   const SizedBox(height: 16),
-                  // Patients List Header
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -180,10 +263,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                       ),
                       Text(
                         '${_filteredPatients.length} total',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: AppColors.Gray,
-                        ),
+                        style: TextStyle(fontSize: 13, color: AppColors.Gray),
                       ),
                     ],
                   ),
