@@ -6,6 +6,7 @@ import 'package:dermalyze/features/auth/view/home/doctor/widgets/patient_list_ca
 import 'package:dermalyze/features/auth/view/home/doctor/widgets/patient_search_bar.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/widgets/quick_actions_card.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/widgets/stats_grid_card.dart';
+import 'package:dermalyze/features/auth/view/patients/screens/add_new_patient_screen.dart';
 import 'package:flutter/material.dart';
 
 class DoctorHomeScreen extends StatefulWidget {
@@ -182,7 +183,9 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                   ),
                                   child: IconButton(
                                     onPressed: () => Navigator.pushNamed(
-                                        context, AppRoutes.notifications),
+                                      context,
+                                      AppRoutes.notifications,
+                                    ),
                                     icon: const Icon(
                                       Icons.notifications_outlined,
                                       color: Colors.white,
@@ -241,8 +244,8 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   AddPatientBanner(
-                    onTap: () => Navigator.pushNamed(
-                        context, AppRoutes.addNewPatient),
+                    onTap: () =>
+                        Navigator.pushNamed(context, AppRoutes.addNewPatient),
                   ),
                   const SizedBox(height: 16),
                   PatientSearchBar(
@@ -270,15 +273,17 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                   const SizedBox(height: 10),
                   PatientListCard(
                     patients: _filteredPatients,
-                    onPatientTap: (p) => Navigator.pushNamed(
-                        context, AppRoutes.patientDetails),
+                    onPatientTap: (p) =>
+                        Navigator.pushNamed(context, AppRoutes.patientDetails),
                   ),
                   const SizedBox(height: 16),
                   QuickActionsCard(
                     totalPatients: '247',
                     criticalCases: '5',
-                    onAllPatients: () {},
-                    onCritical: () {},
+                    onAllPatients: () =>
+                        Navigator.pushNamed(context, AppRoutes.allPatients),
+                    onCritical: () =>
+                        Navigator.pushNamed(context, AppRoutes.allPatients),
                   ),
                   const SizedBox(height: 16),
                   ClinicalResourcesCard(
