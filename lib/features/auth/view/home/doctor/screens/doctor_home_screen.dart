@@ -6,7 +6,6 @@ import 'package:dermalyze/features/auth/view/home/doctor/widgets/patient_list_ca
 import 'package:dermalyze/features/auth/view/home/doctor/widgets/patient_search_bar.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/widgets/quick_actions_card.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/widgets/stats_grid_card.dart';
-import 'package:dermalyze/features/auth/view/patients/screens/add_new_patient_screen.dart';
 import 'package:flutter/material.dart';
 
 class DoctorHomeScreen extends StatefulWidget {
@@ -216,7 +215,10 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: IconButton(
-                                onPressed: () {},
+                                onPressed: () => Navigator.pushNamed(
+                                  context,
+                                  AppRoutes.Settings,
+                                ),
                                 icon: const Icon(
                                   Icons.settings_outlined,
                                   color: Colors.white,

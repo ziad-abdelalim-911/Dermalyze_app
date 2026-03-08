@@ -10,6 +10,7 @@ import 'package:dermalyze/features/auth/view/navigation/custom_bottom_nav_bar.da
 import 'package:dermalyze/features/auth/view/on_boarding/on_boarding_view.dart';
 import 'package:dermalyze/features/auth/view/patients/screens/add_new_patient_screen.dart';
 import 'package:dermalyze/features/auth/view/patients/screens/patient_details_screen.dart';
+import 'package:dermalyze/features/settings/view/privacy_settings_view.dart';
 import 'package:dermalyze/splash.dart';
 import 'package:flutter/material.dart';
 
@@ -89,6 +90,9 @@ class AppRouter {
 
       case AppRoutes.doctorProfile:
         return MaterialPageRoute(builder: (_) => const DoctorProfileScreen());
+
+      case AppRoutes.Settings:
+        return MaterialPageRoute(builder: (_) => const PrivacySettingsView());
 
       default:
         return MaterialPageRoute(
