@@ -24,4 +24,11 @@ class AppRoutes {
   static const diseaseDetails = "/diseaseDetails";
   static const signup = "/signup";
   static const addNewPatient = "/addNewPatient";
+  static const patientDetails = "/patientDetails";
+  static const doctorHome = "/doctorHome";
+  static const allPatients = "/allPatients";
+  static const criticalPatients = "/criticalPatients";
+  static const doctorProfile = "/doctorProfile";
+
+  
 }
