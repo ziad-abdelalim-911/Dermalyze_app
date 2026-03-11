@@ -1,4 +1,5 @@
 import 'package:dermalyze/core/constants/app_colors.dart';
+import 'package:dermalyze/core/routes/app_routes.dart';
 import 'package:dermalyze/features/auth/view/patients/widgets/doctors_review_card.dart';
 import 'package:dermalyze/features/auth/view/patients/widgets/followup_image_card.dart';
 import 'package:dermalyze/features/auth/view/patients/widgets/patient_info_card.dart';
@@ -18,7 +19,6 @@ class PatientDetailsScreen extends StatefulWidget {
 class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
   final _reviewController = TextEditingController();
 
-  // Mock Data
   final _timelineItems = const [
     TimelineItem(label: 'Initial', badge: 'Low', date: 'Dec 01, 2024'),
     TimelineItem(
@@ -63,7 +63,9 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
         child: Column(
           children: [
-            FollowupImageCard(),
+            FollowupImageCard(
+              onTap: () => Navigator.pushNamed(context, AppRoutes.uploadAnalyze),
+            ),
             const SizedBox(height: 16),
             PatientInfoCard(
               name: 'Shawkat',
@@ -138,7 +140,6 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
       ),
       child: Row(
         children: [
-          // Schedule Follow-up
           Expanded(
             child: SizedBox(
               height: 48,
@@ -180,7 +181,6 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
             ),
           ),
           const SizedBox(width: 12),
-          // Update Status
           Expanded(
             child: SizedBox(
               height: 48,
