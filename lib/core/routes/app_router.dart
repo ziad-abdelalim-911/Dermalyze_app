@@ -9,6 +9,7 @@ import 'package:dermalyze/features/auth/view/login/signup_view.dart';
 import 'package:dermalyze/features/auth/view/navigation/custom_bottom_nav_bar.dart';
 import 'package:dermalyze/features/auth/view/on_boarding/on_boarding_view.dart';
 import 'package:dermalyze/features/auth/view/patients/screens/add_new_patient_screen.dart';
+import 'package:dermalyze/features/auth/view/patients/screens/ai_analysis_result_screen.dart';
 import 'package:dermalyze/features/auth/view/patients/screens/patient_details_screen.dart';
 import 'package:dermalyze/features/auth/view/patients/screens/upload_analyze_screen.dart';
 import 'package:dermalyze/splash.dart';
@@ -79,6 +80,10 @@ class AppRouter {
 
       case AppRoutes.uploadAnalyze:
         return MaterialPageRoute(builder: (_) => const UploadAnalyzeScreen());
+
+      case AppRoutes.aiAnalysisResult:
+        return MaterialPageRoute(
+            builder: (_) => const AiAnalysisResultScreen());
 
       case AppRoutes.doctorHome:
         return MaterialPageRoute(builder: (_) => const DoctorHomeScreen());

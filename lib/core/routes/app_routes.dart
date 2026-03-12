@@ -30,6 +30,8 @@ class AppRoutes {
   static const criticalPatients = "/criticalPatients";
   static const doctorProfile = "/doctorProfile";
   static const Settings = "/Settings";
+  static const uploadAnalyze = "/uploadAnalyze";
+  static const aiAnalysisResult = "/aiAnalysisResult";
 
 
 }

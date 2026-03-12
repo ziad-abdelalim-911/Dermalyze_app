@@ -1,4 +1,5 @@
 import 'package:dermalyze/core/constants/app_colors.dart';
+import 'package:dermalyze/core/routes/app_routes.dart';
 import 'package:dermalyze/features/auth/view/patients/widgets/ai_analysis_progress_card.dart';
 import 'package:dermalyze/features/auth/view/patients/widgets/ready_for_analysis_card.dart';
 import 'package:dermalyze/features/auth/view/patients/widgets/uploaded_image_card.dart';
@@ -19,6 +20,7 @@ class _UploadAnalyzeScreenState extends State<UploadAnalyzeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF0F4F8),
       body: Column(
         children: [
           // ── Header ──
@@ -41,8 +43,11 @@ class _UploadAnalyzeScreenState extends State<UploadAnalyzeScreen> {
                       alignment: Alignment.centerLeft,
                       child: GestureDetector(
                         onTap: () => Navigator.pop(context),
-                        child: const Icon(Icons.arrow_back,
-                            color: Colors.white, size: 22),
+                        child: const Icon(
+                          Icons.arrow_back,
+                          color: Colors.white,
+                          size: 22,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -53,8 +58,11 @@ class _UploadAnalyzeScreenState extends State<UploadAnalyzeScreen> {
                         color: Colors.white.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(22),
                       ),
-                      child: const Icon(Icons.camera_alt_outlined,
-                          color: Colors.white, size: 38),
+                      child: const Icon(
+                        Icons.camera_alt_outlined,
+                        color: Colors.white,
+                        size: 38,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     const Text(
@@ -143,8 +151,11 @@ class _UploadAnalyzeScreenState extends State<UploadAnalyzeScreen> {
                           color: AppColors.Turqouoise,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.camera_alt_outlined,
-                            color: Colors.white, size: 26),
+                        child: const Icon(
+                          Icons.camera_alt_outlined,
+                          color: Colors.white,
+                          size: 26,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       Text(
@@ -175,7 +186,9 @@ class _UploadAnalyzeScreenState extends State<UploadAnalyzeScreen> {
                     color: const Color(0xFFFDF4FF),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                        color: const Color(0xFFB57BEE), width: 1.5),
+                      color: const Color(0xFFB57BEE),
+                      width: 1.5,
+                    ),
                   ),
                   child: Column(
                     children: [
@@ -186,8 +199,11 @@ class _UploadAnalyzeScreenState extends State<UploadAnalyzeScreen> {
                           color: Color(0xFF9B40E0),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.upload_outlined,
-                            color: Colors.white, size: 26),
+                        child: const Icon(
+                          Icons.upload_outlined,
+                          color: Colors.white,
+                          size: 26,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       Text(
@@ -242,7 +258,8 @@ class _UploadAnalyzeScreenState extends State<UploadAnalyzeScreen> {
               _buildGuidelineItem('Keep the affected area in focus'),
               _buildGuidelineItem('Use a plain background if possible'),
               _buildGuidelineItem(
-                  'Maintain consistent distance from previous scans'),
+                'Maintain consistent distance from previous scans',
+              ),
             ],
           ),
         ),
@@ -284,7 +301,14 @@ class _UploadAnalyzeScreenState extends State<UploadAnalyzeScreen> {
             borderRadius: BorderRadius.circular(16),
           ),
           child: ElevatedButton.icon(
-            onPressed: () => setState(() => _state = UploadState.analyzing),
+            onPressed: () {
+              setState(() => _state = UploadState.analyzing);
+              Future.delayed(const Duration(seconds: 3), () {
+                if (mounted) {
+                  Navigator.pushNamed(context, AppRoutes.aiAnalysisResult);
+                }
+              });
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.transparent,
               shadowColor: Colors.transparent,
@@ -292,8 +316,11 @@ class _UploadAnalyzeScreenState extends State<UploadAnalyzeScreen> {
                 borderRadius: BorderRadius.circular(16),
               ),
             ),
-            icon: const Icon(Icons.camera_alt_outlined,
-                color: Colors.white, size: 20),
+            icon: const Icon(
+              Icons.camera_alt_outlined,
+              color: Colors.white,
+              size: 20,
+            ),
             label: const Text(
               'Analyze with AI',
               style: TextStyle(
@@ -314,8 +341,11 @@ class _UploadAnalyzeScreenState extends State<UploadAnalyzeScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.check_circle_outline,
-              color: AppColors.Turqouoise, size: 18),
+          Icon(
+            Icons.check_circle_outline,
+            color: AppColors.Turqouoise,
+            size: 18,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
