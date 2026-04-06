@@ -1,5 +1,6 @@
 import 'package:dermalyze/core/constants/app_assets.dart';
 import 'package:dermalyze/core/constants/app_colors.dart';
+import 'package:dermalyze/core/routes/app_routes.dart';
 import 'package:dermalyze/features/auth/view/login/login_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -15,37 +16,36 @@ class _DoctorSignupState extends State<DoctorSignup> {
   bool _isPasswordHidden = true;
   bool _isConfirmPasswordHidden = true;
 
-  final TextEditingController _passwordController =
-      TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
 
   String? _confirmPasswordError;
 
   void _validatePasswords() {
     if (_passwordController.text != _confirmPasswordController.text) {
-      setState(() {
-        _confirmPasswordError = "Passwords do not match";
-      });
+      setState(() => _confirmPasswordError = "Passwords do not match");
     } else {
-      setState(() {
-        _confirmPasswordError = null;
-      });
+      setState(() => _confirmPasswordError = null);
     }
+  }
+
+  @override
+  void dispose() {
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        FocusScope.of(context).unfocus();
-      },
+      onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         backgroundColor: AppColors.primaryColor,
         body: SingleChildScrollView(
           child: Column(
             children: [
-              // ================= Header =================
+              // ── Header ──
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 40),
@@ -62,10 +62,7 @@ class _DoctorSignupState extends State<DoctorSignup> {
                       alignment: Alignment.centerLeft,
                       child: TextButton.icon(
                         onPressed: () => Navigator.pop(context),
-                        icon: const Icon(
-                          Icons.arrow_back,
-                          color: Colors.white,
-                        ),
+                        icon: const Icon(Icons.arrow_back, color: Colors.white),
                         label: const Text(
                           "Back",
                           style: TextStyle(color: Colors.white),
@@ -98,10 +95,7 @@ class _DoctorSignupState extends State<DoctorSignup> {
                     const SizedBox(height: 6),
                     const Text(
                       "Join DERMALYZE as a Medical Professional",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white70,
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.white70),
                     ),
                   ],
                 ),
@@ -109,36 +103,24 @@ class _DoctorSignupState extends State<DoctorSignup> {
 
               const SizedBox(height: 24),
 
-              // ================= Personal Information =================
+              // ── Personal Information ──
               _buildCard(
                 title: "Personal Information",
                 icon: Icons.person_outline,
                 child: Column(
                   children: [
-                    _buildField(
-                      "Full Name *",
-                      "Dr. John Smith",
-                      Icons.person_outline,
-                    ),
+                    _buildField("Full Name *", "Dr. John Smith", Icons.person_outline),
                     const SizedBox(height: 16),
-                    _buildField(
-                      "Email Address *",
-                      "doctor@hospital.com",
-                      Icons.email_outlined,
-                    ),
+                    _buildField("Email Address *", "doctor@hospital.com", Icons.email_outlined),
                     const SizedBox(height: 16),
-                    _buildField(
-                      "Mobile Number *",
-                      "01234567890",
-                      Icons.phone_outlined,
-                    ),
+                    _buildField("Mobile Number *", "01234567890", Icons.phone_outlined),
                   ],
                 ),
               ),
 
               const SizedBox(height: 24),
 
-              // ================= Account Security =================
+              // ── Account Security ──
               _buildCard(
                 title: "Account Security",
                 icon: Icons.lock_outline,
@@ -149,19 +131,12 @@ class _DoctorSignupState extends State<DoctorSignup> {
                       hint: "Min. 8 characters",
                       controller: _passwordController,
                       hidden: _isPasswordHidden,
-                      toggle: () {
-                        setState(() {
-                          _isPasswordHidden = !_isPasswordHidden;
-                        });
-                      },
+                      toggle: () => setState(() => _isPasswordHidden = !_isPasswordHidden),
                     ),
-                    SizedBox(height: 6),
+                    const SizedBox(height: 6),
                     const Text(
                       "Must include uppercase, lowercase, and number",
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                     const SizedBox(height: 16),
                     _buildPasswordField(
@@ -170,12 +145,8 @@ class _DoctorSignupState extends State<DoctorSignup> {
                       controller: _confirmPasswordController,
                       hidden: _isConfirmPasswordHidden,
                       error: _confirmPasswordError,
-                      toggle: () {
-                        setState(() {
-                          _isConfirmPasswordHidden =
-                              !_isConfirmPasswordHidden;
-                        });
-                      },
+                      toggle: () => setState(
+                          () => _isConfirmPasswordHidden = !_isConfirmPasswordHidden),
                       onChanged: (_) => _validatePasswords(),
                     ),
                   ],
@@ -184,7 +155,7 @@ class _DoctorSignupState extends State<DoctorSignup> {
 
               const SizedBox(height: 24),
 
-              // ================= National ID Verification =================
+              // ── National ID Verification ──
               _buildCard(
                 title: "National ID Verification",
                 icon: Icons.badge_outlined,
@@ -193,20 +164,13 @@ class _DoctorSignupState extends State<DoctorSignup> {
                   children: [
                     const Text(
                       "Smart scan will capture both sides of your National ID automatically",
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey,
-                      ),
+                      style: TextStyle(fontSize: 13, color: Colors.grey),
                     ),
-
                     const SizedBox(height: 16),
-
                     // Scan Card
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 24,
-                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 24),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF0FDFF),
                         borderRadius: BorderRadius.circular(16),
@@ -215,56 +179,38 @@ class _DoctorSignupState extends State<DoctorSignup> {
                           width: 1.2,
                         ),
                       ),
-                      child: Column(
-                        children: const [
-                          Icon(
-                            Icons.badge_outlined,
-                            size: 42,
-                            color: Color(0xFF5AC8D8),
-                          ),
+                      child: const Column(
+                        children: [
+                          Icon(Icons.badge_outlined, size: 42, color: Color(0xFF5AC8D8)),
                           SizedBox(height: 12),
                           Text(
                             "Scan National ID",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                           ),
                           SizedBox(height: 4),
                           Text(
                             "Smart scan both sides automatically",
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
                           ),
                         ],
                       ),
                     ),
-
                     const SizedBox(height: 16),
-
-                    // How it works box
+                    // How it works
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: const Color(0xFFEFF6FF),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: const Color(0xFFBFDBFE),
-                        ),
+                        border: Border.all(color: const Color(0xFFBFDBFE)),
                       ),
-                      child: Column(
+                      child: const Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
+                        children: [
                           Row(
                             children: [
-                              Icon(
-                                Icons.info_outline,
-                                size: 18,
-                                color: Color(0xFF2563EB),
-                              ),
+                              Icon(Icons.info_outline, size: 18, color: Color(0xFF2563EB)),
                               SizedBox(width: 6),
                               Text(
                                 "How it works:",
@@ -292,22 +238,17 @@ class _DoctorSignupState extends State<DoctorSignup> {
                         ],
                       ),
                     ),
-
                     const SizedBox(height: 16),
-
                     // Front / Back buttons
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _ScanStepButton(title: "FRONT"),
+                        const _ScanStepButton(title: "FRONT"),
                         const SizedBox(width: 12),
-                        const Icon(
-                          Icons.arrow_forward_ios,
-                          size: 14,
-                          color: Color(0xFF5AC8D8),
-                        ),
+                        const Icon(Icons.arrow_forward_ios,
+                            size: 14, color: Color(0xFF5AC8D8)),
                         const SizedBox(width: 12),
-                        _ScanStepButton(title: "BACK"),
+                        const _ScanStepButton(title: "BACK"),
                       ],
                     ),
                   ],
@@ -316,14 +257,21 @@ class _DoctorSignupState extends State<DoctorSignup> {
 
               const SizedBox(height: 32),
 
-              // ================= Register Button =================
+              // ── Register Button ──
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: SizedBox(
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        AppRoutes.bottomNavBar,
+                        (route) => false,
+                        arguments: true, // true = isDoctor
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.zero,
                       backgroundColor: Colors.transparent,
@@ -366,20 +314,17 @@ class _DoctorSignupState extends State<DoctorSignup> {
 
               const SizedBox(height: 16),
 
-              // ================= Back to Login =================
+              // ── Back to Login ──
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text("Already have an account? "),
                   GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const LoginView(),
-                        ),
-                      );
-                    },
+                    onTap: () => Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      AppRoutes.login,
+                      (route) => false,
+                    ),
                     child: const Text(
                       "Back to Login",
                       style: TextStyle(
@@ -399,7 +344,6 @@ class _DoctorSignupState extends State<DoctorSignup> {
     );
   }
 
-  // ================= Helpers =================
   Widget _buildCard({
     required String title,
     required IconData icon,
@@ -490,9 +434,7 @@ class _DoctorSignupState extends State<DoctorSignup> {
             prefixIcon: const Icon(Icons.lock_outline),
             suffixIcon: IconButton(
               icon: Icon(
-                hidden
-                    ? Icons.visibility_off_outlined
-                    : Icons.visibility_outlined,
+                hidden ? Icons.visibility_off_outlined : Icons.visibility_outlined,
               ),
               onPressed: toggle,
             ),
@@ -507,13 +449,6 @@ class _DoctorSignupState extends State<DoctorSignup> {
       ],
     );
   }
-
-  @override
-  void dispose() {
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    super.dispose();
-  }
 }
 
 class _ScanStepButton extends StatelessWidget {
@@ -524,10 +459,7 @@ class _ScanStepButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: const Color(0xFF5AC8D8),
         borderRadius: BorderRadius.circular(8),

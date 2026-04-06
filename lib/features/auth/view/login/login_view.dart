@@ -9,38 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-const TextStyle kTitleTextStyle = TextStyle(
-  fontSize: 24,
-  fontWeight: FontWeight.w700,
-  color: Color(0xFF1F2933),
-  height: 1.3,
-);
-
-const TextStyle kSubtitleTextStyle = TextStyle(
-  fontSize: 16,
-  fontWeight: FontWeight.w400,
-  color: Color(0xFF6B7280),
-  height: 1.4,
-);
-
-const TextStyle kFieldLabelStyle = TextStyle(
-  fontSize: 16,
-  fontWeight: FontWeight.w500,
-  color: Color(0xFF4B5563),
-);
-
-const TextStyle kButtonTextStyle = TextStyle(
-  fontSize: 16,
-  fontWeight: FontWeight.w600,
-  color: Colors.white,
-);
-
-const TextStyle kLinkTextStyle = TextStyle(
-  fontSize: 16,
-  fontWeight: FontWeight.w500,
-  color: Color(0xFF2563EB),
-);
-
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
 
@@ -50,9 +18,15 @@ class LoginView extends StatefulWidget {
 
 class _LoginViewState extends State<LoginView> {
   bool _isPasswordHidden = true;
-
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,11 +37,10 @@ class _LoginViewState extends State<LoginView> {
           if (state is LoginSuccess) {
             Navigator.pushNamed(context, AppRoutes.bottomNavBar);
           }
-
           if (state is LoginFailure) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.message)));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
           }
         },
         child: GestureDetector(
@@ -78,143 +51,305 @@ class _LoginViewState extends State<LoginView> {
               height: double.infinity,
               decoration: BoxDecoration(gradient: AppColors.primaryGradient1),
               child: SafeArea(
-                child: Center(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 32),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                /// LOGO
-                                Center(
-                                  child: Container(
-                                    width: 80,
-                                    height: 80,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 48),
+
+                      // ── Logo ──
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          gradient: AppColors.primaryGradient2,
+                          borderRadius: BorderRadius.circular(22),
+                        ),
+                        child: Center(
+                          child: SvgPicture.asset(
+                            AppAssets.Icon_register_1,
+                            height: 44,
+                            width: 44,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // ── App Name ──
+                      ShaderMask(
+                        shaderCallback: (bounds) =>
+                            AppColors.primaryGradient2.createShader(bounds),
+                        child: const Text(
+                          'DERMALYZE',
+                          style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'AI-Powered Skin Monitoring',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppColors.Gray,
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+
+                      // ── Card ──
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.blueGrey.withOpacity(0.08),
+                              blurRadius: 20,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Title
+                            Center(
+                              child: Text(
+                                'Welcome Back',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.Black,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+
+                            // ── Email ──
+                            Text(
+                              'E-mail',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.Black,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: _emailController,
+                              keyboardType: TextInputType.emailAddress,
+                              style: TextStyle(
+                                  fontSize: 14, color: AppColors.Black),
+                              decoration: InputDecoration(
+                                hintText: 'Enter your E-mail',
+                                hintStyle: TextStyle(
+                                    fontSize: 14, color: AppColors.Gray),
+                                prefixIcon: Icon(Icons.person_outline,
+                                    color: AppColors.SkyBlue, size: 20),
+                                filled: true,
+                                fillColor: Colors.white,
+                                contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 14),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide: BorderSide(
+                                      color: AppColors.Gray2, width: 1.5),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide: BorderSide(
+                                      color: AppColors.Gray2, width: 1.5),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide: BorderSide(
+                                      color: AppColors.SkyBlue, width: 1.8),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+
+                            // ── Password ──
+                            Text(
+                              'Password',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.Black,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: _passwordController,
+                              obscureText: _isPasswordHidden,
+                              style: TextStyle(
+                                  fontSize: 14, color: AppColors.Black),
+                              decoration: InputDecoration(
+                                hintText: 'Enter your password',
+                                hintStyle: TextStyle(
+                                    fontSize: 14, color: AppColors.Gray),
+                                prefixIcon: Icon(Icons.lock_outline,
+                                    color: AppColors.SkyBlue, size: 20),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _isPasswordHidden
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility_outlined,
+                                    color: AppColors.Gray,
+                                    size: 20,
+                                  ),
+                                  onPressed: () => setState(() =>
+                                      _isPasswordHidden = !_isPasswordHidden),
+                                ),
+                                filled: true,
+                                fillColor: Colors.white,
+                                contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 14),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide: BorderSide(
+                                      color: AppColors.Gray2, width: 1.5),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide: BorderSide(
+                                      color: AppColors.Gray2, width: 1.5),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide: BorderSide(
+                                      color: AppColors.SkyBlue, width: 1.8),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+
+                            // ── Login Button ──
+                            BlocBuilder<LoginBloc, LoginState>(
+                              builder: (context, state) {
+                                return SizedBox(
+                                  width: double.infinity,
+                                  height: 52,
+                                  child: DecoratedBox(
                                     decoration: BoxDecoration(
                                       gradient: AppColors.primaryGradient2,
-                                      borderRadius: BorderRadius.circular(24),
+                                      borderRadius: BorderRadius.circular(14),
                                     ),
-                                    child: Center(
-                                      child: SvgPicture.asset(
-                                        AppAssets.Icon_register_1,
-                                        height: 48,
-                                        width: 48,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 28),
-                                Text(
-                                  'Welcome Back',
-                                  textAlign: TextAlign.center,
-                                  style: kTitleTextStyle,
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Sign in to continue your skin health journey',
-                                  textAlign: TextAlign.center,
-                                  style: kSubtitleTextStyle,
-                                ),
-                                const SizedBox(height: 30),
-
-                                /// EMAIL
-                                TextField(
-                                  controller: _emailController,
-                                  decoration: InputDecoration(
-                                    labelText: 'Email address',
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-
-                                /// PASSWORD
-                                TextField(
-                                  controller: _passwordController,
-                                  obscureText: _isPasswordHidden,
-                                  decoration: InputDecoration(
-                                    labelText: 'Password',
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                    suffixIcon: IconButton(
-                                      icon: Icon(
-                                        _isPasswordHidden
-                                            ? Icons.visibility_off
-                                            : Icons.visibility,
-                                      ),
-                                      onPressed: () {
-                                        setState(() {
-                                          _isPasswordHidden =
-                                              !_isPasswordHidden;
-                                        });
-                                      },
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 24),
-
-                                /// SIGN IN BUTTON
-                                BlocBuilder<LoginBloc, LoginState>(
-                                  builder: (context, state) {
-                                    return SizedBox(
-                                      height: 57,
-                                      child: InkWell(
-                                        onTap: state is LoginLoading
-                                            ? null
-                                            : () {
-                                                context.read<LoginBloc>().add(
-                                                  LoginButtonPressed(
-                                                    email: _emailController.text
-                                                        .trim(),
-                                                    password:
-                                                        _passwordController.text
-                                                            .trim(),
-                                                  ),
-                                                );
-                                              },
-                                        borderRadius: BorderRadius.circular(16),
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            gradient:
-                                                AppColors.primaryGradient2,
-                                            borderRadius: BorderRadius.circular(
-                                              16,
-                                            ),
-                                          ),
-                                          child: Center(
-                                            child: state is LoginLoading
-                                                ? const CircularProgressIndicator(
-                                                    color: Colors.white,
-                                                  )
-                                                : Text(
-                                                    'Sign In',
-                                                    style: kButtonTextStyle,
-                                                  ),
-                                          ),
+                                    child: ElevatedButton(
+                                      onPressed: state is LoginLoading
+                                          ? null
+                                          : () {
+                                              context.read<LoginBloc>().add(
+                                                    LoginButtonPressed(
+                                                      email: _emailController
+                                                          .text
+                                                          .trim(),
+                                                      password:
+                                                          _passwordController
+                                                              .text
+                                                              .trim(),
+                                                    ),
+                                                  );
+                                            },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.transparent,
+                                        shadowColor: Colors.transparent,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(14),
                                         ),
                                       ),
-                                    );
-                                  },
-                                ),
-                              ],
+                                      child: state is LoginLoading
+                                          ? const CircularProgressIndicator(
+                                              color: Colors.white,
+                                            )
+                                          : const Text(
+                                              'Login',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
+                            const SizedBox(height: 16),
+
+                            // ── Forgot Password ──
+                            Center(
+                              child: GestureDetector(
+                                onTap: () => Navigator.pushNamed(
+                                    context, AppRoutes.forgotPassword),
+                                child: Text(
+                                  'Forgot Password?',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.SkyBlue,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+
+                            Divider(color: AppColors.Gray2),
+                            const SizedBox(height: 16),
+
+                            // ── Sign Up ──
+                            Center(
+                              child: GestureDetector(
+                                onTap: () => Navigator.pushNamed(
+                                    context, AppRoutes.register),
+                                child: RichText(
+                                  text: TextSpan(
+                                    text: "Don't have an account? ",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: AppColors.Gray,
+                                    ),
+                                    children: [
+                                      TextSpan(
+                                        text: 'Sign Up',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.SkyBlue,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // ── Footer ──
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.security_outlined,
+                              size: 14, color: AppColors.Gray),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Secure medical platform • HIPAA Compliant',
+                            style: TextStyle(
+                                fontSize: 12, color: AppColors.Gray),
                           ),
                         ],
                       ),
-                    ),
+                      const SizedBox(height: 24),
+                    ],
                   ),
                 ),
               ),

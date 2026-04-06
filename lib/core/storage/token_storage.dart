@@ -1,9 +1,9 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class TokenStorage {
-  static const _storage = FlutterSecureStorage();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
-  static const _key = 'auth_token';
+  static const String _key = "auth_token";
 
   Future<void> saveToken(String token) async {
     await _storage.write(key: _key, value: token);

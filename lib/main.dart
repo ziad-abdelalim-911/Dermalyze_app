@@ -13,8 +13,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-    
-
       debugShowCheckedModeBanner: false,
 
       title: 'Dermalyze',
@@ -24,6 +22,16 @@ class MyApp extends StatelessWidget {
       initialRoute: AppRoutes.splash,
 
       onGenerateRoute: AppRouter.generateRoute,
+
+      onUnknownRoute: (settings) {
+        return MaterialPageRoute(
+          builder: (_) =>
+              const Scaffold(body: Center(child: Text("Page Not Found"))),
+        );
+      },
+
+
+      // home:DoctorHomeScreen(),
     );
   }
 }

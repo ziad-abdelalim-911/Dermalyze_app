@@ -22,5 +22,16 @@ class AppRoutes {
   static const notifications = "/notifications";
   static const medicationList = "/medicationList";
   static const diseaseDetails = "/diseaseDetails";
-  static const Signup = "/signup";
+  static const signup = "/signup";
+  static const addNewPatient = "/addNewPatient";
+  static const patientDetails = "/patientDetails";
+  static const doctorHome = "/doctorHome";
+  static const allPatients = "/allPatients";
+  static const criticalPatients = "/criticalPatients";
+  static const doctorProfile = "/doctorProfile";
+  static const Settings = "/Settings";
+  static const uploadAnalyze = "/uploadAnalyze";
+  static const aiAnalysisResult = "/aiAnalysisResult";
+
+
 }

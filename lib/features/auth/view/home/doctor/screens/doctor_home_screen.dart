@@ -1,0 +1,284 @@
+import 'package:dermalyze/core/constants/app_colors.dart';
+import 'package:dermalyze/core/routes/app_routes.dart';
+import 'package:dermalyze/features/auth/view/home/doctor/data/repositories/doctor_home_repository_impl.dart';
+import 'package:dermalyze/features/auth/view/home/doctor/domain/usecases/get_critical_patients_usecase.dart';
+import 'package:dermalyze/features/auth/view/home/doctor/domain/usecases/get_doctor_stats_usecase.dart';
+import 'package:dermalyze/features/auth/view/home/doctor/domain/usecases/get_patients_usecase.dart';
+import 'package:dermalyze/features/auth/view/home/doctor/presentation/bloc/doctor_home_bloc.dart';
+import 'package:dermalyze/features/auth/view/home/doctor/presentation/bloc/doctor_home_event.dart';
+import 'package:dermalyze/features/auth/view/home/doctor/presentation/bloc/doctor_home_state.dart';
+import 'package:dermalyze/features/auth/view/home/doctor/widgets/add_patient_banner.dart';
+import 'package:dermalyze/features/auth/view/home/doctor/widgets/clinical_resources_card.dart';
+import 'package:dermalyze/features/auth/view/home/doctor/widgets/patient_list_card.dart';
+import 'package:dermalyze/features/auth/view/home/doctor/widgets/patient_search_bar.dart';
+import 'package:dermalyze/features/auth/view/home/doctor/widgets/quick_actions_card.dart';
+import 'package:dermalyze/features/auth/view/home/doctor/widgets/stats_grid_card.dart';
+
+
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+class DoctorHomeScreen extends StatelessWidget {
+  const DoctorHomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => DoctorHomeBloc(
+        getDoctorStatsUseCase: GetDoctorStatsUseCase(DoctorHomeRepositoryImpl()),
+        getPatientsUseCase: GetPatientsUseCase(DoctorHomeRepositoryImpl()),
+        getCriticalPatientsUseCase: GetCriticalPatientsUseCase(DoctorHomeRepositoryImpl()),
+      )..add(LoadDoctorHomeEvent()),
+      child: const _DoctorHomeView(),
+    );
+  }
+}
+
+class _DoctorHomeView extends StatefulWidget {
+  const _DoctorHomeView();
+
+  @override
+  State<_DoctorHomeView> createState() => _DoctorHomeViewState();
+}
+
+class _DoctorHomeViewState extends State<_DoctorHomeView> {
+  final _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF0F4F8),
+      body: BlocBuilder<DoctorHomeBloc, DoctorHomeState>(
+        builder: (context, state) {
+          return Column(
+            children: [
+              // ── Header + Stats ──
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: AppColors.primaryGradient2,
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(28),
+                    bottomRight: Radius.circular(28),
+                  ),
+                ),
+                child: SafeArea(
+                  bottom: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Welcome, Dr.',
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.85),
+                                    fontSize: 13,
+                                  ),
+                                ),
+                                const Text(
+                                  'Shawkat',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Stack(
+                                  children: [
+                                    Container(
+                                      width: 40,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: IconButton(
+                                        onPressed: () => Navigator.pushNamed(
+                                            context, AppRoutes.notifications),
+                                        icon: const Icon(
+                                          Icons.notifications_outlined,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: 6,
+                                      right: 6,
+                                      child: Container(
+                                        width: 8,
+                                        height: 8,
+                                        decoration: const BoxDecoration(
+                                          color: Colors.red,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(width: 10),
+                                Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: IconButton(
+                                    onPressed: () {},
+                                    icon: const Icon(
+                                      Icons.settings_outlined,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        // Stats
+                        if (state is DoctorHomeLoaded)
+                          StatsGridCard(
+                            stats: [
+                              StatItem(
+                                label: 'Total Patients',
+                                value: state.stats.totalPatients.toString(),
+                                icon: Icons.people_outline,
+                                iconColor: Colors.white,
+                              ),
+                              StatItem(
+                                label: 'Infected People',
+                                value: state.stats.infectedPeople.toString(),
+                                icon: Icons.warning_amber_outlined,
+                                iconColor: Colors.orangeAccent,
+                              ),
+                              StatItem(
+                                label: 'Active Today',
+                                value: state.stats.activeToday.toString(),
+                                icon: Icons.trending_up,
+                                iconColor: Colors.white,
+                              ),
+                              StatItem(
+                                label: 'Critical Cases',
+                                value: state.stats.criticalCases.toString(),
+                                icon: Icons.emergency_outlined,
+                                iconColor: Colors.redAccent,
+                              ),
+                            ],
+                          ),
+                        if (state is DoctorHomeLoading)
+                          const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              // ── Content ──
+              Expanded(
+                child: state is DoctorHomeLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : state is DoctorHomeError
+                        ? Center(child: Text(state.message))
+                        : state is DoctorHomeLoaded
+                            ? SingleChildScrollView(
+                                padding: const EdgeInsets.fromLTRB(16, 16, 16, 30),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    AddPatientBanner(
+                                      onTap: () => Navigator.pushNamed(
+                                          context, AppRoutes.addNewPatient),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    PatientSearchBar(
+                                      controller: _searchController,
+                                      onChanged: (q) => context
+                                          .read<DoctorHomeBloc>()
+                                          .add(SearchPatientsEvent(q)),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          'Patients List',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w700,
+                                            color: AppColors.Black,
+                                          ),
+                                        ),
+                                        Text(
+                                          '${state.filteredPatients.length} total',
+                                          style: TextStyle(
+                                              fontSize: 13,
+                                              color: AppColors.Gray),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 10),
+                                    PatientListCard(
+                                      patients: state.filteredPatients
+                                          .map((p) => PatientListItem(
+                                                name: p.name,
+                                                diagnosis: p.diagnosis,
+                                                qualityBadge: p.qualityBadge,
+                                                statusBadge: p.statusBadge,
+                                                recoveryRate: p.recoveryRate,
+                                                lastVisit: p.lastVisit,
+                                              ))
+                                          .toList(),
+                                      onPatientTap: (_) => Navigator.pushNamed(
+                                          context, AppRoutes.patientDetails),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    QuickActionsCard(
+                                      totalPatients: state.stats.totalPatients.toString(),
+                                      criticalCases: state.stats.criticalCases.toString(),
+                                      onAllPatients: () => Navigator.pushNamed(
+                                          context, AppRoutes.allPatients),
+                                      onCritical: () => Navigator.pushNamed(
+                                          context, AppRoutes.criticalPatients),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    ClinicalResourcesCard(
+                                      onSmartHistory: () {},
+                                      onMedications: () {},
+                                      onDiseases: () {},
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : const SizedBox(),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}

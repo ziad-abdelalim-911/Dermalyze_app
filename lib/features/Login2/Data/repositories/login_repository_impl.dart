@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dermalyze/core/network/api_exception.dart';
 import 'package:dermalyze/core/network/api_service.dart';
 import 'package:dermalyze/features/Login2/Data/models/login_response_model.dart';
@@ -12,14 +14,14 @@ class LoginRepositoryImpl implements LoginRepository {
     required String password,
   }) async {
     try {
-      final response = await _apiService.post(
-        "/login",
-        data: {"email": email, "password": password},
-      );
+      await Future.delayed(const Duration(seconds: 1));
 
-      final data = response.data;
+      final mockResponse = {
+        "token": "mock_token_123456",
+        "user": {"id": 1, "name": "Test User", "email": email},
+      };
 
-      return LoginResponseModel.fromJson(data);
+      return LoginResponseModel.fromJson(mockResponse);
     } on ApiException {
       rethrow;
     } catch (_) {
