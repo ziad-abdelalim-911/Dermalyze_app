@@ -14,17 +14,26 @@ class PatientModel extends PatientEntity {
   });
 
   factory PatientModel.fromJson(Map<String, dynamic> json) {
+    final status = json['status'] ?? 'Stable';
+    final recovery = ((json['recoveryProgress'] ?? json['recovery'] ?? 0) as num).toDouble();
+
     return PatientModel(
-      id: json['id'] ?? '',
+      id: json['_id'] ?? json['id'] ?? '',
       name: json['name'] ?? '',
-      diagnosis: json['diagnosis'] ?? '',
-      qualityBadge: json['quality_badge'] ?? '',
-      statusBadge: json['status_badge'] ?? '',
-      recoveryRate: (json['recovery_rate'] ?? 0).toDouble(),
-      lastVisit: json['last_visit'] ?? '',
+      diagnosis: json['diagnosis'] ?? 'Unknown',
+      qualityBadge: _recoveryToQuality(recovery),
+      statusBadge: status.toString().toLowerCase(),
+      recoveryRate: recovery / 100,
+      lastVisit: json['lastVisit'] ?? json['updatedAt'] ?? '',
       age: json['age'] ?? 0,
-      isCritical: json['is_critical'] ?? false,
+      isCritical: status.toString().toLowerCase() == 'critical',
     );
+  }
+
+  static String _recoveryToQuality(double progress) {
+    if (progress >= 70) return 'High';
+    if (progress >= 40) return 'Medium';
+    return 'Low';
   }
 
   // Mock Data

@@ -1,24 +1,24 @@
 import 'package:dermalyze/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:dermalyze/core/network/api_service.dart';
+import 'package:dermalyze/features/auth/view/chat/model/message_model.dart';
+import 'package:dermalyze/features/auth/view/chat/logic/chat_cubit.dart';
+import 'package:dermalyze/features/auth/view/chat/data/repositories/chat_repository.dart';
 
-/// ================= MODEL =================
-class ChatMessage {
-  final String senderName;
-  final String message;
-  final String time;
-  final bool isMe;
 
-  ChatMessage({
-    required this.senderName,
-    required this.message,
-    required this.time,
-    required this.isMe,
-  });
-}
 
-/// ================= CHAT VIEW =================
 class ChatView extends StatefulWidget {
-  const ChatView({super.key});
+  final String receiverId;
+  final String receiverName;
+  final String receiverRole;
+
+  const ChatView({
+    super.key,
+    required this.receiverId,
+    required this.receiverName,
+    required this.receiverRole,
+  });
 
   @override
   State<ChatView> createState() => _ChatViewState();
@@ -26,32 +26,7 @@ class ChatView extends StatefulWidget {
 
 class _ChatViewState extends State<ChatView> {
   final TextEditingController _controller = TextEditingController();
-
   final ScrollController _scrollController = ScrollController();
-
-  final List<ChatMessage> messages = [
-    ChatMessage(
-      senderName: "Dr. Ahmed Hassan",
-      message: "Hello! How are you feeling today?",
-      time: "09:15 AM",
-      isMe: false,
-    ),
-
-    ChatMessage(
-      senderName: "You",
-      message: "Good morning Dr. Ahmed. I'm feeling much better!",
-      time: "09:18 AM",
-      isMe: true,
-    ),
-
-    ChatMessage(
-      senderName: "Dr. Ahmed Hassan",
-      message:
-          "That's great to hear! Are you still experiencing any itching or redness?",
-      time: "09:20 AM",
-      isMe: false,
-    ),
-  ];
 
   /// ================= AUTO SCROLL =================
   void scrollToBottom() {
@@ -67,62 +42,85 @@ class _ChatViewState extends State<ChatView> {
   }
 
   /// ================= SEND MESSAGE =================
-  void sendMessage() {
+  void sendMessage(BuildContext context) {
     if (_controller.text.trim().isEmpty) return;
-
-    final newMessage = ChatMessage(
-      senderName: "You",
-      message: _controller.text.trim(),
-      time: TimeOfDay.now().format(context),
-      isMe: true,
-    );
-
-    setState(() {
-      messages.add(newMessage);
-    });
-
+    context.read<ChatCubit>().sendMessage(_controller.text);
     _controller.clear();
-
     scrollToBottom();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FB),
-
-      body: Column(
-        children: [
-          const ChatAppBar(),
-
-          /// LIST
-          Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-
-              padding: const EdgeInsets.all(16),
-
-              itemCount: messages.length,
-
-              itemBuilder: (context, index) {
-                return MessageBubble(message: messages[index]);
-              },
+    return BlocProvider(
+      create: (context) => ChatCubit(
+        ChatRepository(ApiService()),
+        receiverId: widget.receiverId,
+      ),
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: Column(
+          children: [
+            ChatAppBar(
+              name: widget.receiverName,
+              role: widget.receiverRole,
             ),
-          ),
-
-          MessageInputBar(
-            controller: _controller,
-            onSend: sendMessage,
-          ),
-        ],
+            /// LIST
+            Expanded(
+              child: Builder(
+                builder: (context) {
+                  return BlocConsumer<ChatCubit, ChatState>(
+                    listener: (context, state) {
+                      if (state is ChatLoaded) {
+                        scrollToBottom();
+                      }
+                    },
+                    builder: (context, state) {
+                      if (state is ChatLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (state is ChatLoaded) {
+                        final messages = state.messages;
+                        if (messages.isEmpty) {
+                          return const Center(child: Text("No messages yet."));
+                        }
+                        return ListView.builder(
+                          controller: _scrollController,
+                          padding: const EdgeInsets.all(16),
+                          itemCount: messages.length,
+                          itemBuilder: (context, index) {
+                            return MessageBubble(message: messages[index]);
+                          },
+                        );
+                      } else if (state is ChatError) {
+                        return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  );
+                }
+              ),
+            ),
+            Builder(
+              builder: (context) {
+                return MessageInputBar(
+                  controller: _controller,
+                  onSend: () => sendMessage(context),
+                );
+              }
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
+
 /// ================= APP BAR =================
 class ChatAppBar extends StatelessWidget {
-  const ChatAppBar({super.key});
+  final String name;
+  final String role;
+
+  const ChatAppBar({super.key, required this.name, required this.role});
 
   @override
   Widget build(BuildContext context) {
@@ -154,13 +152,13 @@ class ChatAppBar extends StatelessWidget {
 
           const SizedBox(width: 12),
 
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Dr. Ahmed Hassan",
-                  style: TextStyle(
+                  name,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
@@ -168,8 +166,8 @@ class ChatAppBar extends StatelessWidget {
                 ),
 
                 Text(
-                  "Dermatologist",
-                  style: TextStyle(
+                  role,
+                  style: const TextStyle(
                     color: Colors.white70,
                     fontSize: 13,
                   ),
@@ -179,7 +177,7 @@ class ChatAppBar extends StatelessWidget {
           ),
 
           Row(
-            children: const [
+            children: [
               Icon(Icons.circle, size: 10, color: Colors.greenAccent),
 
               SizedBox(width: 6),
@@ -198,7 +196,7 @@ class ChatAppBar extends StatelessWidget {
 
 /// ================= MESSAGE BUBBLE =================
 class MessageBubble extends StatelessWidget {
-  final ChatMessage message;
+  final MessageModel message;
 
   const MessageBubble({super.key, required this.message});
 
@@ -232,7 +230,7 @@ class MessageBubble extends StatelessWidget {
                 const SizedBox(width: 6),
 
                 Text(
-                  message.senderName,
+                  isMe ? "You" : "Dr.",
                   style: const TextStyle(
                     fontSize: 13,
                     color: Colors.grey,
@@ -253,7 +251,7 @@ class MessageBubble extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: isMe ? AppColors.primaryGradient2 : null,
 
-              color: isMe ? null : Colors.white,
+              color: isMe ? null : Theme.of(context).cardColor,
 
               borderRadius: BorderRadius.circular(16),
 
@@ -266,9 +264,9 @@ class MessageBubble extends StatelessWidget {
             ),
 
             child: Text(
-              message.message,
+              message.content,
               style: TextStyle(
-                color: isMe ? Colors.white : Colors.black87,
+                color: isMe ? Colors.white : Theme.of(context).colorScheme.onSurface,
               ),
             ),
           ),
@@ -276,7 +274,7 @@ class MessageBubble extends StatelessWidget {
           const SizedBox(height: 4),
 
           Text(
-            message.time,
+            _formatTime(message.timestamp),
             style: const TextStyle(fontSize: 12, color: Colors.grey),
           ),
 
@@ -284,6 +282,15 @@ class MessageBubble extends StatelessWidget {
         ],
       ),
     );
+  }
+  String _formatTime(String? timestamp) {
+    if (timestamp == null) return "";
+    try {
+      final date = DateTime.parse(timestamp);
+      return "${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}";
+    } catch (e) {
+      return "";
+    }
   }
 }
 
@@ -303,7 +310,7 @@ class MessageInputBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
 
-      color: Colors.white,
+      color: Theme.of(context).scaffoldBackgroundColor,
 
       child: Row(
         children: [

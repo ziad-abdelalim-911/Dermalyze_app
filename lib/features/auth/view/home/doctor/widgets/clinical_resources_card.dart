@@ -27,7 +27,7 @@ class ClinicalResourcesCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
-                color: AppColors.Black,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
           ],
@@ -115,6 +115,7 @@ class ClinicalResourcesCard extends StatelessWidget {
           children: [
             Expanded(
               child: _buildResourceCard(
+                context: context,
                 onTap: onMedications,
                 icon: Icons.medication_outlined,
                 iconColor: AppColors.Turqouoise,
@@ -126,6 +127,7 @@ class ClinicalResourcesCard extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: _buildResourceCard(
+                context: context,
                 onTap: onDiseases,
                 icon: Icons.library_books_outlined,
                 iconColor: AppColors.SkyBlue,
@@ -141,6 +143,7 @@ class ClinicalResourcesCard extends StatelessWidget {
   }
 
   Widget _buildResourceCard({
+    required BuildContext context,
     required VoidCallback onTap,
     required IconData icon,
     required Color iconColor,
@@ -153,7 +156,7 @@ class ClinicalResourcesCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -173,7 +176,7 @@ class ClinicalResourcesCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
-                color: AppColors.Black,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 3),

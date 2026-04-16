@@ -1,9 +1,16 @@
+import 'package:dermalyze/features/auth/view/forgot_password/auth_password_repository.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 
 class CreateNewPasswordView extends StatefulWidget {
-  const CreateNewPasswordView({super.key});
+  final String email;
+  final String code;
+  const CreateNewPasswordView({
+    super.key,
+    this.email = '',
+    this.code = '',
+  });
 
   @override
   State<CreateNewPasswordView> createState() =>
@@ -19,6 +26,8 @@ class _CreateNewPasswordViewState
 
   bool _hidePassword = true;
   bool _hideConfirm = true;
+  bool _isSubmitting = false;
+  final _repo = AuthPasswordRepository();
 
   // ===== Password Rules =====
   bool hasMinLength = false;
@@ -51,15 +60,36 @@ class _CreateNewPasswordViewState
       hasSpecialChar &&
       passwordsMatch;
 
-  void _submit() {
-    // ===== BACKEND READY =====
+  Future<void> _submit() async {
     final newPassword = _passwordController.text;
-
-    // TODO:
-    // send newPassword + token/email to backend
-
-    // Navigate to login after success
-    Navigator.popUntil(context, (route) => route.isFirst);
+    setState(() => _isSubmitting = true);
+    try {
+      await _repo.resetPassword(
+        email: widget.email,
+        code: widget.code,
+        newPassword: newPassword,
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Password reset successfully! Please log in.'),
+            backgroundColor: Color(0xFF4ECDC4),
+          ),
+        );
+        Navigator.popUntil(context, (route) => route.isFirst);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed: ${e.toString()}'),
+            backgroundColor: Colors.red.shade400,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
   }
 
   @override
@@ -209,7 +239,7 @@ class _CreateNewPasswordViewState
                           width: double.infinity,
                           height: 56,
                           child: ElevatedButton(
-                            onPressed: isFormValid ? _submit : null,
+                            onPressed: isFormValid && !_isSubmitting ? _submit : null,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
                               shadowColor: Colors.transparent,

@@ -1,62 +1,61 @@
 import 'package:dio/dio.dart';
-import 'dio_client.dart';
-import 'api_exception.dart';
+import 'package:dermalyze/core/network/dio_client.dart';
+import 'package:dermalyze/core/network/api_exception.dart';
 
 class ApiService {
-  final Dio _dio = DioClient().dio;
+  final DioClient _dioClient = DioClient();
 
-  Future<Response> get(
-    String path, {
-    Map<String, dynamic>? queryParameters,
-  }) async {
+  /// GET
+  Future<dynamic> get(String endPoint, {Map<String, dynamic>? queryParameters}) async {
     try {
-      final response = await _dio.get(
-        path,
+      final response = await _dioClient.dio.get(
+        endPoint,
         queryParameters: queryParameters,
       );
-      return response;
+      return response.data;
     } on DioException catch (e) {
-      throw _handleDioError(e);
+      throw ApiExceptions.handleError(e);
     }
   }
 
-  Future<Response> post(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-  }) async {
+  /// POST
+  Future<dynamic> post(String endPoint, [dynamic body]) async {
     try {
-      final response = await _dio.post(
-        path,
-        data: data,
-        queryParameters: queryParameters,
-      );
-      return response;
+      final response = await _dioClient.dio.post(endPoint, data: body);
+      return response.data;
     } on DioException catch (e) {
-      throw _handleDioError(e);
+      throw ApiExceptions.handleError(e);
     }
   }
 
-  ApiException _handleDioError(DioException e) {
-    if (e.type == DioExceptionType.connectionTimeout) {
-      return ApiException(message: "Connection timeout");
+  /// PUT / UPDATE
+  Future<dynamic> put(String endPoint, Map<String, dynamic> body) async {
+    try {
+      final response = await _dioClient.dio.put(endPoint, data: body);
+      return response.data;
+    } on DioException catch (e) {
+      throw ApiExceptions.handleError(e);
     }
-
-    if (e.type == DioExceptionType.receiveTimeout) {
-      return ApiException(message: "Receive timeout");
-    }
-
-    if (e.type == DioExceptionType.badResponse) {
-      return ApiException(
-        message: e.response?.data["message"] ?? "Server error",
-        statusCode: e.response?.statusCode,
-      );
-    }
-
-    if (e.type == DioExceptionType.connectionError) {
-      return ApiException(message: "No internet connection");
-    }
-
-    return ApiException(message: "Unexpected error occurred");
   }
+
+  /// DELETE
+  Future<dynamic> delete(String endPoint, {Map<String, dynamic>? body, Map<String, dynamic>? queryParameters}) async {
+    try {
+      final response = await _dioClient.dio.delete(endPoint, data: body, queryParameters: queryParameters);
+      return response.data;
+    } on DioException catch (e) {
+      throw ApiExceptions.handleError(e);
+    }
+  }
+}
+
+// ignore: unused_element
+class ApiException implements Exception {
+  final String message;
+  final int? statusCode;
+
+  ApiException({required this.message, this.statusCode});
+
+  @override
+  String toString() => message;
 }

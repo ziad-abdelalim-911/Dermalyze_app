@@ -2,6 +2,18 @@ import 'package:dermalyze/features/auth/view/home/doctor/screens/all_patients_sc
 import 'package:dermalyze/features/auth/view/home/doctor/screens/critical_patients_screen.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/screens/doctor_home_screen.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/screens/doctor_profile_screen.dart';
+import 'package:dermalyze/features/auth/view/home/doctor/data/repositories/doctor_home_repository_impl.dart';
+import 'package:dermalyze/features/auth/view/home/doctor/domain/usecases/get_critical_patients_usecase.dart';
+import 'package:dermalyze/features/auth/view/home/doctor/domain/usecases/get_doctor_stats_usecase.dart';
+import 'package:dermalyze/features/auth/view/home/doctor/domain/usecases/get_patients_usecase.dart';
+import 'package:dermalyze/features/auth/view/home/doctor/presentation/bloc/doctor_home_bloc.dart';
+import 'package:dermalyze/features/auth/view/home/doctor/presentation/bloc/doctor_home_event.dart';
+import 'package:dermalyze/features/auth/view/home/doctor/domain/entities/patient_entity.dart';
+import 'package:dermalyze/features/auth/view/home/doctor/screens/smart_history_screen.dart';
+import 'package:dermalyze/features/auth/view/home/doctor/screens/medications_guide_screen.dart';
+import 'package:dermalyze/features/auth/view/home/doctor/screens/diseases_library_screen.dart';
+import 'package:dermalyze/features/settings/view/settings_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dermalyze/features/auth/view/login/Patient_SignUp.dart';
 import 'package:dermalyze/features/auth/view/login/doctor_SignUp.dart';
 import 'package:dermalyze/features/auth/view/login/register_view.dart';
@@ -70,16 +82,28 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const MedicationListView());
 
       case AppRoutes.diseaseDetails:
-        return MaterialPageRoute(builder: (_) => const DiseaseDetailsView());
+        final diseaseName = settings.arguments as String? ?? 'Skin Condition';
+        return MaterialPageRoute(builder: (_) => DiseaseDetailsView(diseaseName: diseaseName));
 
       case AppRoutes.addNewPatient:
         return MaterialPageRoute(builder: (_) => const AddNewPatientScreen());
 
       case AppRoutes.patientDetails:
-        return MaterialPageRoute(builder: (_) => const PatientDetailsScreen());
+        // PatientEntity يتمرر من الـ patients list
+        final patient = settings.arguments as PatientEntity?;
+        return MaterialPageRoute(
+          builder: (_) => PatientDetailsScreen(initialPatient: patient),
+        );
 
       case AppRoutes.uploadAnalyze:
-        return MaterialPageRoute(builder: (_) => const UploadAnalyzeScreen());
+        final uploadArgs = settings.arguments as Map<String, dynamic>? ?? {};
+        return MaterialPageRoute(
+          builder: (_) => UploadAnalyzeScreen(
+            patientId: uploadArgs['patientId'] as String? ?? '',
+            patientName: uploadArgs['patientName'] as String?,
+            diagnosis: uploadArgs['diagnosis'] as String?,
+          ),
+        );
 
       case AppRoutes.aiAnalysisResult:
         return MaterialPageRoute(
@@ -89,14 +113,43 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const DoctorHomeScreen());
 
       case AppRoutes.allPatients:
-        return MaterialPageRoute(builder: (_) => const AllPatientsScreen());
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (_) => DoctorHomeBloc(
+              getDoctorStatsUseCase: GetDoctorStatsUseCase(DoctorHomeRepositoryImpl()),
+              getPatientsUseCase: GetPatientsUseCase(DoctorHomeRepositoryImpl()),
+              getCriticalPatientsUseCase: GetCriticalPatientsUseCase(DoctorHomeRepositoryImpl()),
+            )..add(LoadDoctorHomeEvent()),
+            child: const AllPatientsScreen(),
+          ),
+        );
 
       case AppRoutes.criticalPatients:
         return MaterialPageRoute(
-            builder: (_) => const CriticalPatientsScreen());
+          builder: (_) => BlocProvider(
+            create: (_) => DoctorHomeBloc(
+              getDoctorStatsUseCase: GetDoctorStatsUseCase(DoctorHomeRepositoryImpl()),
+              getPatientsUseCase: GetPatientsUseCase(DoctorHomeRepositoryImpl()),
+              getCriticalPatientsUseCase: GetCriticalPatientsUseCase(DoctorHomeRepositoryImpl()),
+            )..add(LoadDoctorHomeEvent()),
+            child: const CriticalPatientsScreen(),
+          ),
+        );
 
       case AppRoutes.doctorProfile:
         return MaterialPageRoute(builder: (_) => const DoctorProfileScreen());
+
+      case AppRoutes.smartHistory:
+        return MaterialPageRoute(builder: (_) => const SmartHistoryScreen());
+        
+      case AppRoutes.medicationsGuide:
+        return MaterialPageRoute(builder: (_) => const MedicationsGuideScreen());
+
+      case AppRoutes.diseasesLibrary:
+        return MaterialPageRoute(builder: (_) => const DiseasesLibraryScreen());
+
+      case AppRoutes.Settings:
+        return MaterialPageRoute(builder: (_) => const SettingsScreen());
 
       default:
         return MaterialPageRoute(

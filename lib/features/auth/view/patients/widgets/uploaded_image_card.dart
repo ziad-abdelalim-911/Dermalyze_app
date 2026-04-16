@@ -1,10 +1,16 @@
+import 'dart:io';
 import 'package:dermalyze/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class UploadedImageCard extends StatelessWidget {
   final VoidCallback onReupload;
+  final File? imageFile; // ✅ الصورة الحقيقية
 
-  const UploadedImageCard({super.key, required this.onReupload});
+  const UploadedImageCard({
+    super.key,
+    required this.onReupload,
+    this.imageFile,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +22,7 @@ class UploadedImageCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.blueGrey.withOpacity(0.08),
+            color: Colors.blueGrey.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: const Offset(0, 2),
           ),
@@ -42,23 +48,33 @@ class UploadedImageCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
-          // Image Placeholder
-          Container(
-            width: double.infinity,
-            height: 200,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF0F4F8),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: AppColors.SkyBlue,
-                width: 1.5,
-              ),
-            ),
-            child: Icon(
-              Icons.image_outlined,
-              size: 48,
-              color: AppColors.Gray2,
-            ),
+          // Image — حقيقي لو موجود، placeholder لو لا
+          ClipRRect(
+            borderRadius: BorderRadius.circular(14),
+            child: imageFile != null
+                ? Image.file(
+                    imageFile!,
+                    width: double.infinity,
+                    height: 200,
+                    fit: BoxFit.cover,
+                  )
+                : Container(
+                    width: double.infinity,
+                    height: 200,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF0F4F8),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: AppColors.SkyBlue,
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.image_outlined,
+                      size: 48,
+                      color: AppColors.Gray2,
+                    ),
+                  ),
           ),
           const SizedBox(height: 12),
           // Re-upload Button

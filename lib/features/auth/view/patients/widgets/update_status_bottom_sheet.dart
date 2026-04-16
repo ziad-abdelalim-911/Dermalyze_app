@@ -1,14 +1,17 @@
 import 'package:dermalyze/core/constants/app_colors.dart';
+import 'package:dermalyze/features/auth/view/patients/data/review_repository.dart';
 import 'package:flutter/material.dart';
 
 enum PatientStatus { improving, stable, critical }
 
 class UpdateStatusBottomSheet extends StatefulWidget {
   final String patientName;
+  final String patientId;
 
   const UpdateStatusBottomSheet({
     super.key,
     required this.patientName,
+    required this.patientId,
   });
 
   @override
@@ -18,6 +21,8 @@ class UpdateStatusBottomSheet extends StatefulWidget {
 
 class _UpdateStatusBottomSheetState extends State<UpdateStatusBottomSheet> {
   PatientStatus? _selectedStatus;
+  bool _isUpdating = false;
+  final _repo = ReviewRepository();
 
   @override
   Widget build(BuildContext context) {
@@ -109,11 +114,36 @@ class _UpdateStatusBottomSheetState extends State<UpdateStatusBottomSheet> {
                 child: SizedBox(
                   height: 48,
                   child: ElevatedButton(
-                    onPressed: _selectedStatus == null
+                    onPressed: _selectedStatus == null || _isUpdating
                         ? null
-                        : () {
-                            // TODO: send status to bloc
-                            Navigator.pop(context, _selectedStatus);
+                        : () async {
+                            setState(() => _isUpdating = true);
+                            try {
+                              await _repo.updatePatientStatus(
+                                patientId: widget.patientId,
+                                status: _selectedStatus!.name,
+                              );
+                              if (context.mounted) {
+                                Navigator.pop(context, _selectedStatus);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Status updated to ${_selectedStatus!.name}'),
+                                    backgroundColor: const Color(0xFF4ECDC4),
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Failed to update: ${e.toString()}'),
+                                    backgroundColor: Colors.red.shade400,
+                                  ),
+                                );
+                              }
+                            } finally {
+                              if (mounted) setState(() => _isUpdating = false);
+                            }
                           },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.SkyBlue,

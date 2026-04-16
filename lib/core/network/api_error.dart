@@ -1,4 +1,4 @@
-class ApiError {
+class ApiError implements Exception {
   final String message;
   final int? statusCode;
 
@@ -6,6 +6,6 @@ class ApiError {
 
   @override
   String toString() {
-    return 'Error is: $message (Status code: $statusCode)';
+    return message;
   }
 }

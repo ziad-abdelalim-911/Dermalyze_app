@@ -1,4 +1,5 @@
 import 'package:dermalyze/core/constants/app_colors.dart';
+import 'package:dermalyze/features/auth/view/forgot_password/auth_password_repository.dart';
 import 'package:dermalyze/features/auth/view/forgot_password/verify_code_view.dart';
 import 'package:flutter/material.dart';
 
@@ -12,7 +13,37 @@ class ForgotPasswordView extends StatefulWidget {
 
 class _ForgotPasswordViewState extends State<ForgotPasswordView> {
   bool isEmailSelected = true;
+  bool _isSending = false;
   final TextEditingController _controller = TextEditingController();
+  final _repo = AuthPasswordRepository();
+
+  Future<void> _sendCode() async {
+    final value = _controller.text.trim();
+    if (value.isEmpty) return;
+    setState(() => _isSending = true);
+    try {
+      await _repo.sendResetCode(value);
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => VerifyCodeView(email: value),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red.shade400,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSending = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -212,18 +243,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                           width: double.infinity,
                           height: 56,
                           child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      VerifyCodeView(
-                                        email: _controller.text
-                                            .trim(),
-                                      ),
-                                ),
-                              );
-                            },
+                            onPressed: _isSending ? null : _sendCode,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
                               shadowColor: Colors.transparent,

@@ -40,7 +40,17 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
       body: IndexedStack(index: _currentIndex, children: _pages),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          gradient: AppColors.primaryGradient1,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Theme.of(context).cardColor
+              : Colors.white,
+          boxShadow: [
+            if (Theme.of(context).brightness == Brightness.light)
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, -4),
+              ),
+          ],
         ),
         child: BottomNavigationBar(
           backgroundColor: Colors.transparent,
@@ -48,7 +58,9 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
           currentIndex: _currentIndex,
           onTap: (index) => setState(() => _currentIndex = index),
           selectedItemColor: AppColors.SkyBlue,
-          unselectedItemColor: AppColors.Gray,
+          unselectedItemColor: Theme.of(context).brightness == Brightness.dark 
+              ? Colors.grey.shade500 
+              : AppColors.Gray,
           items: const [
             BottomNavigationBarItem(
               icon: ImageIcon(AssetImage(AppAssets.home_icon), size: 24),

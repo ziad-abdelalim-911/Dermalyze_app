@@ -1,15 +1,18 @@
 import 'package:dermalyze/core/constants/app_colors.dart';
-import 'package:dermalyze/features/shared/Custom_Date_Textformfield.dart';
+import 'package:dermalyze/features/auth/view/patients/data/review_repository.dart';
+import 'package:dermalyze/features/shared/custom_date_textformfield.dart';
 import 'package:flutter/material.dart';
 
 class ScheduleFollowupBottomSheet extends StatefulWidget {
   final String patientName;
   final String diagnosis;
+  final String patientId;
 
   const ScheduleFollowupBottomSheet({
     super.key,
     required this.patientName,
     required this.diagnosis,
+    required this.patientId,
   });
 
   @override
@@ -22,6 +25,8 @@ class _ScheduleFollowupBottomSheetState
   final _dateController = TextEditingController();
   final _timeController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool _isSaving = false;
+  final _repo = ReviewRepository();
 
   @override
   void dispose() {
@@ -220,12 +225,42 @@ class _ScheduleFollowupBottomSheetState
                   child: SizedBox(
                     height: 48,
                     child: ElevatedButton.icon(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          // TODO: send to bloc
-                          Navigator.pop(context);
-                        }
-                      },
+                    onPressed: _isSaving
+                        ? null
+                        : () async {
+                            if (_formKey.currentState!.validate()) {
+                              setState(() => _isSaving = true);
+                              try {
+                                await _repo.scheduleFollowup(
+                                  patientId: widget.patientId,
+                                  patientName: widget.patientName,
+                                  diagnosis: widget.diagnosis,
+                                  date: _dateController.text,
+                                  time: _timeController.text,
+                                );
+                                if (context.mounted) {
+                                  Navigator.pop(context);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Follow-up scheduled ✓'),
+                                      backgroundColor: Color(0xFF4ECDC4),
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Failed: ${e.toString()}'),
+                                      backgroundColor: Colors.red.shade400,
+                                    ),
+                                  );
+                                }
+                              } finally {
+                                if (mounted) setState(() => _isSaving = false);
+                              }
+                            }
+                          },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.SkyBlue,
                         elevation: 0,

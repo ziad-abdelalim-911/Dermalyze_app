@@ -1,5 +1,6 @@
 import 'package:dermalyze/core/constants/app_colors.dart';
 import 'package:dermalyze/core/routes/app_routes.dart';
+import 'package:dermalyze/core/storage/token_storage.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/data/repositories/doctor_home_repository_impl.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/domain/usecases/get_critical_patients_usecase.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/domain/usecases/get_doctor_stats_usecase.dart';
@@ -13,8 +14,6 @@ import 'package:dermalyze/features/auth/view/home/doctor/widgets/patient_list_ca
 import 'package:dermalyze/features/auth/view/home/doctor/widgets/patient_search_bar.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/widgets/quick_actions_card.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/widgets/stats_grid_card.dart';
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -43,6 +42,22 @@ class _DoctorHomeView extends StatefulWidget {
 
 class _DoctorHomeViewState extends State<_DoctorHomeView> {
   final _searchController = TextEditingController();
+  String _doctorName = 'Doctor';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDoctorName();
+  }
+
+  Future<void> _loadDoctorName() async {
+    try {
+      final user = await TokenStorage().getUser();
+      if (mounted && user != null) {
+        setState(() => _doctorName = user['name'] ?? 'Doctor');
+      }
+    } catch (_) {}
+  }
 
   @override
   void dispose() {
@@ -53,7 +68,7 @@ class _DoctorHomeViewState extends State<_DoctorHomeView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F4F8),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: BlocBuilder<DoctorHomeBloc, DoctorHomeState>(
         builder: (context, state) {
           return Column(
@@ -88,9 +103,9 @@ class _DoctorHomeViewState extends State<_DoctorHomeView> {
                                     fontSize: 13,
                                   ),
                                 ),
-                                const Text(
-                                  'Shawkat',
-                                  style: TextStyle(
+                                Text(
+                                  _doctorName,
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 22,
                                     fontWeight: FontWeight.bold,
@@ -142,7 +157,7 @@ class _DoctorHomeViewState extends State<_DoctorHomeView> {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: IconButton(
-                                    onPressed: () {},
+                                    onPressed: () => Navigator.pushNamed(context, AppRoutes.Settings),
                                     icon: const Icon(
                                       Icons.settings_outlined,
                                       color: Colors.white,
@@ -201,7 +216,61 @@ class _DoctorHomeViewState extends State<_DoctorHomeView> {
                 child: state is DoctorHomeLoading
                     ? const Center(child: CircularProgressIndicator())
                     : state is DoctorHomeError
-                        ? Center(child: Text(state.message))
+                        ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24.0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.cloud_off_outlined,
+                                    size: 64,
+                                    color: Colors.red.withValues(alpha: 0.5),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  const Text(
+                                    'Server Connection Issue',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Our clinical database is currently undergoing maintenance. Please try again in a few moments.',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: AppColors.Gray,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 24),
+                                  ElevatedButton.icon(
+                                    onPressed: () => context
+                                        .read<DoctorHomeBloc>()
+                                        .add(LoadDoctorHomeEvent()),
+                                    icon: const Icon(Icons.refresh),
+                                    label: const Text('Retry Connection'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.SkyBlue,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    'Error Log: ${state.message}',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.grey.withValues(alpha: 0.6),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
                         : state is DoctorHomeLoaded
                             ? SingleChildScrollView(
                                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 30),
@@ -229,7 +298,7 @@ class _DoctorHomeViewState extends State<_DoctorHomeView> {
                                           style: TextStyle(
                                             fontSize: 15,
                                             fontWeight: FontWeight.w700,
-                                            color: AppColors.Black,
+                                            color: Theme.of(context).colorScheme.onSurface,
                                           ),
                                         ),
                                         Text(
@@ -252,8 +321,16 @@ class _DoctorHomeViewState extends State<_DoctorHomeView> {
                                                 lastVisit: p.lastVisit,
                                               ))
                                           .toList(),
-                                      onPatientTap: (_) => Navigator.pushNamed(
-                                          context, AppRoutes.patientDetails),
+                                      onPatientTap: (item) {
+                                        // نلاقي الـ PatientEntity المناسب
+                                        final patient = state.filteredPatients
+                                            .firstWhere((p) => p.name == item.name);
+                                        Navigator.pushNamed(
+                                          context,
+                                          AppRoutes.patientDetails,
+                                          arguments: patient,
+                                        );
+                                      },
                                     ),
                                     const SizedBox(height: 16),
                                     QuickActionsCard(
@@ -266,9 +343,12 @@ class _DoctorHomeViewState extends State<_DoctorHomeView> {
                                     ),
                                     const SizedBox(height: 16),
                                     ClinicalResourcesCard(
-                                      onSmartHistory: () {},
-                                      onMedications: () {},
-                                      onDiseases: () {},
+                                      onSmartHistory: () => Navigator.pushNamed(
+                                          context, AppRoutes.smartHistory),
+                                      onMedications: () => Navigator.pushNamed(
+                                          context, AppRoutes.medicationsGuide),
+                                      onDiseases: () => Navigator.pushNamed(
+                                          context, AppRoutes.diseasesLibrary),
                                     ),
                                   ],
                                 ),

@@ -19,11 +19,12 @@ class ProfileInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.White,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
@@ -41,49 +42,53 @@ class ProfileInfoCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: AppColors.Black,
+              color: colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 16),
-          _buildInfoRow(Icons.email_outlined, 'Email', email),
+          _buildInfoRow(context, Icons.email_outlined, 'Email', email),
           _buildDivider(),
-          _buildInfoRow(Icons.phone_outlined, 'Phone', phone),
+          _buildInfoRow(context, Icons.phone_outlined, 'Phone', phone),
           _buildDivider(),
-          _buildInfoRow(Icons.shield_outlined, 'Specialization', specialization),
+          _buildInfoRow(context, Icons.shield_outlined, 'Specialization', specialization),
           _buildDivider(),
-          _buildInfoRow(Icons.shield_outlined, 'License Number', licenseNumber),
+          _buildInfoRow(context, Icons.shield_outlined, 'License Number', licenseNumber),
           _buildDivider(),
-          _buildInfoRow(Icons.calendar_today_outlined, 'Experience', experience),
+          _buildInfoRow(context, Icons.calendar_today_outlined, 'Experience', experience),
         ],
       ),
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String label, String value) {
+  Widget _buildInfoRow(BuildContext context, IconData icon, String label, String value) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 20, color: AppColors.Gray),
+          Icon(icon, size: 20, color: AppColors.Gray3),
           const SizedBox(width: 14),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(fontSize: 12, color: AppColors.Gray),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.Black,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(fontSize: 12, color: AppColors.Gray3),
                 ),
-              ),
-            ],
+                const SizedBox(height: 3),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: colorScheme.onSurface,
+                  ),
+                  overflow: TextOverflow.visible,
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -91,6 +96,6 @@ class ProfileInfoCard extends StatelessWidget {
   }
 
   Widget _buildDivider() {
-    return Divider(height: 1, color: AppColors.Gray2.withOpacity(0.5));
+    return Divider(height: 1, color: AppColors.Gray2.withOpacity(0.2));
   }
 }

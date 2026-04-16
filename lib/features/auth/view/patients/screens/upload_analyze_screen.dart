@@ -1,14 +1,26 @@
+import 'dart:io';
 import 'package:dermalyze/core/constants/app_colors.dart';
 import 'package:dermalyze/core/routes/app_routes.dart';
+import 'package:dermalyze/features/auth/view/patients/data/analysis_repository.dart';
 import 'package:dermalyze/features/auth/view/patients/widgets/ai_analysis_progress_card.dart';
 import 'package:dermalyze/features/auth/view/patients/widgets/ready_for_analysis_card.dart';
 import 'package:dermalyze/features/auth/view/patients/widgets/uploaded_image_card.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 enum UploadState { initial, uploaded, analyzing }
 
 class UploadAnalyzeScreen extends StatefulWidget {
-  const UploadAnalyzeScreen({super.key});
+  final String patientId;
+  final String? patientName;
+  final String? diagnosis;
+
+  const UploadAnalyzeScreen({
+    super.key,
+    required this.patientId,
+    this.patientName,
+    this.diagnosis,
+  });
 
   @override
   State<UploadAnalyzeScreen> createState() => _UploadAnalyzeScreenState();
@@ -16,6 +28,10 @@ class UploadAnalyzeScreen extends StatefulWidget {
 
 class _UploadAnalyzeScreenState extends State<UploadAnalyzeScreen> {
   UploadState _state = UploadState.initial;
+  File? _imageFile;
+  String? _errorMessage;
+  final _picker = ImagePicker();
+  final _repository = AnalysisRepository();
 
   @override
   Widget build(BuildContext context) {
@@ -133,7 +149,7 @@ class _UploadAnalyzeScreenState extends State<UploadAnalyzeScreen> {
               const SizedBox(height: 16),
               // Take Photo
               GestureDetector(
-                onTap: () => setState(() => _state = UploadState.uploaded),
+                onTap: () => _pickImage(ImageSource.camera),
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 28),
@@ -178,7 +194,7 @@ class _UploadAnalyzeScreenState extends State<UploadAnalyzeScreen> {
               const SizedBox(height: 14),
               // Upload Image
               GestureDetector(
-                onTap: () => setState(() => _state = UploadState.uploaded),
+                onTap: () => _pickImage(ImageSource.gallery),
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 28),
@@ -272,13 +288,32 @@ class _UploadAnalyzeScreenState extends State<UploadAnalyzeScreen> {
     return Column(
       children: [
         UploadedImageCard(
-          onReupload: () => setState(() => _state = UploadState.initial),
+          imageFile: _imageFile,
+          onReupload: () => setState(() {
+            _state = UploadState.initial;
+            _imageFile = null;
+          }),
         ),
         const SizedBox(height: 16),
-        const ReadyForAnalysisCard(
-          patientName: 'Sarah Johnson',
-          diagnosis: 'Atopic Dermatitis',
+        ReadyForAnalysisCard(
+          patientName: widget.patientName ?? 'Patient',
+          diagnosis: widget.diagnosis ?? 'Pending',
         ),
+        if (_errorMessage != null) ...[
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.red.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.red.shade200),
+            ),
+            child: Text(
+              _errorMessage!,
+              style: TextStyle(color: Colors.red.shade700, fontSize: 13),
+            ),
+          ),
+        ],
         if (_state == UploadState.analyzing) ...[
           const SizedBox(height: 16),
           const AiAnalysisProgressCard(),
@@ -301,14 +336,7 @@ class _UploadAnalyzeScreenState extends State<UploadAnalyzeScreen> {
             borderRadius: BorderRadius.circular(16),
           ),
           child: ElevatedButton.icon(
-            onPressed: () {
-              setState(() => _state = UploadState.analyzing);
-              Future.delayed(const Duration(seconds: 3), () {
-                if (mounted) {
-                  Navigator.pushNamed(context, AppRoutes.aiAnalysisResult);
-                }
-              });
-            },
+            onPressed: () => _runAnalysis(),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.transparent,
               shadowColor: Colors.transparent,
@@ -333,6 +361,58 @@ class _UploadAnalyzeScreenState extends State<UploadAnalyzeScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final picked = await _picker.pickImage(
+        source: source,
+        imageQuality: 85,
+        maxWidth: 1024,
+      );
+      if (picked != null) {
+        setState(() {
+          _imageFile = File(picked.path);
+          _state = UploadState.uploaded;
+          _errorMessage = null;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not pick image: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _runAnalysis() async {
+    if (_imageFile == null) return;
+    setState(() {
+      _state = UploadState.analyzing;
+      _errorMessage = null;
+    });
+    try {
+      final result = await _repository.analyzeImage(
+        patientId: widget.patientId,
+        imageFile: _imageFile!,
+        onProgress: (sent, total) {}, // progress tracked internally
+      );
+      if (mounted) {
+        Navigator.pushNamed(
+          context,
+          AppRoutes.aiAnalysisResult,
+          arguments: result, // pass result to next screen
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _state = UploadState.uploaded;
+          _errorMessage = e.toString();
+        });
+      }
+    }
   }
 
   Widget _buildGuidelineItem(String text) {

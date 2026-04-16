@@ -33,5 +33,8 @@ class AppRoutes {
   static const uploadAnalyze = "/uploadAnalyze";
   static const aiAnalysisResult = "/aiAnalysisResult";
 
+  static const smartHistory = "/smartHistory";
+  static const medicationsGuide = "/medicationsGuide";
+  static const diseasesLibrary = "/diseasesLibrary";
 
 }

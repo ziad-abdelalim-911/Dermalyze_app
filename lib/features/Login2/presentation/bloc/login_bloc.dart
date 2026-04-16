@@ -12,9 +12,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       emit(LoginLoading());
 
       try {
-        await repository.login(email: event.email, password: event.password);
+        final result = await repository.login(
+          email: event.email,
+          password: event.password,
+        );
 
-        emit(LoginSuccess());
+        emit(LoginSuccess(role: result.user.role));
       } catch (e) {
         emit(LoginFailure(e.toString()));
       }

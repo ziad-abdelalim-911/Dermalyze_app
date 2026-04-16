@@ -59,7 +59,7 @@ class _PrivacySettingsViewState extends State<PrivacySettingsView> {
                     onChanged: (v) =>
                         setState(() => profileVisible = v),
                     iconColor: Colors.blue,
-                    iconBgColor: Colors.blue.withOpacity(0.12),
+                    iconBgColor: Colors.blue.withValues(alpha: 0.12),
                     switchColor: AppColors.SkyBlue,
                   ),
                   const SizedBox(height: 12),
@@ -71,7 +71,7 @@ class _PrivacySettingsViewState extends State<PrivacySettingsView> {
                     value: dataSharing,
                     onChanged: (v) => setState(() => dataSharing = v),
                     iconColor: Colors.purple,
-                    iconBgColor: Colors.purple.withOpacity(0.12),
+                    iconBgColor: Colors.purple.withValues(alpha: 0.12),
                     switchColor: AppColors.SkyBlue,
                   ),
                   const SizedBox(height: 12),
@@ -84,7 +84,7 @@ class _PrivacySettingsViewState extends State<PrivacySettingsView> {
                     onChanged: (v) =>
                         setState(() => analyticsEnabled = v),
                     iconColor: Colors.green,
-                    iconBgColor: Colors.green.withOpacity(0.12),
+                    iconBgColor: Colors.green.withValues(alpha: 0.12),
                     switchColor: AppColors.SkyBlue,
                   ),
                 ],
@@ -106,7 +106,7 @@ class _PrivacySettingsViewState extends State<PrivacySettingsView> {
                     onChanged: (v) =>
                         setState(() => pushNotifications = v),
                     iconColor: Colors.blue,
-                    iconBgColor: Colors.blue.withOpacity(0.12),
+                    iconBgColor: Colors.blue.withValues(alpha: 0.12),
                     switchColor: AppColors.SkyBlue,
                   ),
                   const SizedBox(height: 12),
@@ -118,7 +118,7 @@ class _PrivacySettingsViewState extends State<PrivacySettingsView> {
                     onChanged: (v) =>
                         setState(() => emailNotifications = v),
                     iconColor: Colors.blue,
-                    iconBgColor: Colors.blue.withOpacity(0.12),
+                    iconBgColor: Colors.blue.withValues(alpha: 0.12),
                     switchColor: AppColors.SkyBlue,
                   ),
                   const SizedBox(height: 12),
@@ -130,7 +130,7 @@ class _PrivacySettingsViewState extends State<PrivacySettingsView> {
                     onChanged: (v) =>
                         setState(() => smsNotifications = v),
                     iconColor: Colors.grey,
-                    iconBgColor: Colors.grey.withOpacity(0.12),
+                    iconBgColor: Colors.grey.withValues(alpha: 0.12),
                     switchColor: AppColors.SkyBlue,
                   ),
                 ],
@@ -149,7 +149,7 @@ class _PrivacySettingsViewState extends State<PrivacySettingsView> {
                 value: twoFactorAuth,
                 onChanged: (v) => setState(() => twoFactorAuth = v),
                 iconColor: Colors.red,
-                iconBgColor: Colors.red.withOpacity(0.12),
+                iconBgColor: Colors.red.withValues(alpha: 0.12),
                 switchColor: Colors.red,
               ),
             ),
@@ -181,26 +181,41 @@ class _PrivacySettingsViewState extends State<PrivacySettingsView> {
                     icon: Icons.privacy_tip_outlined,
                     title: "Privacy Policy",
                     subtitle: "Read how we handle your data",
-                    onTap: () {},
+                    onTap: () => _showDoc(
+                      context,
+                      title: 'Privacy Policy',
+                      body: 'Dermalyze collects and processes medical images and health data solely to provide AI-powered skin analysis. Your data is encrypted at rest and in transit.\n\nWe do not sell or share personal health information with third parties without your explicit consent.\n\nYou may request a full copy of your stored data or deletion at any time.',
+                    ),
                   ),
                   SettingsNavTile(
                     icon: Icons.article_outlined,
                     title: "Terms of Service",
                     subtitle: "View terms and conditions",
-                    onTap: () {},
+                    onTap: () => _showDoc(
+                      context,
+                      title: 'Terms of Service',
+                      body: 'By using Dermalyze, you agree that:\n\n• AI analysis results are intended to assist licensed medical professionals, not replace clinical judgment.\n• You will not upload images of individuals without their consent.\n• Misuse of the platform may result in account suspension.\n\nBy continuing to use the app you agree to these terms.',
+                    ),
                   ),
                   SettingsNavTile(
                     icon: Icons.verified_user_outlined,
                     title: "HIPAA Compliance",
                     subtitle: "Learn about our compliance measures",
-                    onTap: () {},
+                    onTap: () => _showDoc(
+                      context,
+                      title: 'HIPAA Compliance',
+                      body: 'Dermalyze is designed to comply with the Health Insurance Portability and Accountability Act (HIPAA).\n\n• Protected Health Information (PHI) is handled according to HIPAA Security Rule requirements.\n• Business Associate Agreements are in place with all third-party service providers.\n• Regular security audits are conducted to maintain compliance.',
+                    ),
                   ),
                   SettingsNavTile(
                     icon: Icons.delete_outline,
                     title: "Data Deletion Request",
-                    subtitle:
-                        "Request deletion of your personal data",
-                    onTap: () {},
+                    subtitle: "Request deletion of your personal data",
+                    onTap: () => _showDoc(
+                      context,
+                      title: 'Data Deletion Request',
+                      body: 'To request deletion of your personal data and medical records:\n\n1. Send an email to: privacy@dermalyze.com\n2. Include your registered email address and full name.\n3. Your account and all associated data will be deleted within 30 days.\n\nNote: This action is irreversible.',
+                    ),
                   ),
                 ],
               ),
@@ -215,6 +230,64 @@ class _PrivacySettingsViewState extends State<PrivacySettingsView> {
 
             const SizedBox(height: 24),
           ],
+        ),
+      ),
+    );
+  }
+
+  static void _showDoc(BuildContext context, {required String title, required String body}) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.6,
+        maxChildSize: 0.9,
+        minChildSize: 0.4,
+        builder: (_, ctrl) => Container(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40, height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: ctrl,
+                  child: Text(body, style: const TextStyle(fontSize: 14, height: 1.6, color: Colors.black87)),
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2563EB),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: const Text('Close', style: TextStyle(color: Colors.white)),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

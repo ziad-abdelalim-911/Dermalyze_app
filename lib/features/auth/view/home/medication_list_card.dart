@@ -1,9 +1,15 @@
-import 'package:dermalyze/features/auth/view/login/Patient_SignUp.dart';
 import 'package:dermalyze/features/auth/view/medication_list/medication_list_view.dart';
 import 'package:flutter/material.dart';
 
 class MedicationListCard extends StatelessWidget {
-  const MedicationListCard({super.key});
+  /// قائمة الأدوية الجاية من الـ API
+  /// كل عنصر Map يحتوي على: name, dosage, frequency
+  final List<Map<String, dynamic>> medications;
+
+  const MedicationListCard({
+    super.key,
+    this.medications = const [],
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -57,9 +63,9 @@ class MedicationListCard extends StatelessWidget {
                       color: Colors.grey.shade200,
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Text(
-                      "3 Active",
-                      style: TextStyle(fontSize: 12),
+                    child: Text(
+                      "${medications.length} Active",
+                      style: const TextStyle(fontSize: 12),
                     ),
                   ),
                 ],
@@ -67,25 +73,28 @@ class MedicationListCard extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              const _MedicationItem(
-                title: "Hydrocortisone Cream 1%",
-                subtitle: "Apply twice daily",
-                tag: "Morning & Evening",
-              ),
-              SizedBox(height: 12),
-              const _MedicationItem(
-                title: "Cetirizine 10mg",
-                subtitle: "1 tablet",
-                tag: "Once daily at bedtime",
-              ),
-              SizedBox(height: 12),
-              const _MedicationItem(
-                title: "Moisturizing Lotion",
-                subtitle: "Apply as needed",
-                tag: "3-4 times daily",
-              ),
-
-              const SizedBox(height: 12),
+              // قائمة الأدوية من الـ API
+              if (medications.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    'No medications prescribed',
+                    style: TextStyle(color: Colors.grey, fontSize: 13),
+                  ),
+                )
+              else
+                ...medications.take(3).map((med) {
+                  return Column(
+                    children: [
+                      _MedicationItem(
+                        title: med['name'] ?? '—',
+                        subtitle: med['dosage'] ?? '—',
+                        tag: med['frequency'] ?? '—',
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  );
+                }),
 
               const Text(
                 "Tap to view all medications",

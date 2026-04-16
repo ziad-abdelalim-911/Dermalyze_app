@@ -1,4 +1,3 @@
-import 'package:dermalyze/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class StatItem {

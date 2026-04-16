@@ -29,7 +29,9 @@ class DoctorHomeBloc extends Bloc<DoctorHomeEvent, DoctorHomeState> {
     try {
       final stats = await getDoctorStatsUseCase();
       final patients = await getPatientsUseCase();
-      final criticalPatients = await getCriticalPatientsUseCase();
+      
+      // Filter locally to avoid double API requests!
+      final criticalPatients = patients.where((p) => p.isCritical).toList();
 
       emit(DoctorHomeLoaded(
         stats: stats,

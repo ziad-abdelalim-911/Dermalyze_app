@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../data/add_patient_repository.dart';
 import '../widgets/personal_info_card.dart';
 import '../widgets/medical_info_card.dart';
 import '../widgets/next_steps_card.dart';
@@ -23,6 +24,8 @@ class _AddNewPatientScreenState extends State<AddNewPatientScreen> {
   final _medicalHistoryController = TextEditingController();
 
   String? _selectedGender;
+  bool _isLoading = false;
+  final AddPatientRepository _repository = AddPatientRepository();
 
   @override
   void dispose() {
@@ -195,13 +198,22 @@ class _AddNewPatientScreenState extends State<AddNewPatientScreen> {
                 borderRadius: BorderRadius.circular(14),
               ),
             ),
-            icon: const Icon(
-              Icons.person_add_alt_1,
-              color: Colors.white,
-              size: 20,
-            ),
-            label: const Text(
-              'Add Patient to System',
+            icon: _isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Icon(
+                    Icons.person_add_alt_1,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+            label: Text(
+              _isLoading ? 'Adding...' : 'Add Patient to System',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 15,
@@ -214,14 +226,41 @@ class _AddNewPatientScreenState extends State<AddNewPatientScreen> {
     );
   }
 
-  void _onSubmit() {
-    if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Patient added successfully!'),
-          backgroundColor: Color(0xFF3A8FA8),
-        ),
+  Future<void> _onSubmit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+    try {
+      await _repository.addPatient(
+        name: _fullNameController.text.trim(),
+        age: int.tryParse(_ageController.text.trim()) ?? 0,
+        gender: _selectedGender ?? 'male',
+        diagnosis: _diagnosisController.text.trim(),
+        nationalId: _nationalIdController.text.trim(),
+        phone: _phoneController.text.trim(),
+        address: _addressController.text.trim(),
       );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Patient added successfully!'),
+            backgroundColor: Color(0xFF3A8FA8),
+          ),
+        );
+        Navigator.pop(context, true); // true = refresh
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red.shade400,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 }

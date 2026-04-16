@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dermalyze/features/auth/view/forgot_password/auth_password_repository.dart';
 import 'package:dermalyze/features/auth/view/forgot_password/create_new_password_view.dart';
 import 'package:flutter/material.dart';
 
@@ -21,7 +22,10 @@ class _VerifyCodeViewState extends State<VerifyCodeView> {
   );
 
   Timer? _timer;
-  int _secondsRemaining = 600; // 10 minutes
+  int _secondsRemaining = 600;
+  bool _isVerifying = false;
+  bool _isResending = false;
+  final _repo = AuthPasswordRepository();
 
   @override
   void initState() {
@@ -203,17 +207,50 @@ class _VerifyCodeViewState extends State<VerifyCodeView> {
                           width: double.infinity,
                           height: 56,
                           child: ElevatedButton(
-                            onPressed: () {
-                              // TODO: VERIFY CODE WITH BACKEND
-                              debugPrint("CODE = $_code");
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      const CreateNewPasswordView(),
-                                ),
-                              );
-                            },
+                            onPressed: _isVerifying
+                                ? null
+                                : () async {
+                                    final code = _code;
+                                    if (code.length < 6) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(const SnackBar(
+                                        content:
+                                            Text('Please enter the full 6-digit code'),
+                                        backgroundColor: Colors.orange,
+                                      ));
+                                      return;
+                                    }
+                                    setState(() => _isVerifying = true);
+                                    try {
+                                      await _repo.verifyOtp(
+                                          email: widget.email, code: code);
+                                      if (mounted) {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                CreateNewPasswordView(
+                                              email: widget.email,
+                                              code: code,
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    } catch (e) {
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                          content: Text(
+                                              'Invalid code: ${e.toString()}'),
+                                          backgroundColor:
+                                              Colors.red.shade400,
+                                        ));
+                                      }
+                                    } finally {
+                                      if (mounted)
+                                        setState(() => _isVerifying = false);
+                                    }
+                                  },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
                               shadowColor: Colors.transparent,
@@ -264,13 +301,32 @@ class _VerifyCodeViewState extends State<VerifyCodeView> {
                               style: TextStyle(color: Colors.grey),
                             ),
                             TextButton(
-                              onPressed: () {
-                                setState(() {
-                                  _secondsRemaining = 600;
-                                });
-                                _startTimer();
-                                // TODO: RESEND CODE
-                              },
+                              onPressed: _isResending
+                                  ? null
+                                  : () async {
+                                      setState(() {
+                                        _secondsRemaining = 600;
+                                        _isResending = true;
+                                      });
+                                      _startTimer();
+                                      try {
+                                        await _repo
+                                            .sendResetCode(widget.email);
+                                        if (mounted) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(const SnackBar(
+                                            content: Text('Code resent ✓'),
+                                            backgroundColor:
+                                                Color(0xFF4ECDC4),
+                                          ));
+                                        }
+                                      } catch (e) {
+                                        // silently fail (timer restarted)
+                                      } finally {
+                                        if (mounted)
+                                          setState(() => _isResending = false);
+                                      }
+                                    },
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.center,
@@ -284,13 +340,20 @@ class _VerifyCodeViewState extends State<VerifyCodeView> {
                                   ),
                                   const SizedBox(width: 6),
                                   GestureDetector(
-                                    onTap: _secondsRemaining == 0
-                                        ? () {
+                                    onTap: _secondsRemaining == 0 && !_isResending
+                                        ? () async {
                                             setState(() {
                                               _secondsRemaining = 600;
+                                              _isResending = true;
                                             });
                                             _startTimer();
-                                            // TODO: RESEND CODE FROM BACKEND
+                                            try {
+                                              await _repo.sendResetCode(widget.email);
+                                            } catch (_) {
+                                              // silently ignore
+                                            } finally {
+                                              if (mounted) setState(() => _isResending = false);
+                                            }
                                           }
                                         : null,
                                     child: Text(

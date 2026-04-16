@@ -1,17 +1,35 @@
-class ChatMessage {
-  final String senderName;
-  final String message;
-  final String time;
+class MessageModel {
+  final String? id;
+  final String senderId;
+  final String? receiverId; // Can be null if it's a group or not needed
+  final String content;
+  final String? timestamp;
   final bool isMe;
-  final String kind;
-  final String image;
 
-  ChatMessage({
-    required this.senderName,
-    required this.message,
-    required this.time,
+  MessageModel({
+    this.id,
+    required this.senderId,
+    this.receiverId,
+    required this.content,
+    this.timestamp,
     required this.isMe,
-    required this.kind,
-    required this.image,
   });
+
+  factory MessageModel.fromJson(Map<String, dynamic> json, String currentUserId) {
+    return MessageModel(
+      id: json['id']?.toString(),
+      senderId: json['senderId']?.toString() ?? '',
+      receiverId: json['receiverId']?.toString(),
+      content: json['content']?.toString() ?? '',
+      timestamp: json['timestamp']?.toString() ?? DateTime.now().toIso8601String(),
+      isMe: json['senderId']?.toString() == currentUserId,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'receiverId': receiverId,
+      'content': content,
+    };
+  }
 }

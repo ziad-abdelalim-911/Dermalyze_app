@@ -1,5 +1,9 @@
 import 'package:dermalyze/core/constants/app_colors.dart';
 import 'package:dermalyze/core/routes/app_routes.dart';
+import 'package:dermalyze/features/auth/view/home/doctor/domain/entities/patient_entity.dart';
+import 'package:dermalyze/features/auth/view/patients/data/analysis_repository.dart';
+import 'package:dermalyze/features/auth/view/patients/data/review_repository.dart';
+import 'package:dermalyze/features/auth/view/medication_list/medication_repository.dart';
 import 'package:dermalyze/features/auth/view/patients/widgets/doctors_review_card.dart';
 import 'package:dermalyze/features/auth/view/patients/widgets/followup_image_card.dart';
 import 'package:dermalyze/features/auth/view/patients/widgets/patient_info_card.dart';
@@ -10,7 +14,8 @@ import 'package:dermalyze/features/auth/view/patients/widgets/update_status_bott
 import 'package:flutter/material.dart';
 
 class PatientDetailsScreen extends StatefulWidget {
-  const PatientDetailsScreen({super.key});
+  final PatientEntity? initialPatient;
+  const PatientDetailsScreen({super.key, this.initialPatient});
 
   @override
   State<PatientDetailsScreen> createState() => _PatientDetailsScreenState();
@@ -18,35 +23,50 @@ class PatientDetailsScreen extends StatefulWidget {
 
 class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
   final _reviewController = TextEditingController();
+  final _analysisRepo = AnalysisRepository();
+  final _medicationRepo = MedicationRepository();
+  final _reviewRepo = ReviewRepository();
 
-  final _timelineItems = const [
-    TimelineItem(label: 'Initial', badge: 'Low', date: 'Dec 01, 2024'),
-    TimelineItem(
-      label: 'Week 2',
-      badge: 'Medium',
-      date: 'Dec 15, 2024',
-      improvement: '+13% improvement',
-    ),
-    TimelineItem(
-      label: 'Current',
-      badge: 'Medium',
-      date: 'Dec 29, 2024',
-      improvement: '+20% improvement',
-    ),
-  ];
+  PatientEntity? _patient;
+  List<dynamic> _analyses = [];
+  List<dynamic> _medications = [];
+  bool _isLoading = true;
+  bool _isSavingReview = false;
 
-  final _medications = const [
-    MedicationItem(
-      name: 'Hydrocortisone Cream 1%',
-      dosage: 'Apply twice daily',
-      schedule: 'Morning & Evening',
-    ),
-    MedicationItem(
-      name: 'Cetirizine 10mg',
-      dosage: '1 tablet',
-      schedule: 'Once daily at bedtime',
-    ),
-  ];
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_patient == null) {
+      // 1. جرب الـ constructor parameter أولاً
+      _patient = widget.initialPatient;
+      // 2. لو مش موجود، جرب الـ route arguments
+      if (_patient == null) {
+        final args = ModalRoute.of(context)?.settings.arguments;
+        if (args is PatientEntity) _patient = args;
+      }
+      if (_patient != null) _loadData();
+    }
+  }
+
+  Future<void> _loadData() async {
+    if (_patient == null) return;
+    setState(() => _isLoading = true);
+    try {
+      final results = await Future.wait([
+        _analysisRepo.getPatientAnalyses(_patient!.id),
+        _medicationRepo.getMedications(_patient!.id),
+      ]);
+      if (mounted) {
+        setState(() {
+          _analyses = results[0];
+          _medications = results[1];
+          _isLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   void dispose() {
@@ -54,66 +74,138 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
     super.dispose();
   }
 
+  Future<void> _saveReview() async {
+    if (_reviewController.text.trim().isEmpty) return;
+    setState(() => _isSavingReview = true);
+    try {
+      await _reviewRepo.saveReview(
+        patientId: _patient!.id,
+        review: _reviewController.text.trim(),
+      );
+      _reviewController.clear();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Review saved successfully'),
+            backgroundColor: Color(0xFF4ECDC4),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red.shade400,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSavingReview = false);
+    }
+  }
+
+  // Build timeline from real analyses
+  List<TimelineItem> get _timelineItems {
+    if (_analyses.isEmpty) {
+      return const [
+        TimelineItem(label: 'No analyses yet', badge: 'N/A', date: '—'),
+      ];
+    }
+    return _analyses.take(5).map((a) {
+      final map = a as Map<String, dynamic>;
+      return TimelineItem(
+        label: map['stage'] ?? map['condition'] ?? 'Scan',
+        badge: map['severity'] ?? 'N/A',
+        date: map['createdAt'] ?? map['date'] ?? '—',
+        improvement: map['improvement'],
+      );
+    }).toList();
+  }
+
+  // Build medications from real data
+  List<MedicationItem> get _medicationItems {
+    return _medications.map((m) {
+      final map = m as Map<String, dynamic>;
+      return MedicationItem(
+        name: map['name'] ?? '',
+        dosage: map['dosage'] ?? '',
+        schedule: map['frequency'] ?? '',
+      );
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final name = _patient?.name ?? 'Patient';
+    final diagnosis = _patient?.diagnosis ?? '—';
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F4F8),
-      appBar: _buildAppBar(context),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-        child: Column(
-          children: [
-            FollowupImageCard(
-              onTap: () => Navigator.pushNamed(context, AppRoutes.uploadAnalyze),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: _buildAppBar(context, name),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+              child: Column(
+                children: [
+                  FollowupImageCard(
+                    onTap: () => Navigator.pushNamed(
+                      context,
+                      AppRoutes.uploadAnalyze,
+                      arguments: {
+                        'patientId': _patient?.id ?? '',
+                        'patientName': name,
+                        'diagnosis': diagnosis,
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  PatientInfoCard(
+                    name: name,
+                    diagnosis: diagnosis,
+                    quality: _patient?.qualityBadge ?? '—',
+                    lastVisit: _patient?.lastVisit ?? '—',
+                    recoveryRate:
+                        '${((_patient?.recoveryRate ?? 0) * 100).toInt()}%',
+                  ),
+                  const SizedBox(height: 16),
+                  ProgressTimelineCard(items: _timelineItems),
+                  const SizedBox(height: 16),
+                  DoctorsReviewCard(
+                    reviewController: _reviewController,
+                    onSave: _isSavingReview ? null : _saveReview,
+                  ),
+                  const SizedBox(height: 16),
+                  PrescribedMedicationsCard(
+                    medications: _medicationItems,
+                    onAddMedication: () =>
+                        Navigator.pushNamed(context, AppRoutes.medicationList),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 16),
-            PatientInfoCard(
-              name: 'Shawkat',
-              diagnosis: 'Atopic Dermatitis',
-              quality: 'Medium',
-              lastVisit: '2 days ago',
-              recoveryRate: '68%',
-            ),
-            const SizedBox(height: 16),
-            ProgressTimelineCard(items: _timelineItems),
-            const SizedBox(height: 16),
-            DoctorsReviewCard(
-              reviewController: _reviewController,
-              onSave: () {
-                // TODO: save review logic
-              },
-            ),
-            const SizedBox(height: 16),
-            PrescribedMedicationsCard(
-              medications: _medications,
-              onAddMedication: () {
-                // TODO: navigate to add medication
-              },
-            ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: _buildBottomButtons(context),
+      bottomNavigationBar: _buildBottomButtons(context, name, diagnosis),
     );
   }
 
-  PreferredSizeWidget _buildAppBar(BuildContext context) {
+  PreferredSizeWidget _buildAppBar(BuildContext context, String name) {
     return AppBar(
-      backgroundColor: AppColors.White,
+      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       elevation: 0,
       leading: IconButton(
-        icon: Icon(Icons.arrow_back, color: AppColors.Black),
+        icon: Icon(Icons.arrow_back, color: Theme.of(context).iconTheme.color),
         onPressed: () => Navigator.pop(context),
       ),
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Patient Details',
+            name,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: AppColors.Black,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           Text(
@@ -125,14 +217,15 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
     );
   }
 
-  Widget _buildBottomButtons(BuildContext context) {
+  Widget _buildBottomButtons(
+      BuildContext context, String name, String diagnosis) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
       decoration: BoxDecoration(
-        color: AppColors.White,
+        color: Theme.of(context).scaffoldBackgroundColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -3),
           ),
@@ -156,9 +249,10 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
                       padding: EdgeInsets.only(
                         bottom: MediaQuery.of(context).viewInsets.bottom,
                       ),
-                      child: const ScheduleFollowupBottomSheet(
-                        patientName: 'Shawkat',
-                        diagnosis: 'Atopic Dermatitis',
+                      child: ScheduleFollowupBottomSheet(
+                        patientId: _patient?.id ?? '',
+                        patientName: name,
+                        diagnosis: diagnosis,
                       ),
                     ),
                   );
@@ -193,8 +287,9 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
                       borderRadius:
                           BorderRadius.vertical(top: Radius.circular(24)),
                     ),
-                    builder: (_) => const UpdateStatusBottomSheet(
-                      patientName: 'Shawkat',
+                    builder: (_) => UpdateStatusBottomSheet(
+                      patientId: _patient?.id ?? '',
+                      patientName: name,
                     ),
                   );
                 },

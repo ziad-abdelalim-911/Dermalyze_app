@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 
 class DoctorsReviewCard extends StatelessWidget {
   final TextEditingController reviewController;
-  final VoidCallback onSave;
+  final VoidCallback? onSave;
 
   const DoctorsReviewCard({
     super.key,
     required this.reviewController,
-    required this.onSave,
+    this.onSave,
   });
 
   @override
@@ -17,7 +17,7 @@ class DoctorsReviewCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.White,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(

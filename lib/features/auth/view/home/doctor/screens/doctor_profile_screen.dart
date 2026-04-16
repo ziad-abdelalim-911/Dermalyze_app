@@ -1,16 +1,64 @@
 import 'package:dermalyze/core/constants/app_colors.dart';
 import 'package:dermalyze/core/routes/app_routes.dart';
+import 'package:dermalyze/core/storage/token_storage.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/widgets/profile_info_card.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/widgets/profile_settings_card.dart';
+import 'package:dermalyze/features/auth/view/chat/view/messages_view.dart';
 import 'package:flutter/material.dart';
 
-class DoctorProfileScreen extends StatelessWidget {
+class DoctorProfileScreen extends StatefulWidget {
   const DoctorProfileScreen({super.key});
+
+  @override
+  State<DoctorProfileScreen> createState() => _DoctorProfileScreenState();
+}
+
+class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
+  final _tokenStorage = TokenStorage();
+  String _name = 'Doctor';
+  String _email = '—';
+  String _doctorCode = '—';
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    try {
+      final user = await _tokenStorage.getUser();
+      if (mounted && user != null) {
+        setState(() {
+          _name = user['name'] ?? 'Doctor';
+          _email = user['email'] ?? '—';
+          _doctorCode = user['doctorCode'] ?? '—';
+          _isLoading = false;
+        });
+      } else {
+        if (mounted) setState(() => _isLoading = false);
+      }
+    } catch (_) {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _logout(BuildContext context) async {
+    await _tokenStorage.clearToken();
+    if (context.mounted) {
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.login,
+        (route) => false,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F4F8),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           // Header
@@ -68,18 +116,21 @@ class DoctorProfileScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 14),
-                    const Text(
-                      'Dr. James Anderson',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    // Doctor Name — Real from token ✅
+                    _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : Text(
+                            'Dr. $_name',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                     const SizedBox(height: 4),
-                    const Text(
-                      'Doctor Account',
-                      style: TextStyle(
+                    Text(
+                      _doctorCode != '—' ? _doctorCode : 'Doctor Account',
+                      style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 13,
                       ),
@@ -96,18 +147,23 @@ class DoctorProfileScreen extends StatelessWidget {
               child: Column(
                 children: [
                   ProfileInfoCard(
-                    email: 'dr.anderson@dermalyze.com',
-                    phone: '+1 (555) 987-6543',
+                    email: _email,
+                    phone: '—',
                     specialization: 'Dermatology',
-                    licenseNumber: 'MD-2024-5678',
-                    experience: '15 years',
+                    licenseNumber: _doctorCode,
+                    experience: '—',
                   ),
                   const SizedBox(height: 16),
                   ProfileSettingsCard(
-                    onNotifications: () => Navigator.pushNamed(
-                        context, AppRoutes.notifications),
-                    onPrivacy: () {},
-                    onMessages: () {},
+                    onNotifications: () =>
+                        Navigator.pushNamed(context, AppRoutes.notifications),
+                    onSettings: () => Navigator.pushNamed(context, AppRoutes.Settings),
+                    onMessages: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const MessagesView()),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -122,19 +178,12 @@ class DoctorProfileScreen extends StatelessWidget {
   Widget _buildLogoutButton(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
-      color: const Color(0xFFF0F4F8),
+      color: Theme.of(context).scaffoldBackgroundColor,
       child: SizedBox(
         width: double.infinity,
         height: 52,
         child: OutlinedButton.icon(
-          onPressed: () {
-            // TODO: logout logic
-            Navigator.pushNamedAndRemoveUntil(
-              context,
-              AppRoutes.login,
-              (route) => false,
-            );
-          },
+          onPressed: () => _logout(context),
           style: OutlinedButton.styleFrom(
             side: const BorderSide(color: Color(0xFFE05252), width: 1.5),
             shape: RoundedRectangleBorder(

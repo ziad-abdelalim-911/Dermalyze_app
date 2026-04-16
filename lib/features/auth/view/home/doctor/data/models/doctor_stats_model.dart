@@ -10,10 +10,10 @@ class DoctorStatsModel extends DoctorStatsEntity {
 
   factory DoctorStatsModel.fromJson(Map<String, dynamic> json) {
     return DoctorStatsModel(
-      totalPatients: json['total_patients'] ?? 0,
-      infectedPeople: json['infected_people'] ?? 0,
-      activeToday: json['active_today'] ?? 0,
-      criticalCases: json['critical_cases'] ?? 0,
+      totalPatients: json['totalPatients'] ?? json['total_patients'] ?? 0,
+      infectedPeople: json['infectedPeople'] ?? json['infected_people'] ?? 0,
+      activeToday: json['activeToday'] ?? json['active_today'] ?? 0,
+      criticalCases: json['criticalCases'] ?? json['critical_cases'] ?? 0,
     );
   }
 

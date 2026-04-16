@@ -141,7 +141,11 @@ class _MessagesViewState extends State<MessagesView> {
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => ChatView(),
+                        builder: (context) => const ChatView(
+                          receiverId: 'doctor_123',
+                          receiverName: "Dr. Ahmed Hassan",
+                          receiverRole: "Dermatologist",
+                        ),
                       ),
                     );
                   },
@@ -158,7 +162,11 @@ class _MessagesViewState extends State<MessagesView> {
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => ChatView(),
+                        builder: (context) => const ChatView(
+                          receiverId: 'doctor_456',
+                          receiverName: "Dr. Sarah Mitchell",
+                          receiverRole: "Dermatologist",
+                        ),
                       ),
                     );
                   },

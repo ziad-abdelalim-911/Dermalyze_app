@@ -1,9 +1,13 @@
 import 'package:dermalyze/features/auth/view/ProgressReport_view/progress_report_view.dart';
-import 'package:dermalyze/features/auth/view/login/Patient_SignUp.dart';
 import 'package:flutter/material.dart';
 
 class RecoveryProgressCard extends StatefulWidget {
-  const RecoveryProgressCard({super.key});
+  final double recoveryRate;
+
+  const RecoveryProgressCard({
+    super.key,
+    this.recoveryRate = 0.0,
+  });
 
   @override
   State<RecoveryProgressCard> createState() => _RecoveryProgressCardState();
@@ -12,6 +16,8 @@ class RecoveryProgressCard extends StatefulWidget {
 class _RecoveryProgressCardState extends State<RecoveryProgressCard> {
   @override
   Widget build(BuildContext context) {
+    final percent = '${(widget.recoveryRate * 100).toInt()}%';
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -28,65 +34,58 @@ class _RecoveryProgressCardState extends State<RecoveryProgressCard> {
             color: Colors.white,
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10),
+              BoxShadow(
+                  color: Colors.black.withOpacity(0.05), blurRadius: 10),
             ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               /// ===== Header
-              Row(
-                children: const [
+              const Row(
+                children: [
                   Icon(Icons.trending_up, color: Color(0xFF3B82F6)),
                   SizedBox(width: 8),
                   Text(
                     "Recovery Progress",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
-
               const SizedBox(height: 16),
 
               /// ===== Recovery Rate
-              const Row(
+              Row(
                 children: [
-                  Expanded(
+                  const Expanded(
                     child: Text(
                       "Recovery Rate",
                       style: TextStyle(fontSize: 14),
                     ),
                   ),
                   Text(
-                    "68%",
-                    style: TextStyle(
+                    percent,
+                    style: const TextStyle(
                       color: Color(0xFF3B82F6),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
               ),
-
               const SizedBox(height: 8),
 
               /// ===== Linear Progress
               ClipRRect(
                 borderRadius: BorderRadius.circular(20),
                 child: LinearProgressIndicator(
-                  value: 0.68,
+                  value: widget.recoveryRate,
                   minHeight: 8,
                   backgroundColor: Colors.grey.shade300,
-                  valueColor: const AlwaysStoppedAnimation(Color(0xFF3B82F6)),
+                  valueColor:
+                      const AlwaysStoppedAnimation(Color(0xFF3B82F6)),
                 ),
               ),
-
-              const SizedBox(height: 8),
-
-              const Text(
-                "+12% from last month",
-                style: TextStyle(color: Color(0xFF3B82F6), fontSize: 12),
-              ),
-
               const SizedBox(height: 20),
 
               /// ===== Circle Progress
@@ -101,7 +100,7 @@ class _RecoveryProgressCardState extends State<RecoveryProgressCard> {
                         width: 140,
                         height: 140,
                         child: CircularProgressIndicator(
-                          value: 0.68,
+                          value: widget.recoveryRate,
                           strokeWidth: 12,
                           backgroundColor: Colors.grey.shade300,
                           valueColor: const AlwaysStoppedAnimation(
@@ -109,25 +108,25 @@ class _RecoveryProgressCardState extends State<RecoveryProgressCard> {
                           ),
                         ),
                       ),
-                      const Column(
+                      Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            "68%",
-                            style: TextStyle(
+                            percent,
+                            style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w500,
                               color: Color(0xFF3B82F6),
                             ),
                           ),
-                          Text("Recovery", style: TextStyle(fontSize: 12)),
+                          const Text("Recovery",
+                              style: TextStyle(fontSize: 12)),
                         ],
                       ),
                     ],
                   ),
                 ),
               ),
-
               const SizedBox(height: 12),
 
               const Center(

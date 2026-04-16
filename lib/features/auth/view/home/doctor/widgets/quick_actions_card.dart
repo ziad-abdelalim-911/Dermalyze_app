@@ -21,10 +21,11 @@ class QuickActionsCard extends StatelessWidget {
       children: [
         Expanded(
           child: _buildActionCard(
+            context: context,
             onTap: onAllPatients,
             icon: Icons.people_outline,
             iconColor: AppColors.Turqouoise,
-            bgColor: AppColors.Turqouoise.withOpacity(0.08),
+            bgColor: AppColors.Turqouoise.withValues(alpha: 0.08),
             title: 'All Patients',
             subtitle: '$totalPatients total',
           ),
@@ -32,10 +33,11 @@ class QuickActionsCard extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: _buildActionCard(
+            context: context,
             onTap: onCritical,
             icon: Icons.warning_amber_outlined,
             iconColor: const Color(0xFFE05252),
-            bgColor: const Color(0xFFE05252).withOpacity(0.08),
+            bgColor: const Color(0xFFE05252).withValues(alpha: 0.08),
             title: 'Critical',
             subtitle: '$criticalCases cases',
           ),
@@ -45,6 +47,7 @@ class QuickActionsCard extends StatelessWidget {
   }
 
   Widget _buildActionCard({
+    required BuildContext context,
     required VoidCallback onTap,
     required IconData icon,
     required Color iconColor,
@@ -57,7 +60,7 @@ class QuickActionsCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -87,7 +90,7 @@ class QuickActionsCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.Black,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 Text(

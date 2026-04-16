@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 
 class ProfileSettingsCard extends StatelessWidget {
   final VoidCallback onNotifications;
-  final VoidCallback onPrivacy;
+  final VoidCallback onSettings;
   final VoidCallback onMessages;
 
   const ProfileSettingsCard({
     super.key,
     required this.onNotifications,
-    required this.onPrivacy,
+    required this.onSettings,
     required this.onMessages,
   });
 
@@ -19,7 +19,7 @@ class ProfileSettingsCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.White,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
@@ -37,23 +37,26 @@ class ProfileSettingsCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: AppColors.Black,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 8),
           _buildSettingsTile(
+            context: context,
             icon: Icons.notifications_outlined,
             label: 'Notifications',
             onTap: onNotifications,
           ),
-          Divider(height: 1, color: AppColors.Gray2.withOpacity(0.5)),
+          Divider(height: 1, color: AppColors.Gray2.withValues(alpha: 0.5)),
           _buildSettingsTile(
-            icon: Icons.shield_outlined,
-            label: 'Privacy & Security',
-            onTap: onPrivacy,
+            context: context,
+            icon: Icons.settings_outlined,
+            label: 'Settings',
+            onTap: onSettings,
           ),
-          Divider(height: 1, color: AppColors.Gray2.withOpacity(0.5)),
+          Divider(height: 1, color: AppColors.Gray2.withValues(alpha: 0.5)),
           _buildSettingsTile(
+            context: context,
             icon: Icons.mail_outline,
             label: 'Messages',
             onTap: onMessages,
@@ -64,6 +67,7 @@ class ProfileSettingsCard extends StatelessWidget {
   }
 
   Widget _buildSettingsTile({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required VoidCallback onTap,
@@ -82,7 +86,7 @@ class ProfileSettingsCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.Black,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),

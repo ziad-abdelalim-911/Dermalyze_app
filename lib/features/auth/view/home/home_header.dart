@@ -6,8 +6,15 @@ import '../../../../core/constants/app_colors.dart';
 
 class HomeHeader extends StatefulWidget {
   final String userName;
+  final String lastCheckup;
+  final String nextVisit;
 
-  const HomeHeader({super.key, required this.userName});
+  const HomeHeader({
+    super.key,
+    required this.userName,
+    this.lastCheckup = '—',
+    this.nextVisit = '—',
+  });
 
   @override
   State<HomeHeader> createState() => _HomeHeaderState();
@@ -87,19 +94,19 @@ class _HomeHeaderState extends State<HomeHeader> {
           const SizedBox(height: 20),
 
           Row(
-            children: const [
+            children: [
               Expanded(
                 child: _InfoMiniCard(
                   title: "Last Checkup",
-                  value: "Dec 15, 2024",
+                  value: widget.lastCheckup,
                   icon: Icons.monitor_heart_outlined,
                 ),
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Expanded(
                 child: _InfoMiniCard(
                   title: "Next Visit",
-                  value: "Jan 10, 2025",
+                  value: widget.nextVisit,
                   icon: Icons.description_outlined,
                 ),
               ),

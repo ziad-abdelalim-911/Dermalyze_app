@@ -1,4 +1,5 @@
 import 'package:dermalyze/core/constants/app_colors.dart';
+import 'package:dermalyze/features/auth/view/patients/data/review_repository.dart';
 import 'package:dermalyze/features/auth/view/patients/widgets/ai_recommendation_card.dart';
 import 'package:dermalyze/features/auth/view/patients/widgets/detailed_analysis_card.dart';
 import 'package:dermalyze/features/auth/view/patients/widgets/image_comparison_card.dart';
@@ -6,6 +7,7 @@ import 'package:dermalyze/features/auth/view/patients/widgets/improvement_detect
 import 'package:dermalyze/features/auth/view/patients/widgets/progress_statistics_card.dart';
 import 'package:dermalyze/features/auth/view/patients/widgets/slider_comparison_card.dart';
 import 'package:flutter/material.dart';
+
 
 class AiAnalysisResultScreen extends StatefulWidget {
   const AiAnalysisResultScreen({super.key});
@@ -17,22 +19,86 @@ class AiAnalysisResultScreen extends StatefulWidget {
 
 class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
   bool _isSideBySide = true;
+  bool _isSaving = false;
+  Map<String, dynamic>? _result; // ✅ النتيجة الحقيقية من الـ API
 
-  final _analysisItems = const [
-    DetailedAnalysisItem(
-        label: 'Redness', oldValue: 'High', newValue: 'Medium'),
-    DetailedAnalysisItem(
-        label: 'Inflammation', oldValue: 'Severe', newValue: 'Moderate'),
-    DetailedAnalysisItem(
-        label: 'Texture', oldValue: 'Rough', newValue: 'Smooth'),
-    DetailedAnalysisItem(
-        label: 'Color Match', oldValue: '45%', newValue: '68%'),
-  ];
+  // fallback لو مفيش result
+  String get _diagnosis => _result?['diagnosis'] ?? _result?['condition'] ?? 'Analysis Complete';
+  String get _confidence => _result?['confidence'] != null
+      ? '${(_result!['confidence'] * 100).toStringAsFixed(0)}%'
+      : 'N/A';
+  String get _recommendation =>
+      _result?['recommendation'] ?? _result?['treatment'] ?? 'Continue current treatment plan.';
+  String get _severity => _result?['severity'] ?? _result?['stage'] ?? 'Moderate';
+
+  /// يبني قائمة التحليل التفصيلي من الـ API result ديناميكياً
+  List<DetailedAnalysisItem> get _analysisItems {
+    // لو الـ API رجّع details list استخدمها
+    final details = _result?['details'] ?? _result?['analysisDetails'];
+    if (details is List && details.isNotEmpty) {
+      return details.map((d) {
+        final map = d as Map<String, dynamic>;
+        return DetailedAnalysisItem(
+          label: map['label'] ?? map['metric'] ?? 'Feature',
+          oldValue: (map['previous'] ?? map['oldValue'] ?? '—').toString(),
+          newValue: (map['current'] ?? map['newValue'] ?? '—').toString(),
+        );
+      }).toList();
+    }
+
+    // fallback — بنبني من الحقول الرئيسية الموجودة في الـ result
+    final items = <DetailedAnalysisItem>[];
+    if (_result?['severity'] != null || _result?['stage'] != null) {
+      items.add(DetailedAnalysisItem(
+        label: 'Severity',
+        oldValue: _result?['previousSeverity']?.toString() ?? '—',
+        newValue: _severity,
+      ));
+    }
+    if (_result?['confidence'] != null) {
+      items.add(DetailedAnalysisItem(
+        label: 'Confidence',
+        oldValue: '—',
+        newValue: _confidence,
+      ));
+    }
+    if (_result?['affectedArea'] != null || _result?['currentArea'] != null) {
+      items.add(DetailedAnalysisItem(
+        label: 'Affected Area',
+        oldValue: (_result?['affectedArea'] ?? '—').toString(),
+        newValue: (_result?['currentArea'] ?? '—').toString(),
+      ));
+    }
+    if (_result?['diagnosis'] != null) {
+      items.add(DetailedAnalysisItem(
+        label: 'Condition',
+        oldValue: '—',
+        newValue: _diagnosis,
+      ));
+    }
+    // لو مفيش بيانات كافية نرجع placeholder
+    if (items.isEmpty) {
+      return const [
+        DetailedAnalysisItem(label: 'Analysis', oldValue: '—', newValue: 'Complete'),
+      ];
+    }
+    return items;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // نقرأ الـ arguments من الـ navigation
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is Map<String, dynamic>) {
+      setState(() => _result = args);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F4F8),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           // ── Header ──
@@ -102,10 +168,9 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
                   const SizedBox(height: 16),
 
                   // Improvement
-                  const ImprovementDetectedCard(
-                    percentage: '+15%',
-                    message:
-                        'Patient showing positive response to treatment',
+                  ImprovementDetectedCard(
+                    percentage: _confidence,
+                    message: _recommendation,
                   ),
                   const SizedBox(height: 16),
 
@@ -120,13 +185,13 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
                   const SizedBox(height: 16),
 
                   // Progress Statistics
-                  const ProgressStatisticsCard(
-                    previousSeverity: '65%',
-                    previousDate: 'Jan 15, 2025',
-                    currentSeverity: '50%',
-                    affectedAreaPrevious: '24.5 cm²',
-                    affectedAreaCurrent: '18.2 cm²',
-                    improvementRate: '15%',
+                  ProgressStatisticsCard(
+                    previousSeverity: _severity,
+                    previousDate: _result?['date'] ?? 'Previous scan',
+                    currentSeverity: _severity,
+                    affectedAreaPrevious: _result?['affectedArea'] ?? 'N/A',
+                    affectedAreaCurrent: _result?['currentArea'] ?? 'N/A',
+                    improvementRate: _confidence,
                   ),
                   const SizedBox(height: 16),
 
@@ -135,9 +200,8 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
                   const SizedBox(height: 16),
 
                   // AI Recommendation
-                  const AiRecommendationCard(
-                    recommendation:
-                        'Continue current treatment plan. Patient showing positive response to medication.',
+                  AiRecommendationCard(
+                    recommendation: _recommendation,
                   ),
                 ],
               ),
@@ -156,7 +220,7 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -192,10 +256,11 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
                     gradient: AppColors.primaryGradient2,
                     shape: BoxShape.circle,
                   ),
-                  child: const Center(
+                  child: Center(
                     child: Text(
-                      'SJ',
-                      style: TextStyle(
+                      // initials من اسم المريض الحقيقي
+                      _getInitials(_result?['patientName'] ?? ''),
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -208,22 +273,22 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Sarah Johnson',
+                      _result?['patientName'] ?? 'Patient',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.Black,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     Text(
-                      'Atopic Dermatitis',
+                      _diagnosis,
                       style: TextStyle(
                         fontSize: 12,
                         color: AppColors.Turqouoise,
                       ),
                     ),
                     Text(
-                      'Previous Recovery Rate: 68%',
+                      'Confidence: $_confidence',
                       style: TextStyle(
                           fontSize: 12, color: AppColors.Gray),
                     ),
@@ -241,7 +306,7 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
@@ -289,19 +354,18 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
   Widget _buildSaveButton() {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
-      color: const Color(0xFFF0F4F8),
+      color: Theme.of(context).scaffoldBackgroundColor,
       child: SizedBox(
         width: double.infinity,
         height: 52,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            gradient: AppColors.primaryGradient2,
+            gradient: _isSaving ? null : AppColors.primaryGradient2,
+            color: _isSaving ? Colors.grey.shade400 : null,
             borderRadius: BorderRadius.circular(16),
           ),
           child: ElevatedButton.icon(
-            onPressed: () {
-              // TODO: save to patient record
-            },
+            onPressed: _isSaving ? null : _saveToPatientRecord,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.transparent,
               shadowColor: Colors.transparent,
@@ -309,11 +373,17 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
                 borderRadius: BorderRadius.circular(16),
               ),
             ),
-            icon: const Icon(Icons.save_outlined,
-                color: Colors.white, size: 20),
-            label: const Text(
-              'Save to Patient Record',
-              style: TextStyle(
+            icon: _isSaving
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                        color: Colors.white, strokeWidth: 2),
+                  )
+                : const Icon(Icons.save_outlined, color: Colors.white, size: 20),
+            label: Text(
+              _isSaving ? 'Saving...' : 'Save to Patient Record',
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -323,5 +393,60 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
         ),
       ),
     );
+  }
+
+  /// يحوّل اسم المريض لـ initials (مثلاً "Sarah Johnson" → "SJ")
+  String _getInitials(String name) {
+    final parts = name.trim().split(RegExp(r'\s+'));
+    if (parts.isEmpty || parts[0].isEmpty) return '?';
+    if (parts.length == 1) return parts[0][0].toUpperCase();
+    return '${parts[0][0]}${parts[parts.length - 1][0]}'.toUpperCase();
+  }
+
+  /// يحفظ نتيجة التحليل في سجل المريض عبر الـ API
+  Future<void> _saveToPatientRecord() async {
+    final patientId = _result?['patientId']?.toString() ?? '';
+    if (patientId.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Cannot save: patient ID not found in result'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+      return;
+    }
+
+    setState(() => _isSaving = true);
+    try {
+      // نستخدم ReviewRepository لحفظ ملاحظة تلخيصية بالتحليل
+      final summary =
+          'AI Analysis: $_diagnosis | Severity: $_severity | Confidence: $_confidence';
+      await ReviewRepository().saveReview(
+        patientId: patientId,
+        review: summary,
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Analysis saved to patient record ✓'),
+            backgroundColor: Color(0xFF4ECDC4),
+          ),
+        );
+        Navigator.pop(context); // ارجع للشاشة السابقة بعد الحفظ
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error saving: ${e.toString()}'),
+            backgroundColor: Colors.red.shade400,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
   }
 }

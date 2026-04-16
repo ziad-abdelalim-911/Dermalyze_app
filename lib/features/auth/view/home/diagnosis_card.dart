@@ -2,7 +2,27 @@ import 'package:dermalyze/features/auth/view/disease_details_view/disease_detail
 import 'package:flutter/material.dart';
 
 class DiagnosisCard extends StatelessWidget {
-  const DiagnosisCard({super.key});
+  final String diagnosis;
+  final String quality;
+
+  const DiagnosisCard({
+    super.key,
+    this.diagnosis = '—',
+    this.quality = '—',
+  });
+
+  Color _qualityColor() {
+    switch (quality.toLowerCase()) {
+      case 'high':
+        return Colors.green;
+      case 'medium':
+        return Colors.amber;
+      case 'low':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +32,7 @@ class DiagnosisCard extends StatelessWidget {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => DiseaseDetailsView()),
+            MaterialPageRoute(builder: (context) => const DiseaseDetailsView(diseaseName: 'Skin Condition')),
           );
         },
         child: Container(
@@ -39,26 +59,28 @@ class DiagnosisCard extends StatelessWidget {
                       style: TextStyle(color: Colors.grey, fontSize: 13),
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
+                  if (quality != '—')
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: _qualityColor()),
+                      ),
+                      child: Text(
+                        "Quality: $quality",
+                        style:
+                            TextStyle(color: _qualityColor(), fontSize: 12),
+                      ),
                     ),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.amber),
-                    ),
-                    child: const Text(
-                      "Quality: Medium",
-                      style: TextStyle(color: Colors.amber, fontSize: 12),
-                    ),
-                  ),
                 ],
               ),
               const SizedBox(height: 10),
-              const Text(
-                "Atopic Dermatitis",
-                style: TextStyle(
+              Text(
+                diagnosis,
+                style: const TextStyle(
                   fontSize: 18,
                   color: Color(0xFF3B82F6),
                   fontWeight: FontWeight.w500,

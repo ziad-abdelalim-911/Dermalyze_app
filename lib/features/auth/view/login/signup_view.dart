@@ -4,6 +4,7 @@ import 'package:dermalyze/features/shared/custem_txtfield.dart';
 import 'package:dermalyze/features/shared/custom_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:dermalyze/core/routes/app_routes.dart';
 import 'package:gap/gap.dart';
 
 class SignupView extends StatefulWidget {
@@ -46,7 +47,7 @@ class _SignupViewState extends State<SignupView> {
 
   @override
   Widget build(BuildContext context) {
-    var media = MediaQuery.of(context).size;
+    final _ = MediaQuery.of(context).size; // size available if needed
 
     return Container(
       decoration: BoxDecoration(
@@ -206,7 +207,7 @@ class _SignupViewState extends State<SignupView> {
                       SizedBox(
                         height: 57,
                         child: InkWell(
-                          onTap: () {},
+                          onTap: () => Navigator.pushNamed(context, AppRoutes.register),
                           borderRadius: BorderRadius.circular(16),
                           child: Container(
                             decoration: BoxDecoration(
@@ -215,10 +216,11 @@ class _SignupViewState extends State<SignupView> {
                             ),
                             child: Center(
                               child: Text(
+                                'Continue',
                                 style: TextStyle(
                                   fontSize: 16,
-                                  color: AppColors.White,),
-                                'Continue',
+                                  color: AppColors.White,
+                                ),
                               ),
                             ),
                           ),
@@ -231,19 +233,20 @@ class _SignupViewState extends State<SignupView> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            "Don't have an account? ",
+                            "Already have an account? ",
                             style: TextStyle(
                               fontSize: 16,
                               color: AppColors.Gray,
                             ),
                           ),
                           TextButton(
-                            onPressed: () {},
+                            onPressed: () => Navigator.pop(context),
                             child: Text(
-                              'Sign Up',
+                              'Login',
                               style: TextStyle(
                                 fontSize: 16,
-                                color: AppColors.SkyBlue,)
+                                color: AppColors.SkyBlue,
+                              ),
                             ),
                           ),
                         ],
@@ -280,12 +283,8 @@ class PasswordRequirementsBox extends StatelessWidget {
 
   Widget _row(bool ok, String text) {
 
-    const Color bgColor = Color(0xFFF0F7FF); // box background
-    const Color border20 = Color(0x334A90E2); // 20% opacity border of #4A90E2
     const Color checkColor = Color(0xFF34C759); // green check
     const Color inactiveDot = Color(0xFFC2CDD9); // inactive circle
-    const Color activeBlue = Color(0xFF4A90E2); // active blue
-    const Color titleColor = Color(0xFF1E2D3D);
     const Color bodyColor = Color(0xFF4A5568);
 
     return Row(
@@ -308,7 +307,7 @@ class PasswordRequirementsBox extends StatelessWidget {
           text,
           style: TextStyle(
             fontSize: 14,
-            color: ok ? titleColor : bodyColor,
+            color: ok ? const Color(0xFF1E2D3D) : bodyColor,
             fontWeight: FontWeight.w400,
           ),
         ),
@@ -321,7 +320,6 @@ class PasswordRequirementsBox extends StatelessWidget {
     // Colors from Figma
     const Color boxBg = Color(0xFFF0F7FF);
     const Color border20 = Color(0x334A90E2);
-    const Color titleColor = Color(0xFF1E2D3D);
 
     return Container(
       padding: const EdgeInsets.all(16),
