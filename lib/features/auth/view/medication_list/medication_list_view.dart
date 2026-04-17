@@ -46,7 +46,10 @@ class _MedicationListViewState extends State<MedicationListView> {
       }
 
       final raw = await _repo.getMedications(patientId);
-      final all = raw.map((m) => _fromApi(m as Map<String, dynamic>)).toList();
+      final all = raw
+          .map((m) => m == null ? null : _fromApi(m as Map<String, dynamic>))
+          .whereType<MedicationModel>()
+          .toList();
 
       setState(() {
         _activeMedications = all.where((m) => !m.isCompleted).toList();

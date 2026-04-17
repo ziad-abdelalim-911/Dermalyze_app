@@ -112,6 +112,7 @@ class _ProgressReportViewState extends State<ProgressReportView> {
       List<dynamic> analyses, Map<String, dynamic> profile) {
     if (analyses.isNotEmpty) {
       return analyses.take(4).map((a) {
+        if (a == null) return null;
         final m = a as Map<String, dynamic>;
         final rate = m['recoveryRate'] ?? m['improvement'] ?? 0;
         final rateStr = rate != 0 ? '$rate%' : '—';
@@ -123,7 +124,7 @@ class _ProgressReportViewState extends State<ProgressReportView> {
           color: const Color(0xFF22C55E),
           bgColor: const Color(0xFFE7F6EC),
         );
-      }).toList();
+      }).whereType<TimelineItemModel>().toList();
     }
 
     // fallback — من بيانات الـ profile
@@ -184,12 +185,13 @@ class _ProgressReportViewState extends State<ProgressReportView> {
     final raw = profile['symptoms'] ?? profile['symptomImprovement'];
     if (raw is List && raw.isNotEmpty) {
       return raw.map((s) {
+        if (s == null) return null;
         final m = s as Map<String, dynamic>;
         return SymptomModel(
           name: m['name'] ?? 'Symptom',
           percent: (m['improvement'] ?? m['percent'] ?? 0) as int,
         );
-      }).toList();
+      }).whereType<SymptomModel>().toList();
     }
     // لو مفيش بيانات symptoms من الـ API نرجع قائمة فارغة (مش mock)
     return [];

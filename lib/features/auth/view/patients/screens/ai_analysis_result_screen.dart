@@ -37,13 +37,14 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
     final details = _result?['details'] ?? _result?['analysisDetails'];
     if (details is List && details.isNotEmpty) {
       return details.map((d) {
+        if (d == null) return null;
         final map = d as Map<String, dynamic>;
         return DetailedAnalysisItem(
           label: map['label'] ?? map['metric'] ?? 'Feature',
           oldValue: (map['previous'] ?? map['oldValue'] ?? '—').toString(),
           newValue: (map['current'] ?? map['newValue'] ?? '—').toString(),
         );
-      }).toList();
+      }).whereType<DetailedAnalysisItem>().toList();
     }
 
     // fallback — بنبني من الحقول الرئيسية الموجودة في الـ result

@@ -8,6 +8,9 @@ class PatientEntity {
   final String lastVisit;
   final int age;
   final bool isCritical;
+  final String phone;
+  final String currentSymptoms;
+  final String nextAppointment;
 
   const PatientEntity({
     required this.id,
@@ -19,5 +22,8 @@ class PatientEntity {
     required this.lastVisit,
     required this.age,
     required this.isCritical,
+    this.phone = '',
+    this.currentSymptoms = '',
+    this.nextAppointment = '',
   });
-}
+}

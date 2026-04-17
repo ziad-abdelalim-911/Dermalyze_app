@@ -20,7 +20,7 @@ class AnalysisRepository {
     });
 
     final response = await _dio.post(
-      'analysis/$patientId',
+      'doctor/patients/$patientId/analysis',
       data: formData,
       onSendProgress: onProgress,
     );

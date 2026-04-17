@@ -15,7 +15,7 @@ class NotificationsRepository {
     }
 
     try {
-      final response = await _api.get('user/$userId/notifications');
+      final response = await _api.get('doctor/notifications');
       
       if (response is List) {
          return response.map((json) => NotificationModel.fromJson(json as Map<String, dynamic>)).toList();
@@ -32,7 +32,7 @@ class NotificationsRepository {
     final userId = user?['id'] ?? user?['_id'] ?? '';
     
     if (userId.isNotEmpty) {
-      await _api.put('user/$userId/notifications/read', {});
+      await _api.put('doctor/notifications/read', {});
     }
   }
 }

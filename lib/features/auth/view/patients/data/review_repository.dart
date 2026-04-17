@@ -3,12 +3,12 @@ import 'package:dermalyze/core/network/api_service.dart';
 class ReviewRepository {
   final ApiService _api = ApiService();
 
-  /// POST /api/doctor/review/{patientId}
+  /// POST /api/patients/{patientId}/review
   Future<void> saveReview({
     required String patientId,
     required String review,
   }) async {
-    await _api.post('doctor/review/$patientId', {
+    await _api.post('doctor/patients/$patientId/review', {
       'review': review,
     });
   }
@@ -18,12 +18,15 @@ class ReviewRepository {
     required String patientId,
     required String status, // 'improving' | 'stable' | 'critical'
   }) async {
-    await _api.put('doctor/patients/$patientId/status', {
-      'status': status,
+    // Capitalize first letter (e.g., 'stable' -> 'Stable')
+    final capitalizedStatus = status[0].toUpperCase() + status.substring(1);
+    
+    await _api.put('patients/$patientId/status', {
+      'status': capitalizedStatus,
     });
   }
 
-  /// POST /api/doctor/appointments
+  /// POST /api/patient/{patientId}/appointments
   Future<void> scheduleFollowup({
     required String patientId,
     required String patientName,
@@ -31,8 +34,7 @@ class ReviewRepository {
     required String date,
     required String time,
   }) async {
-    await _api.post('doctor/appointments', {
-      'patientId': patientId,
+    await _api.post('doctor/patients/$patientId/appointments', {
       'patientName': patientName,
       'diagnosis': diagnosis,
       'appointmentDate': date,

@@ -8,9 +8,18 @@ import 'package:dermalyze/features/auth/view/home/doctor/widgets/critical_care_g
 import 'package:dermalyze/features/auth/view/home/doctor/widgets/critical_patient_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 
 class CriticalPatientsScreen extends StatelessWidget {
   const CriticalPatientsScreen({super.key});
+
+  static Future<void> _launchCall(String phone) async {
+    final uri = Uri(scheme: 'tel', path: phone);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -139,24 +148,32 @@ class CriticalPatientsScreen extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            // Patients Cards from API
+                            // Patients Cards from API ✅
                             ...criticalPatients.map(
                               (p) => CriticalPatientCard(
                                 name: p.name,
                                 diagnosis: p.diagnosis,
                                 age: p.age,
                                 lastVisit: p.lastVisit,
-                                updatedAgo: '—',
-                                currentSymptoms: '—',
+                                updatedAgo: p.lastVisit,
+                                currentSymptoms: p.currentSymptoms.isNotEmpty
+                                    ? p.currentSymptoms
+                                    : 'No symptoms recorded',
                                 recoveryRate: p.recoveryRate,
-                                nextAppointment: '—',
-                                riskLevel: RiskLevel.high,
+                                nextAppointment: p.nextAppointment.isNotEmpty
+                                    ? p.nextAppointment
+                                    : 'Not scheduled',
+                                riskLevel: p.recoveryRate < 0.25
+                                    ? RiskLevel.severe
+                                    : RiskLevel.high,
                                 onView: () => Navigator.pushNamed(
                                   context,
                                   AppRoutes.patientDetails,
                                   arguments: p,
                                 ),
-                                onCall: () {},
+                                onCall: p.phone.isNotEmpty
+                                    ? () => _launchCall(p.phone)
+                                    : () {},
                                 onMessage: () {},
                               ),
                             ),

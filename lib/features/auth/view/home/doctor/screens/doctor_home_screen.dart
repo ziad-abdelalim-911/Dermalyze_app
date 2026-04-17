@@ -14,6 +14,7 @@ import 'package:dermalyze/features/auth/view/home/doctor/widgets/patient_list_ca
 import 'package:dermalyze/features/auth/view/home/doctor/widgets/patient_search_bar.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/widgets/quick_actions_card.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/widgets/stats_grid_card.dart';
+import 'package:dermalyze/features/auth/view/notifications/notifications_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -42,12 +43,15 @@ class _DoctorHomeView extends StatefulWidget {
 
 class _DoctorHomeViewState extends State<_DoctorHomeView> {
   final _searchController = TextEditingController();
+  final _notificationsRepo = NotificationsRepository();
   String _doctorName = 'Doctor';
+  int _unreadCount = 0;
 
   @override
   void initState() {
     super.initState();
     _loadDoctorName();
+    _loadUnreadCount();
   }
 
   Future<void> _loadDoctorName() async {
@@ -57,6 +61,19 @@ class _DoctorHomeViewState extends State<_DoctorHomeView> {
         setState(() => _doctorName = user['name'] ?? 'Doctor');
       }
     } catch (_) {}
+  }
+
+  Future<void> _loadUnreadCount() async {
+    try {
+      final notifications = await _notificationsRepo.getNotifications();
+      if (mounted) {
+        setState(() {
+          _unreadCount = notifications.where((n) => n.isUnread).length;
+        });
+      }
+    } catch (_) {
+      // Silently fail — badge stays hidden
+    }
   }
 
   @override
@@ -125,8 +142,12 @@ class _DoctorHomeViewState extends State<_DoctorHomeView> {
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: IconButton(
-                                        onPressed: () => Navigator.pushNamed(
-                                            context, AppRoutes.notifications),
+                                        onPressed: () async {
+                                          await Navigator.pushNamed(
+                                              context, AppRoutes.notifications);
+                                          // Refresh badge after returning from notifications
+                                          _loadUnreadCount();
+                                        },
                                         icon: const Icon(
                                           Icons.notifications_outlined,
                                           color: Colors.white,
@@ -134,6 +155,7 @@ class _DoctorHomeViewState extends State<_DoctorHomeView> {
                                         ),
                                       ),
                                     ),
+                                    if (_unreadCount > 0)
                                     Positioned(
                                       top: 6,
                                       right: 6,
