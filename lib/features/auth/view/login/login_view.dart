@@ -59,11 +59,12 @@ class _LoginViewState extends State<LoginView> {
           if (state is LoginSuccess) {
             if (state.role == 'doctor') {
               Navigator.pushNamedAndRemoveUntil(
-                context, AppRoutes.doctorHome, (route) => false);
+                  context, AppRoutes.bottomNavBar, (route) => false,
+                  arguments: true);
             } else {
               Navigator.pushNamedAndRemoveUntil(
-                context, AppRoutes.bottomNavBar, (route) => false,
-                arguments: false);
+                  context, AppRoutes.bottomNavBar, (route) => false,
+                  arguments: false);
             }
           }
           if (state is LoginFailure) {

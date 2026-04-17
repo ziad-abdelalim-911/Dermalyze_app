@@ -55,7 +55,7 @@ class PrescribedMedicationsCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.Black,
+                      color: Theme.of(context).colorScheme.onSurface,
                       height: 1.4,
                     ),
                   ),
@@ -91,13 +91,13 @@ class PrescribedMedicationsCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           // Medications List
-          ...medications.map((med) => _buildMedicationItem(med)).toList(),
+          ...medications.map((med) => _buildMedicationItem(context, med)).toList(),
         ],
       ),
     );
   }
 
-  Widget _buildMedicationItem(MedicationItem med) {
+  Widget _buildMedicationItem(BuildContext context, MedicationItem med) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
@@ -108,7 +108,7 @@ class PrescribedMedicationsCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: AppColors.Black,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 3),

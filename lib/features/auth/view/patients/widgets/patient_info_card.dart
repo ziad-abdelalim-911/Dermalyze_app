@@ -58,7 +58,7 @@ class PatientInfoCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.Black,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               Container(
@@ -89,7 +89,7 @@ class PatientInfoCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          Divider(color: AppColors.Gray2, height: 1),
+          Divider(color: Theme.of(context).dividerColor, height: 1),
           const SizedBox(height: 16),
           // Stats Row
           Row(
@@ -99,10 +99,10 @@ class PatientInfoCard extends StatelessWidget {
                   icon: Icons.calendar_today_outlined,
                   label: 'Last Visit',
                   value: lastVisit,
-                  valueColor: AppColors.Black,
+                  valueColor: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
-              Container(width: 1, height: 40, color: AppColors.Gray2),
+              Container(width: 1, height: 40, color: Theme.of(context).dividerColor),
               Expanded(
                 child: _buildStat(
                   icon: Icons.show_chart,

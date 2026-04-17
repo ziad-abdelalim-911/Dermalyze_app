@@ -42,15 +42,11 @@ class _SplashViewState extends State<SplashView>
         final role = user?['role'] ?? 'patient';
 
         if (!mounted) return;
-        if (role == 'doctor') {
-          Navigator.pushReplacementNamed(context, AppRoutes.doctorHome);
-        } else {
-          Navigator.pushReplacementNamed(
-            context,
-            AppRoutes.bottomNavBar,
-            arguments: false, // patient
-          );
-        }
+        Navigator.pushReplacementNamed(
+          context,
+          AppRoutes.bottomNavBar,
+          arguments: role == 'doctor',
+        );
       } else {
         // مفيش token — روح للـ onboarding
         if (!mounted) return;

@@ -47,8 +47,8 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
   Future<void> _logout() async {
     await _tokenStorage.clearToken();
     if (mounted) {
-      Navigator.pushNamedAndRemoveUntil(
-          context, AppRoutes.login, (route) => false);
+      Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil(
+          AppRoutes.login, (route) => false);
     }
   }
 
@@ -86,7 +86,9 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                           Align(
                             alignment: Alignment.centerLeft,
                             child: GestureDetector(
-                              onTap: () => Navigator.pop(context),
+                              onTap: () {
+                                Navigator.pop(context);
+                              },
                               child: const Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [

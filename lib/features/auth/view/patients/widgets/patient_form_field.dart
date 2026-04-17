@@ -8,6 +8,8 @@ class PatientFormField extends StatelessWidget {
   final IconData? prefixIcon;
   final TextInputType? keyboardType;
   final int maxLines;
+  final int? maxLength;
+  final String? Function(String?)? validator;
 
   const PatientFormField({
     super.key,
@@ -18,6 +20,8 @@ class PatientFormField extends StatelessWidget {
     this.prefixIcon,
     this.keyboardType,
     this.maxLines = 1,
+    this.maxLength,
+    this.validator,
   });
 
   @override
@@ -50,9 +54,10 @@ class PatientFormField extends StatelessWidget {
           controller: controller,
           keyboardType: keyboardType,
           maxLines: maxLines,
-          validator: required
+          maxLength: maxLength,
+          validator: validator ?? (required
               ? (val) => (val == null || val.trim().isEmpty) ? 'This field is required' : null
-              : null,
+              : null),
           style: const TextStyle(fontSize: 14, color: Color(0xFF1A2E3B)),
           decoration: InputDecoration(
             hintText: hint,

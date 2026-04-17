@@ -57,17 +57,17 @@ class ProgressTimelineCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: AppColors.Black,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 14),
-          ...items.map((item) => _buildTimelineItem(item)).toList(),
+          ...items.map((item) => _buildTimelineItem(context, item)).toList(),
         ],
       ),
     );
   }
 
-  Widget _buildTimelineItem(TimelineItem item) {
+  Widget _buildTimelineItem(BuildContext context, TimelineItem item) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -77,10 +77,10 @@ class ProgressTimelineCard extends StatelessWidget {
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              color: AppColors.Gray2.withOpacity(0.4),
+              color: Theme.of(context).brightness == Brightness.dark ? Colors.white10 : AppColors.Gray2.withOpacity(0.4),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(Icons.show_chart, color: AppColors.Gray, size: 24),
+            child: Icon(Icons.show_chart, color: Theme.of(context).iconTheme.color ?? AppColors.Gray, size: 24),
           ),
           const SizedBox(width: 14),
           // Info
@@ -96,7 +96,7 @@ class ProgressTimelineCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.Black,
+                        color: Theme.of(context).brightness == Brightness.dark ? Colors.white : AppColors.Black,
                       ),
                     ),
                     const SizedBox(width: 8),

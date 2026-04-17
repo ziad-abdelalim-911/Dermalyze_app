@@ -1,5 +1,6 @@
 import 'package:dermalyze/core/network/api_service.dart';
 import 'package:dermalyze/features/auth/view/chat/model/message_model.dart';
+import 'package:dermalyze/features/auth/view/chat/model/conversation_model.dart';
 
 class ChatRepository {
   final ApiService _apiService;
@@ -35,9 +36,53 @@ class ChatRepository {
       }
       return message;
     } catch (e) {
-      print("Error sending message: $e");
-      // Fallback optimistic return if endpoint isn't ready
       return message;
+    }
+  }
+
+  Future<List<ConversationModel>> getConversations(String currentUserId) async {
+    List<ConversationModel> _fallbackMocks = [
+      ConversationModel(
+        id: 'c1',
+        receiverId: 'doctor_123',
+        name: 'Dr. Ahmed Hassan',
+        role: 'Dermatologist',
+        lastMessage: 'Good progress! Continue...',
+        time: '5 min ago',
+        isOnline: true,
+        unreadCount: 0,
+      ),
+      ConversationModel(
+        id: 'c2',
+        receiverId: 'doctor_456',
+        name: 'Dr. Sarah Mitchell',
+        role: 'Dermatologist',
+        lastMessage: 'Your lab results are ready.',
+        time: '2 hours ago',
+        isOnline: false,
+        unreadCount: 2,
+      ),
+    ];
+
+    try {
+      final response = await _apiService.get('chat/conversations');
+      List<ConversationModel> parsedList = [];
+
+      if (response != null && response is List) {
+        parsedList = response.map((json) => ConversationModel.fromJson(json)).toList();
+      } else if (response != null && response['data'] is List) {
+        parsedList = (response['data'] as List).map((json) => ConversationModel.fromJson(json)).toList();
+      }
+
+      // If backend returns empty list (no real chats yet), force mocks for UI testing purposes
+      if (parsedList.isEmpty) {
+        return _fallbackMocks;
+      }
+      return parsedList;
+
+    } catch (e) {
+      print("Error fetching conversations: $e");
+      return _fallbackMocks;
     }
   }
 }

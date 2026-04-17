@@ -40,7 +40,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       appBar: AppBar(
         backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
         elevation: 0,
-        automaticallyImplyLeading: false,
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon: Icon(Icons.arrow_back_ios_new, color: textPrimary, size: 20),
+                onPressed: () => Navigator.pop(context),
+              )
+            : null,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -201,7 +206,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               icon: Icons.settings_outlined,
               label: 'App Settings',
               color: const Color(0xFF1F2937),
-              colorDark: Colors.white,
+              colorDark: const Color(0xFF334155),
             ),
             const SizedBox(height: 8),
             _buildCard(
@@ -234,6 +239,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               icon: Icons.article_outlined,
               label: 'Legal & Privacy',
               color: textPrimary,
+              colorDark: const Color(0xFF334155),
             ),
             const SizedBox(height: 8),
             _buildCard(
@@ -324,8 +330,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onTap: () async {
                     await TokenStorage().clearToken();
                     if (context.mounted) {
-                      Navigator.pushNamedAndRemoveUntil(
-                          context, AppRoutes.login, (route) => false);
+                      Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil(
+                          AppRoutes.login, (route) => false);
                     }
                   },
                 ),

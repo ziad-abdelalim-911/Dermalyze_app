@@ -1,9 +1,7 @@
 import 'package:dermalyze/core/constants/app_colors.dart';
 import 'package:dermalyze/core/routes/app_routes.dart';
 import 'package:dermalyze/core/storage/token_storage.dart';
-import 'package:dermalyze/features/auth/view/chat/view/messages_view.dart';
 import 'package:flutter/material.dart';
-
 
 class ProfileView extends StatefulWidget {
   const ProfileView({super.key});
@@ -18,8 +16,10 @@ class _ProfileViewState extends State<ProfileView> {
   String _name = 'Patient';
   String _email = '—';
   String _phone = '—';
-  String _diagnosis = '—';
+  String _birthDate = '—';
   String _nationalId = '—';
+  String _diagnosis = '—';
+  String _allergies = '—';
   bool _isLoading = true;
 
   @override
@@ -36,8 +36,10 @@ class _ProfileViewState extends State<ProfileView> {
           _name = user['name'] ?? 'Patient';
           _email = user['email'] ?? '—';
           _phone = user['phone'] ?? '—';
-          _diagnosis = user['diagnosis'] ?? '—';
+          _birthDate = user['birthDate'] ?? user['dateOfBirth'] ?? '—';
           _nationalId = user['nationalId'] ?? '—';
+          _diagnosis = user['diagnosis'] ?? '—';
+          _allergies = user['allergies'] ?? '—';
           _isLoading = false;
         });
       } else {
@@ -51,8 +53,8 @@ class _ProfileViewState extends State<ProfileView> {
   Future<void> _logout() async {
     await _tokenStorage.clearToken();
     if (mounted) {
-      Navigator.pushNamedAndRemoveUntil(
-          context, AppRoutes.login, (route) => false);
+      Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil(
+          AppRoutes.login, (route) => false);
     }
   }
 
@@ -92,13 +94,14 @@ class _ProfileViewState extends State<ProfileView> {
                           Align(
                             alignment: Alignment.centerLeft,
                             child: Row(
-                              children: [
-                                const Icon(Icons.person_2_outlined,
-                                    color: Colors.white70, size: 18),
-                                const SizedBox(width: 8),
+                              mainAxisSize: MainAxisSize.min,
+                              children: const [
+                                Icon(Icons.arrow_back_ios_new,
+                                    color: Colors.white, size: 16),
+                                SizedBox(width: 8),
                                 Text(
                                   'Profile',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
@@ -144,8 +147,9 @@ class _ProfileViewState extends State<ProfileView> {
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Personal Information Card
+                        // ── Personal Information ─────────────────
                         _buildCard(
                           cardBg: cardBg,
                           child: Column(
@@ -176,46 +180,100 @@ class _ProfileViewState extends State<ProfileView> {
                                 textPrimary: textPrimary,
                                 textSecondary: textSecondary,
                                 divider: dividerColor,
-                                showDivider: _nationalId != '—',
+                                showDivider: true,
                               ),
-                              if (_nationalId != '—')
-                                _buildInfoRow(
-                                  icon: Icons.badge_outlined,
-                                  label: 'National ID',
-                                  value: _nationalId,
-                                  textPrimary: textPrimary,
-                                  textSecondary: textSecondary,
-                                  divider: dividerColor,
-                                  showDivider: false,
-                                ),
+                              _buildInfoRow(
+                                icon: Icons.calendar_today_outlined,
+                                label: 'Date of Birth',
+                                value: _birthDate,
+                                textPrimary: textPrimary,
+                                textSecondary: textSecondary,
+                                divider: dividerColor,
+                                showDivider: true,
+                              ),
+                              _buildInfoRow(
+                                icon: Icons.shield_outlined,
+                                label: 'National ID',
+                                value: _nationalId,
+                                textPrimary: textPrimary,
+                                textSecondary: textSecondary,
+                                divider: dividerColor,
+                                showDivider: false,
+                              ),
                             ],
                           ),
                         ),
 
-                        // Medical Information Card (لو فيه diagnosis)
-                        if (_diagnosis != '—') ...[
-                          const SizedBox(height: 16),
-                          _buildCard(
-                            cardBg: cardBg,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Medical Information',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w700,
-                                    color: textPrimary,
-                                  ),
+                        const SizedBox(height: 16),
+
+                        // ── Medical Information ──────────────────
+                        _buildCard(
+                          cardBg: cardBg,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Medical Information',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color: textPrimary,
                                 ),
-                                const SizedBox(height: 12),
+                              ),
+                              const SizedBox(height: 12),
+
+                              // Allergies box (pink)
+                              if (_allergies != '—') ...[
                                 Container(
                                   width: double.infinity,
-                                  padding: const EdgeInsets.all(14),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 14, vertical: 12),
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? Colors.red.withValues(alpha: 0.12)
+                                        : const Color(0xFFFFF0F0),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: Colors.red.withValues(alpha: 0.25),
+                                    ),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Allergies',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.red.shade400,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        _allergies,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.red.shade500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                              ],
+
+                              // Current Diagnosis box (blue)
+                              if (_diagnosis != '—')
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 14, vertical: 12),
                                   decoration: BoxDecoration(
                                     color: isDark
                                         ? AppColors.SkyBlue
-                                            .withValues(alpha: 0.15)
+                                            .withValues(alpha: 0.12)
                                         : const Color(0xFFF0FDFF),
                                     borderRadius: BorderRadius.circular(12),
                                     border: Border.all(
@@ -230,8 +288,9 @@ class _ProfileViewState extends State<ProfileView> {
                                       Text(
                                         'Current Diagnosis',
                                         style: TextStyle(
-                                          fontSize: 12,
-                                          color: textSecondary,
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.SkyBlue,
                                         ),
                                       ),
                                       const SizedBox(height: 4),
@@ -239,21 +298,30 @@ class _ProfileViewState extends State<ProfileView> {
                                         _diagnosis,
                                         style: TextStyle(
                                           fontSize: 14,
-                                          fontWeight: FontWeight.w600,
+                                          fontWeight: FontWeight.w500,
                                           color: AppColors.SkyBlue,
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
-                              ],
-                            ),
+
+                              // لو مفيش diagnosis ولا allergies
+                              if (_diagnosis == '—' && _allergies == '—')
+                                Center(
+                                  child: Text(
+                                    'No medical information available',
+                                    style: TextStyle(
+                                        fontSize: 13, color: textSecondary),
+                                  ),
+                                ),
+                            ],
                           ),
-                        ],
+                        ),
 
                         const SizedBox(height: 16),
 
-                        // Settings Card
+                        // ── Settings ─────────────────────────────
                         _buildCard(
                           cardBg: cardBg,
                           child: Column(
@@ -282,21 +350,9 @@ class _ProfileViewState extends State<ProfileView> {
                                 label: 'Privacy & Security',
                                 textPrimary: textPrimary,
                                 divider: dividerColor,
-                                showDivider: true,
+                                showDivider: false,
                                 onTap: () => Navigator.pushNamed(
                                     context, AppRoutes.Settings),
-                              ),
-                              _buildSettingsTile(
-                                icon: Icons.mail_outline,
-                                label: 'Messages',
-                                textPrimary: textPrimary,
-                                divider: dividerColor,
-                                showDivider: false,
-                                onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (_) => const MessagesView()),
-                                ),
                               ),
                             ],
                           ),
@@ -304,7 +360,7 @@ class _ProfileViewState extends State<ProfileView> {
 
                         const SizedBox(height: 24),
 
-                        // Logout Button
+                        // ── Logout Button ─────────────────────────
                         SizedBox(
                           width: double.infinity,
                           height: 54,
@@ -322,9 +378,10 @@ class _ProfileViewState extends State<ProfileView> {
                             label: const Text(
                               'Logout',
                               style: TextStyle(
-                                  color: Color(0xFFE05252),
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold),
+                                color: Color(0xFFE05252),
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),

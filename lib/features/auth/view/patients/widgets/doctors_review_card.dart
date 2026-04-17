@@ -40,7 +40,7 @@ class DoctorsReviewCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.Black,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ],
@@ -50,20 +50,20 @@ class DoctorsReviewCard extends StatelessWidget {
           TextFormField(
             controller: reviewController,
             maxLines: 5,
-            style: TextStyle(fontSize: 14, color: AppColors.Black),
+            style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurface),
             decoration: InputDecoration(
               hintText: 'Add your review notes here...',
               hintStyle: TextStyle(fontSize: 13, color: AppColors.Gray),
               filled: true,
-              fillColor: const Color(0xFFFAFCFE),
+              fillColor: Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.05) : const Color(0xFFFAFCFE),
               contentPadding: const EdgeInsets.all(14),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: AppColors.Gray2, width: 1.5),
+                borderSide: BorderSide(color: Theme.of(context).brightness == Brightness.dark ? Colors.white24 : AppColors.Gray2, width: 1.5),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: AppColors.Gray2, width: 1.5),
+                borderSide: BorderSide(color: Theme.of(context).brightness == Brightness.dark ? Colors.white24 : AppColors.Gray2, width: 1.5),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),

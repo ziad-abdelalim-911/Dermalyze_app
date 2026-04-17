@@ -84,7 +84,7 @@ class _DoctorSignupState extends State<DoctorSignup> {
         listener: (context, state) {
           if (state is RegisterSuccess) {
             Navigator.pushNamedAndRemoveUntil(
-              context, AppRoutes.doctorHome, (route) => false);
+              context, AppRoutes.bottomNavBar, (route) => false, arguments: true);
           }
           if (state is RegisterFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
