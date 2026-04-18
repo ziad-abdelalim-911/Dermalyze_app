@@ -30,7 +30,7 @@ class _PrivacySettingsViewState extends State<PrivacySettingsView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5FAFF),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -280,10 +280,10 @@ class _PrivacySettingsViewState extends State<PrivacySettingsView> {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2563EB),
+                    backgroundColor: Color(0xFF2563EB),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text('Close', style: TextStyle(color: Colors.white)),
+                  child: Text('Close', style: TextStyle(color: Theme.of(context).cardColor)),
                 ),
               ),
             ],

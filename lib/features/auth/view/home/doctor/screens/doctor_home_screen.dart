@@ -14,6 +14,7 @@ import 'package:dermalyze/features/auth/view/home/doctor/widgets/patient_list_ca
 import 'package:dermalyze/features/auth/view/home/doctor/widgets/patient_search_bar.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/widgets/quick_actions_card.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/widgets/stats_grid_card.dart';
+import 'package:dermalyze/features/auth/view/notifications/notifications_cubit.dart';
 import 'package:dermalyze/features/auth/view/notifications/notifications_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -43,15 +44,13 @@ class _DoctorHomeView extends StatefulWidget {
 
 class _DoctorHomeViewState extends State<_DoctorHomeView> {
   final _searchController = TextEditingController();
-  final _notificationsRepo = NotificationsRepository();
   String _doctorName = 'Doctor';
-  int _unreadCount = 0;
 
   @override
   void initState() {
     super.initState();
     _loadDoctorName();
-    _loadUnreadCount();
+    context.read<NotificationsCubit>().fetchNotifications();
   }
 
   Future<void> _loadDoctorName() async {
@@ -63,18 +62,7 @@ class _DoctorHomeViewState extends State<_DoctorHomeView> {
     } catch (_) {}
   }
 
-  Future<void> _loadUnreadCount() async {
-    try {
-      final notifications = await _notificationsRepo.getNotifications();
-      if (mounted) {
-        setState(() {
-          _unreadCount = notifications.where((n) => n.isUnread).length;
-        });
-      }
-    } catch (_) {
-      // Silently fail — badge stays hidden
-    }
-  }
+
 
   @override
   void dispose() {
@@ -116,7 +104,7 @@ class _DoctorHomeViewState extends State<_DoctorHomeView> {
                                 Text(
                                   'Welcome, Dr.',
                                   style: TextStyle(
-                                    color: Colors.white.withOpacity(0.85),
+                                    color: Theme.of(context).cardColor.withOpacity(0.85),
                                     fontSize: 13,
                                   ),
                                 ),
@@ -132,21 +120,26 @@ class _DoctorHomeViewState extends State<_DoctorHomeView> {
                             ),
                             Row(
                               children: [
-                                Stack(
+                            BlocBuilder<NotificationsCubit, NotificationsState>(
+                              builder: (context, notificationState) {
+                                int unread = 0;
+                                if (notificationState is NotificationsLoaded) {
+                                  unread = notificationState.unreadCount;
+                                }
+
+                                return Stack(
+                                  clipBehavior: Clip.none,
                                   children: [
                                     Container(
                                       width: 40,
                                       height: 40,
                                       decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.2),
+                                        color: Theme.of(context).cardColor.withOpacity(0.2),
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: IconButton(
-                                        onPressed: () async {
-                                          await Navigator.pushNamed(
-                                              context, AppRoutes.notifications);
-                                          // Refresh badge after returning from notifications
-                                          _loadUnreadCount();
+                                        onPressed: () {
+                                          Navigator.pushNamed(context, AppRoutes.notifications);
                                         },
                                         icon: const Icon(
                                           Icons.notifications_outlined,
@@ -155,27 +148,42 @@ class _DoctorHomeViewState extends State<_DoctorHomeView> {
                                         ),
                                       ),
                                     ),
-                                    if (_unreadCount > 0)
-                                    Positioned(
-                                      top: 6,
-                                      right: 6,
-                                      child: Container(
-                                        width: 8,
-                                        height: 8,
-                                        decoration: const BoxDecoration(
-                                          color: Colors.red,
-                                          shape: BoxShape.circle,
+                                    if (unread > 0)
+                                      Positioned(
+                                        top: -2,
+                                        right: -2,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(2),
+                                          decoration: const BoxDecoration(
+                                            color: Colors.red,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          constraints: const BoxConstraints(
+                                            minWidth: 14,
+                                            minHeight: 14,
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              unread > 9 ? '9+' : '$unread',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 8,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
                                         ),
                                       ),
-                                    ),
                                   ],
-                                ),
+                                );
+                              },
+                            ),
                                 const SizedBox(width: 10),
                                 Container(
                                   width: 40,
                                   height: 40,
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.2),
+                                    color: Theme.of(context).cardColor.withOpacity(0.2),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: IconButton(
@@ -198,7 +206,7 @@ class _DoctorHomeViewState extends State<_DoctorHomeView> {
                             stats: [
                               StatItem(
                                 label: 'Total Patients',
-                                value: state.stats.totalPatients.toString(),
+                                value: state.patients.length.toString(),
                                 icon: Icons.people_outline,
                                 iconColor: Colors.white,
                               ),
@@ -216,7 +224,7 @@ class _DoctorHomeViewState extends State<_DoctorHomeView> {
                               ),
                               StatItem(
                                 label: 'Critical Cases',
-                                value: state.stats.criticalCases.toString(),
+                                value: state.criticalPatients.length.toString(),
                                 icon: Icons.emergency_outlined,
                                 iconColor: Colors.redAccent,
                               ),
@@ -300,8 +308,15 @@ class _DoctorHomeViewState extends State<_DoctorHomeView> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     AddPatientBanner(
-                                      onTap: () => Navigator.pushNamed(
-                                          context, AppRoutes.addNewPatient),
+                                      onTap: () async {
+                                        final refresh = await Navigator.pushNamed(
+                                            context, AppRoutes.addNewPatient);
+                                        if (refresh == true && context.mounted) {
+                                          context
+                                              .read<DoctorHomeBloc>()
+                                              .add(LoadDoctorHomeEvent());
+                                        }
+                                      },
                                     ),
                                     const SizedBox(height: 16),
                                     PatientSearchBar(
@@ -343,21 +358,24 @@ class _DoctorHomeViewState extends State<_DoctorHomeView> {
                                                 lastVisit: p.lastVisit,
                                               ))
                                           .toList(),
-                                      onPatientTap: (item) {
+                                      onPatientTap: (item) async {
                                         // نلاقي الـ PatientEntity المناسب
                                         final patient = state.filteredPatients
                                             .firstWhere((p) => p.name == item.name);
-                                        Navigator.pushNamed(
+                                        await Navigator.pushNamed(
                                           context,
                                           AppRoutes.patientDetails,
                                           arguments: patient,
                                         );
+                                        if (context.mounted) {
+                                          context.read<DoctorHomeBloc>().add(LoadDoctorHomeEvent());
+                                        }
                                       },
                                     ),
                                     const SizedBox(height: 16),
                                     QuickActionsCard(
-                                      totalPatients: state.stats.totalPatients.toString(),
-                                      criticalCases: state.stats.criticalCases.toString(),
+                                      totalPatients: state.patients.length.toString(),
+                                      criticalCases: state.criticalPatients.length.toString(),
                                       onAllPatients: () => Navigator.pushNamed(
                                           context, AppRoutes.allPatients),
                                       onCritical: () => Navigator.pushNamed(

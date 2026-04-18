@@ -1,6 +1,8 @@
+import 'package:dermalyze/features/auth/view/notifications/notifications_cubit.dart';
 import 'package:dermalyze/features/auth/view/notifications/notifications_view.dart';
 import 'package:dermalyze/features/settings/view/privacy_settings_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/app_colors.dart';
 
@@ -46,11 +48,11 @@ class _HomeHeaderState extends State<HomeHeader> {
                       "Welcome back,",
                       style: TextStyle(color: Colors.white70, fontSize: 14),
                     ),
-                    const SizedBox(height: 6),
+                    SizedBox(height: 6),
                     Text(
                       widget.userName,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: Theme.of(context).cardColor,
                         fontSize: 22,
                         fontWeight: FontWeight.w500,
                       ),
@@ -61,14 +63,54 @@ class _HomeHeaderState extends State<HomeHeader> {
 
               Row(
                 children: [
-                  _circleIcon(
-                    Icons.notifications_none,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const NotificationsView(),
-                        ),
+                  BlocBuilder<NotificationsCubit, NotificationsState>(
+                    builder: (context, state) {
+                      int unreadCount = 0;
+                      if (state is NotificationsLoaded) {
+                        unreadCount = state.unreadCount;
+                      }
+
+                      return Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          _circleIcon(
+                            Icons.notifications_none,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => NotificationsView(),
+                                ),
+                              );
+                            },
+                          ),
+                          if (unreadCount > 0)
+                            Positioned(
+                              top: -2,
+                              right: -2,
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: const BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
+                                constraints: const BoxConstraints(
+                                  minWidth: 16,
+                                  minHeight: 16,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    unreadCount > 9 ? '9+' : '$unreadCount',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
                       );
                     },
                   ),
@@ -124,7 +166,7 @@ class _HomeHeaderState extends State<HomeHeader> {
         width: 42,
         height: 42,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
+          color: Theme.of(context).cardColor.withOpacity(0.2),
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: Colors.white),
@@ -150,7 +192,7 @@ class _InfoMiniCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
+        color: Theme.of(context).cardColor.withOpacity(0.15),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(

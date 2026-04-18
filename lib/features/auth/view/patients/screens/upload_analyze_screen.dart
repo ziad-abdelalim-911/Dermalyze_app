@@ -36,7 +36,7 @@ class _UploadAnalyzeScreenState extends State<UploadAnalyzeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F4F8),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           // ── Header ──
@@ -52,16 +52,16 @@ class _UploadAnalyzeScreenState extends State<UploadAnalyzeScreen> {
             child: SafeArea(
               bottom: false,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
+                padding: EdgeInsets.fromLTRB(20, 12, 20, 40),
                 child: Column(
                   children: [
                     Align(
                       alignment: Alignment.centerLeft,
                       child: GestureDetector(
                         onTap: () => Navigator.pop(context),
-                        child: const Icon(
+                        child: Icon(
                           Icons.arrow_back,
-                          color: Colors.white,
+                          color: Theme.of(context).cardColor,
                           size: 22,
                         ),
                       ),
@@ -71,7 +71,7 @@ class _UploadAnalyzeScreenState extends State<UploadAnalyzeScreen> {
                       width: 80,
                       height: 80,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Theme.of(context).cardColor.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(22),
                       ),
                       child: const Icon(
@@ -125,7 +125,7 @@ class _UploadAnalyzeScreenState extends State<UploadAnalyzeScreen> {
           width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
@@ -154,7 +154,7 @@ class _UploadAnalyzeScreenState extends State<UploadAnalyzeScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 28),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF0FDFA),
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: AppColors.Turqouoise, width: 1.5),
                   ),
@@ -167,9 +167,9 @@ class _UploadAnalyzeScreenState extends State<UploadAnalyzeScreen> {
                           color: AppColors.Turqouoise,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.camera_alt_outlined,
-                          color: Colors.white,
+                          color: Theme.of(context).cardColor,
                           size: 26,
                         ),
                       ),
@@ -199,7 +199,7 @@ class _UploadAnalyzeScreenState extends State<UploadAnalyzeScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 28),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFDF4FF),
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: const Color(0xFFB57BEE),
@@ -211,13 +211,13 @@ class _UploadAnalyzeScreenState extends State<UploadAnalyzeScreen> {
                       Container(
                         width: 56,
                         height: 56,
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           color: Color(0xFF9B40E0),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.upload_outlined,
-                          color: Colors.white,
+                          color: Theme.of(context).cardColor,
                           size: 26,
                         ),
                       ),
@@ -248,7 +248,7 @@ class _UploadAnalyzeScreenState extends State<UploadAnalyzeScreen> {
           width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: const Color(0xFFEFF6FF),
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: const Color(0xFFBFDBFE), width: 1),
           ),
@@ -344,9 +344,9 @@ class _UploadAnalyzeScreenState extends State<UploadAnalyzeScreen> {
                 borderRadius: BorderRadius.circular(16),
               ),
             ),
-            icon: const Icon(
+            icon: Icon(
               Icons.camera_alt_outlined,
-              color: Colors.white,
+              color: Theme.of(context).cardColor,
               size: 20,
             ),
             label: const Text(

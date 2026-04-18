@@ -43,7 +43,7 @@ class _AddNewPatientScreenState extends State<AddNewPatientScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F4F8),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           _buildHeader(context),
@@ -129,7 +129,7 @@ class _AddNewPatientScreenState extends State<AddNewPatientScreen> {
                 width: 68,
                 height: 68,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Theme.of(context).cardColor.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Icon(
@@ -163,7 +163,7 @@ class _AddNewPatientScreenState extends State<AddNewPatientScreen> {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
       decoration: BoxDecoration(
-        color: const Color(0xFFF0F4F8),
+        color: Theme.of(context).cardColor,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -199,11 +199,11 @@ class _AddNewPatientScreenState extends State<AddNewPatientScreen> {
               ),
             ),
             icon: _isLoading
-                ? const SizedBox(
+                ? SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
-                      color: Colors.white,
+                      color: Theme.of(context).cardColor,
                       strokeWidth: 2,
                     ),
                   )
@@ -230,10 +230,21 @@ class _AddNewPatientScreenState extends State<AddNewPatientScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
+    
+    // Calculate Age from DD/MM/YYYY
+    int calculatedAge = 0;
+    try {
+      final parts = _ageController.text.trim().split('/');
+      if (parts.length == 3) {
+        final birthYear = int.parse(parts[2]);
+        calculatedAge = DateTime.now().year - birthYear;
+      }
+    } catch (_) {}
+
     try {
       await _repository.addPatient(
         name: _fullNameController.text.trim(),
-        age: int.tryParse(_ageController.text.trim()) ?? 0,
+        age: calculatedAge,
         gender: _selectedGender ?? 'male',
         diagnosis: _diagnosisController.text.trim(),
         nationalId: _nationalIdController.text.trim(),

@@ -17,10 +17,10 @@ class CriticalCareGuidelinesCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-            color: const Color(0xFFE05252).withOpacity(0.3), width: 1.5),
+            color: Theme.of(context).cardColor.withOpacity(0.3), width: 1.5),
         boxShadow: [
           BoxShadow(
             color: Colors.blueGrey.withOpacity(0.07),

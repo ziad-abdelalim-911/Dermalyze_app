@@ -36,5 +36,6 @@ class AppRoutes {
   static const smartHistory = "/smartHistory";
   static const medicationsGuide = "/medicationsGuide";
   static const diseasesLibrary = "/diseasesLibrary";
+  static const chat = "/chat";
 
 }

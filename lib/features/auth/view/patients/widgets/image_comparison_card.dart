@@ -10,7 +10,7 @@ class ImageComparisonCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -54,7 +54,7 @@ class ImageComparisonCard extends StatelessWidget {
                     Container(
                       height: 130,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF5F5F5),
+                        color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Center(
@@ -70,16 +70,16 @@ class ImageComparisonCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Container(
-                      padding: const EdgeInsets.symmetric(
+                      padding: EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: AppColors.Black,
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      child: const Text(
+                      child: Text(
                         'Severity: 65%',
                         style:
-                            TextStyle(color: Colors.white, fontSize: 11),
+                            TextStyle(color: Theme.of(context).cardColor, fontSize: 11),
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -112,7 +112,7 @@ class ImageComparisonCard extends StatelessWidget {
                     Container(
                       height: 130,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF5F5F5),
+                        color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                             color: AppColors.Turqouoise, width: 2),
@@ -130,16 +130,16 @@ class ImageComparisonCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Container(
-                      padding: const EdgeInsets.symmetric(
+                      padding: EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: AppColors.Black,
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      child: const Text(
+                      child: Text(
                         'Severity: 50%',
                         style:
-                            TextStyle(color: Colors.white, fontSize: 11),
+                            TextStyle(color: Theme.of(context).cardColor, fontSize: 11),
                       ),
                     ),
                     const SizedBox(height: 4),

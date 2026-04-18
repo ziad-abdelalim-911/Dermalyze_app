@@ -22,7 +22,7 @@ class MedicationCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
 
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
         ),
 
@@ -34,7 +34,7 @@ class MedicationCard extends StatelessWidget {
               height: 44,
 
               decoration: BoxDecoration(
-                color: const Color(0xFFE6F4F1),
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(12),
               ),
 
@@ -102,7 +102,7 @@ class MedicationCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
 
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
 
         boxShadow: [
@@ -173,6 +173,7 @@ class MedicationCard extends StatelessWidget {
 
               Expanded(
                 child: infoBox(
+                  context,
                   AppAssets.time_icon,
                   "Frequency",
                   medication.frequency,
@@ -183,6 +184,7 @@ class MedicationCard extends StatelessWidget {
 
               Expanded(
                 child: infoBox(
+                  context,
                   AppAssets.calendarIcon,
                   "Duration",
                   medication.duration,
@@ -199,7 +201,7 @@ class MedicationCard extends StatelessWidget {
             padding: const EdgeInsets.all(12),
 
             decoration: BoxDecoration(
-              color: const Color(0xFFE8F0FE),
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(12),
             ),
 
@@ -233,7 +235,7 @@ class MedicationCard extends StatelessWidget {
             padding: const EdgeInsets.all(12),
 
             decoration: BoxDecoration(
-              color: const Color(0xFFFFFBEB),
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: const Color(0xFFFACC15),
@@ -288,12 +290,12 @@ class MedicationCard extends StatelessWidget {
     );
   }
 
-  Widget infoBox(String icon, String title, String value) {
+  Widget infoBox(BuildContext context, String icon, String title, String value) {
     return Container(
       padding: const EdgeInsets.all(12),
 
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
       ),
 

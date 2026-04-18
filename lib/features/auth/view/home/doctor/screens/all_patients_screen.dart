@@ -183,11 +183,16 @@ class _AllPatientsScreenState extends State<AllPatientsScreen> {
                           lastVisit: p.lastVisit,
                           age: p.age,
                           // ✅ يمرر الـ PatientEntity الحقيقي
-                          onTap: () => Navigator.pushNamed(
-                            context,
-                            AppRoutes.patientDetails,
-                            arguments: p,
-                          ),
+                          onTap: () async {
+                            await Navigator.pushNamed(
+                              context,
+                              AppRoutes.patientDetails,
+                              arguments: p,
+                            );
+                            if (context.mounted) {
+                              context.read<DoctorHomeBloc>().add(LoadDoctorHomeEvent());
+                            }
+                          },
                         );
                       },
                     ),

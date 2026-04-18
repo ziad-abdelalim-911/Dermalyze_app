@@ -44,4 +44,26 @@ class ConversationModel {
       'unreadCount': unreadCount,
     };
   }
+
+  ConversationModel copyWith({
+    String? id,
+    String? receiverId,
+    String? name,
+    String? role,
+    String? lastMessage,
+    String? time,
+    bool? isOnline,
+    int? unreadCount,
+  }) {
+    return ConversationModel(
+      id: id ?? this.id,
+      receiverId: receiverId ?? this.receiverId,
+      name: name ?? this.name,
+      role: role ?? this.role,
+      lastMessage: lastMessage ?? this.lastMessage,
+      time: time ?? this.time,
+      isOnline: isOnline ?? this.isOnline,
+      unreadCount: unreadCount ?? this.unreadCount,
+    );
+  }
 }

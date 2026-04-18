@@ -1,11 +1,12 @@
 import 'package:dermalyze/core/constants/app_assets.dart';
 import 'package:dermalyze/core/constants/app_colors.dart';
+import 'package:dermalyze/features/auth/view/chat/logic/conversations_cubit.dart';
 import 'package:dermalyze/features/auth/view/chat/view/messages_view.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/screens/doctor_home_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/screens/doctor_profile_screen.dart';
 import 'package:dermalyze/features/auth/view/home/home_view.dart';
 import 'package:dermalyze/features/auth/view/profile_sceern/profile_view.dart';
-import 'package:dermalyze/features/settings/view/settings_screen.dart';
 import 'package:dermalyze/core/routes/app_router.dart';
 import 'package:flutter/material.dart';
 
@@ -99,7 +100,24 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
               label: 'Home',
             ),
             BottomNavigationBarItem(
-              icon: ImageIcon(const AssetImage(AppAssets.chat_icon), size: 24),
+              icon: BlocBuilder<ConversationsCubit, ConversationsState>(
+                builder: (context, state) {
+                  int totalUnread = 0;
+                  if (state is ConversationsLoaded) {
+                    totalUnread = state.totalUnreadCount;
+                  }
+
+                  return Badge(
+                    label: Text(totalUnread > 9 ? '9+' : '$totalUnread'),
+                    isLabelVisible: totalUnread > 0,
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: ImageIcon(
+                        const AssetImage(AppAssets.chat_icon),
+                        size: 24),
+                  );
+                },
+              ),
               label: 'Chat',
             ),
             BottomNavigationBarItem(

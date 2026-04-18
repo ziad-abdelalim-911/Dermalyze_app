@@ -9,7 +9,7 @@ class DiseaseHeaderCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
 
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
 
         border: Border.all(color: const Color(0xFF2DD4BF), width: 1.5),
@@ -31,7 +31,7 @@ class DiseaseHeaderCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
             ),
 
-            child: const Icon(Icons.monitor_heart, color: Colors.white),
+            child: Icon(Icons.monitor_heart, color: Theme.of(context).cardColor),
           ),
 
           const SizedBox(width: 16),
@@ -68,7 +68,7 @@ class DiseaseHeaderCard extends StatelessWidget {
                       ),
 
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFDE68A),
+                        color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(20),
                       ),
 
@@ -91,7 +91,7 @@ class DiseaseHeaderCard extends StatelessWidget {
                       ),
 
                       decoration: BoxDecoration(
-                        color: const Color(0xFFBFDBFE),
+                        color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(20),
                       ),
 

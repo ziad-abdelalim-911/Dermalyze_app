@@ -73,7 +73,7 @@ class _DiseaseDetailsViewState extends State<DiseaseDetailsView> {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
+                      color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
@@ -158,7 +158,7 @@ class _DiseaseDetailsViewState extends State<DiseaseDetailsView> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                       color: const Color(0xFFFDE68A),
+                       color: Theme.of(context).cardColor,
                        borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -218,7 +218,7 @@ class _DiseaseDetailsViewState extends State<DiseaseDetailsView> {
            Container(
              padding: const EdgeInsets.all(16),
              decoration: BoxDecoration(
-               color: const Color(0xFFE0E7FF),
+               color: Theme.of(context).cardColor,
                borderRadius: BorderRadius.circular(16),
                border: Border.all(color: const Color(0xFF818CF8)),
              ),

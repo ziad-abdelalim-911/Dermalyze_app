@@ -152,7 +152,7 @@ class _ProgressReportViewState extends State<ProgressReportView> {
         label: 'Days in Treatment',
         iconColor: const Color(0xFF0F766E),
         textColor: const Color(0xFF0F766E),
-        backgroundColor: const Color(0xFFE6F4F1),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
       MetricItem(
         iconPath: AppAssets.progress_icon,
@@ -160,7 +160,7 @@ class _ProgressReportViewState extends State<ProgressReportView> {
         label: 'Overall Improvement',
         iconColor: const Color(0xFF166534),
         textColor: const Color(0xFF166534),
-        backgroundColor: const Color(0xFFE7F6EC),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
       MetricItem(
         iconPath: AppAssets.pulse_icon,
@@ -168,7 +168,7 @@ class _ProgressReportViewState extends State<ProgressReportView> {
         label: 'Doctor Checkups',
         iconColor: const Color(0xFF1D4ED8),
         textColor: const Color(0xFF1D4ED8),
-        backgroundColor: const Color(0xFFE8F0FE),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
       MetricItem(
         iconPath: AppAssets.award_Icon,
@@ -176,7 +176,7 @@ class _ProgressReportViewState extends State<ProgressReportView> {
         label: 'Medication Adherence',
         iconColor: const Color(0xFF6D28D9),
         textColor: const Color(0xFF6D28D9),
-        backgroundColor: const Color(0xFFF3E8FF),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
     ];
   }
@@ -237,7 +237,7 @@ class _ProgressReportViewState extends State<ProgressReportView> {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
+                      color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),

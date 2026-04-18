@@ -115,15 +115,15 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
             child: SafeArea(
               bottom: false,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
+                padding: EdgeInsets.fromLTRB(20, 12, 20, 40),
                 child: Column(
                   children: [
                     Align(
                       alignment: Alignment.centerLeft,
                       child: GestureDetector(
                         onTap: () => Navigator.pop(context),
-                        child: const Icon(Icons.arrow_back,
-                            color: Colors.white, size: 22),
+                        child: Icon(Icons.arrow_back,
+                            color: Theme.of(context).cardColor, size: 22),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -131,7 +131,7 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
                       width: 72,
                       height: 72,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Theme.of(context).cardColor.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: const Icon(Icons.auto_awesome,
@@ -243,7 +243,7 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
             padding:
                 const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFFF0FDFA),
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(14),
               border:
                   Border.all(color: AppColors.Turqouoise, width: 1),
@@ -261,8 +261,8 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
                     child: Text(
                       // initials من اسم المريض الحقيقي
                       _getInitials(_result?['patientName'] ?? ''),
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: Theme.of(context).cardColor,
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
@@ -375,11 +375,11 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
               ),
             ),
             icon: _isSaving
-                ? const SizedBox(
+                ? SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
-                        color: Colors.white, strokeWidth: 2),
+                        color: Theme.of(context).cardColor, strokeWidth: 2),
                   )
                 : const Icon(Icons.save_outlined, color: Colors.white, size: 20),
             label: Text(

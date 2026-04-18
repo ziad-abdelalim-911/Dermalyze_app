@@ -17,7 +17,7 @@ class _SliderComparisonCardState extends State<SliderComparisonCard> {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -98,16 +98,16 @@ class _SliderComparisonCardState extends State<SliderComparisonCard> {
                           top: 8,
                           left: 8,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(
+                            padding: EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
                               color: Colors.red,
                               borderRadius: BorderRadius.circular(6),
                             ),
-                            child: const Text(
+                            child: Text(
                               'Previous',
                               style: TextStyle(
-                                  color: Colors.white, fontSize: 11),
+                                  color: Theme.of(context).cardColor, fontSize: 11),
                             ),
                           ),
                         ),
@@ -115,16 +115,16 @@ class _SliderComparisonCardState extends State<SliderComparisonCard> {
                           top: 8,
                           right: 8,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(
+                            padding: EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
                               color: Colors.green,
                               borderRadius: BorderRadius.circular(6),
                             ),
-                            child: const Text(
+                            child: Text(
                               'Current',
                               style: TextStyle(
-                                  color: Colors.white, fontSize: 11),
+                                  color: Theme.of(context).cardColor, fontSize: 11),
                             ),
                           ),
                         ),
@@ -151,9 +151,9 @@ class _SliderComparisonCardState extends State<SliderComparisonCard> {
                                 color: AppColors.SkyBlue,
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.compare_arrows,
-                                color: Colors.white,
+                                color: Theme.of(context).cardColor,
                                 size: 16,
                               ),
                             ),

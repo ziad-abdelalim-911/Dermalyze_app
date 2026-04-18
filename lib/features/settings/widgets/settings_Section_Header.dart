@@ -28,7 +28,7 @@ class SettingsSectionHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, color: Colors.white),
+          Icon(icon, color: Theme.of(context).cardColor),
           const SizedBox(width: 8),
           Text(
             title,

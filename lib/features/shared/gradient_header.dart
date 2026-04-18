@@ -27,23 +27,24 @@ class GradientHeader extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              label: const Text(
-                "Back",
-                style: TextStyle(color: Colors.white),
+          if (Navigator.canPop(context))
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: () => Navigator.pop(context),
+                icon: Icon(Icons.arrow_back, color: Theme.of(context).cardColor),
+                label: const Text(
+                  "Back",
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ),
-          ),
           const SizedBox(height: 16),
           Container(
             width: 72,
             height: 72,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: Theme.of(context).cardColor.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Icon(icon, color: Colors.white, size: 36),

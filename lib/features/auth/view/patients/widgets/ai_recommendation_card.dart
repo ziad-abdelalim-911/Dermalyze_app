@@ -12,7 +12,7 @@ class AiRecommendationCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFFF0FDFA),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.Turqouoise, width: 1),
       ),

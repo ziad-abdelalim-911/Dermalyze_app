@@ -40,7 +40,7 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: CustomScrollView(
         slivers: [
           _buildHeaderSliver(),
@@ -95,7 +95,7 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
                 width: 64,
                 height: 64,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.25),
+                  color: Theme.of(context).cardColor.withOpacity(0.25),
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(color: Colors.white.withOpacity(0.5), width: 1),
                 ),
@@ -126,10 +126,12 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
   }
 
   Widget _buildSearchCard() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -142,24 +144,25 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
       child: Column(
         children: [
           Row(
-            children: const [
-              Icon(Icons.radar, color: Color(0xFF4A90E2), size: 20),
-              SizedBox(width: 8),
+            children: [
+              const Icon(Icons.radar, color: Color(0xFF4A90E2), size: 20),
+              const SizedBox(width: 8),
               Text(
                 'Search My Past Treatments',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: isDark ? Colors.white : Colors.black87),
               ),
             ],
           ),
           const SizedBox(height: 16),
           TextField(
             controller: _searchController,
+            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
             decoration: InputDecoration(
               hintText: 'Enter disease name (e.g., Psoriasis)',
               hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
               prefixIcon: const Icon(Icons.search, color: Colors.grey),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: isDark ? const Color(0xFF0F172A) : Colors.white,
               contentPadding: const EdgeInsets.symmetric(vertical: 14),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -183,13 +186,13 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
             child: ElevatedButton.icon(
               onPressed: () => _performSearch(_searchController.text),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF5BAED0),
+                backgroundColor: Color(0xFF5BAED0),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 elevation: 0,
               ),
-              icon: const Icon(Icons.search, color: Colors.white, size: 20),
+              icon: Icon(Icons.search, color: Theme.of(context).cardColor, size: 20),
               label: const Text(
                 'Search My History',
                 style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
@@ -200,7 +203,7 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFFEFF6FF),
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: const Color(0xFFBFDBFE)),
             ),
@@ -225,12 +228,13 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
   }
 
   Widget _buildEmptyState() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final chips = ['Psoriasis', 'Atopic Dermatitis', 'Acne Vulgaris', 'Seborrheic Dermatitis'];
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -244,16 +248,16 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
         children: [
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: Color(0xFF5BAED0),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.psychology, color: Colors.white, size: 36),
+            child: Icon(Icons.psychology, color: Theme.of(context).cardColor, size: 36),
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'AI-Powered Insights',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87),
           ),
           const SizedBox(height: 8),
           const Text(
@@ -266,7 +270,7 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFFEFF6FF),
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: const Color(0xFFBFDBFE)),
             ),
@@ -286,7 +290,7 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: isDark ? const Color(0xFF0F172A) : Colors.white,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(color: const Color(0xFF93C5FD)),
                       ),
@@ -306,6 +310,7 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
   }
 
   Widget _buildResults() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final drugName = _insights!['bestPerformingDrug']['name'];
     final drugRecovery = _insights!['bestPerformingDrug']['avgRecovery'];
     final casesUsed = _insights!['bestPerformingDrug']['casesUsed'];
@@ -331,7 +336,7 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
                    Container(
                      padding: const EdgeInsets.all(6),
                      decoration: BoxDecoration(
-                       color: Colors.white.withOpacity(0.2),
+                       color: Theme.of(context).cardColor.withOpacity(0.2),
                        borderRadius: BorderRadius.circular(8),
                      ),
                      child: const Icon(Icons.trending_up, color: Colors.white, size: 20),
@@ -357,7 +362,7 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
+                  color: Theme.of(context).cardColor.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: Colors.white.withOpacity(0.3)),
                 ),
@@ -386,7 +391,7 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
           width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
@@ -402,20 +407,20 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFF9500),
+                      color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.military_tech, color: Colors.white, size: 20),
+                    child: Icon(Icons.military_tech, color: Theme.of(context).cardColor, size: 20),
                   ),
                   const SizedBox(width: 10),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Best Performing Drug',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87),
                       ),
                       Text(
                         'Based on your patient outcomes',
@@ -429,15 +434,15 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFFDF5),
+                  color: isDark ? Colors.white12 : const Color(0xFFFFFDF5),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFFFFEAA7)),
+                  border: Border.all(color: isDark ? Colors.white24 : Color(0xFFFFEAA7)),
                 ),
                 child: Column(
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.medication, color: Color(0xFFFF5722), size: 24),
+                        Icon(Icons.medication, color: Theme.of(context).cardColor, size: 24),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
@@ -445,7 +450,7 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
                             children: [
                               Text(
                                 drugName,
-                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87),
                               ),
                               Text(
                                 'Used in $casesUsed case(s)',
@@ -493,7 +498,7 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
           width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
@@ -507,12 +512,12 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                children: const [
-                  Icon(Icons.person_outline, color: Color(0xFF4A90E2), size: 22),
-                  SizedBox(width: 8),
+                children: [
+                  const Icon(Icons.person_outline, color: Color(0xFF4A90E2), size: 22),
+                  const SizedBox(width: 8),
                   Text(
                     'Patient Evidence',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87),
                   ),
                 ],
               ),
@@ -522,7 +527,7 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
                 style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
               ),
               const SizedBox(height: 16),
-              ...patients.map((p) => _buildPatientEvidenceCard(p)).toList(),
+              ...patients.map((p) => _buildPatientEvidenceCard(p)),
             ],
           ),
         ),
@@ -541,9 +546,9 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Quick Statistics',
-                style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                style: TextStyle(color: Theme.of(context).cardColor, fontSize: 16, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 16),
               Row(
@@ -552,7 +557,7 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.15),
+                        color: Theme.of(context).cardColor.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: Colors.white.withOpacity(0.3)),
                       ),
@@ -577,7 +582,7 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                         color: Colors.white.withOpacity(0.15),
+                         color: Theme.of(context).cardColor.withOpacity(0.15),
                          borderRadius: BorderRadius.circular(12),
                          border: Border.all(color: Colors.white.withOpacity(0.3)),
                       ),
@@ -607,14 +612,15 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
   }
 
   Widget _buildPatientEvidenceCard(Map<String, dynamic> patient) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     bool isBest = patient['recoveryRate'] > 92;
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF0F172A) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isBest ? const Color(0xFF6EE7B7) : const Color(0xFF93C5FD)),
+        border: Border.all(color: isBest ? const Color(0xFF6EE7B7) : (isDark ? Colors.white12 : const Color(0xFF93C5FD))),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -624,14 +630,14 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
                Container(
                  width: 40,
                  height: 40,
-                 decoration: const BoxDecoration(
+                 decoration: BoxDecoration(
                    color: Color(0xFF5BAED0),
                    shape: BoxShape.circle,
                  ),
                  child: Center(
                    child: Text(
                      _getInitials(patient['patientName']),
-                     style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                     style: TextStyle(color: Theme.of(context).cardColor, fontWeight: FontWeight.bold),
                    ),
                  ),
                ),
@@ -642,7 +648,7 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
                    children: [
                      Text(
                        patient['patientName'],
-                       style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                       style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87),
                      ),
                      Text(
                        patient['treatmentDuration'],
@@ -664,9 +670,9 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
                ),
             ],
           ),
-          const Padding(
-             padding: EdgeInsets.symmetric(vertical: 12),
-             child: Divider(height: 1, color: Color(0xFFF3F4F6)),
+          Padding(
+             padding: const EdgeInsets.symmetric(vertical: 12),
+             child: Divider(height: 1, color: isDark ? Colors.white24 : const Color(0xFFF3F4F6)),
           ),
           Row(
             children: [
@@ -679,7 +685,7 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
                     const TextSpan(text: 'Treated with: '),
                     TextSpan(
                       text: patient['drugUsed'],
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                      style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black),
                     ),
                   ],
                 ),
@@ -691,7 +697,7 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFFECFDF5),
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: const Color(0xFF6EE7B7)),
               ),

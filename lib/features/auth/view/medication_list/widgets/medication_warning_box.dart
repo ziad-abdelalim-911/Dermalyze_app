@@ -20,7 +20,7 @@ class MedicationWarningBox extends StatelessWidget {
 
       decoration: BoxDecoration(
 
-        color: const Color(0xFFFEF9C3),
+        color: Theme.of(context).cardColor,
 
         borderRadius: BorderRadius.circular(12),
 

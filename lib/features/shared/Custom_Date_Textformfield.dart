@@ -24,12 +24,18 @@ class _CustomDateTextformfieldState
     extends State<CustomDateTextformfield> {
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final inputBg = isDark ? const Color(0xFF0F172A) : Colors.white;
+    final textColor = isDark ? Colors.white : AppColors.Black;
+    final hintColor = isDark ? Colors.grey.shade400 : Colors.grey.shade600;
+
     return SizedBox(
       width: widget.width ?? double.infinity,
       child: TextFormField(
         controller: widget.controller,
         readOnly: true,
         cursorColor: Colors.grey,
+        style: TextStyle(color: textColor, fontSize: 14),
         validator: (v) {
           if (v == null || v.isEmpty) {
             return widget.validatorText;
@@ -43,12 +49,13 @@ class _CustomDateTextformfieldState
             vertical: 10,
           ),
           hintText: widget.hint,
-          suffixIcon: const Icon(Icons.calendar_today),
-          fillColor: Colors.white,
+          hintStyle: TextStyle(color: hintColor, fontSize: 14),
+          suffixIcon: Icon(Icons.calendar_today, color: hintColor),
+          fillColor: inputBg,
           filled: true,
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Colors.grey.shade700),
+            borderSide: BorderSide(color: isDark ? Colors.white24 : AppColors.Gray2),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),

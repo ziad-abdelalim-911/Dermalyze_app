@@ -26,11 +26,18 @@ class PersonalInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = Theme.of(context).cardColor;
+    final textPrimary = isDark ? Colors.white : const Color(0xFF1A2E3B);
+    final textSecondary = isDark ? Colors.grey.shade300 : const Color(0xFF2C4A5A);
+    final inputBg = isDark ? const Color(0xFF0F172A) : const Color(0xFFFAFCFE);
+    final borderColor = isDark ? Colors.white24 : const Color(0xFFD8E4EC);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: bgColor,
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
@@ -44,16 +51,16 @@ class PersonalInfoCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ── Card Header ──
-          const Row(
+          Row(
             children: [
-              Icon(Icons.person_outline, color: Color(0xFF3AABB0), size: 20),
-              SizedBox(width: 8),
+              const Icon(Icons.person_outline, color: Color(0xFF3AABB0), size: 20),
+              const SizedBox(width: 8),
               Text(
                 'Personal Information',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF1A2E3B),
+                  color: textPrimary,
                 ),
               ),
             ],
@@ -74,9 +81,19 @@ class PersonalInfoCard extends StatelessWidget {
           PatientFormField(
             controller: nationalIdController,
             label: 'National ID',
-            hint: '1234567890123',
+            hint: '12345678901234',
             prefixIcon: Icons.badge_outlined,
             keyboardType: TextInputType.number,
+            maxLength: 14,
+            validator: (val) {
+              if (val == null || val.trim().isEmpty) {
+                return 'This field is required';
+              }
+              if (val.trim().length != 14) {
+                return 'National ID must be exactly 14 digits';
+              }
+              return null;
+            },
           ),
           const SizedBox(height: 14),
 
@@ -89,18 +106,18 @@ class PersonalInfoCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Row(
+                    Row(
                       children: [
                         Text(
                           'Age',
                           style: TextStyle(
                             fontSize: 13.5,
                             fontWeight: FontWeight.w500,
-                            color: Color(0xFF2C4A5A),
+                            color: textSecondary,
                           ),
                         ),
-                        SizedBox(width: 3),
-                        Text(
+                        const SizedBox(width: 3),
+                        const Text(
                           '*',
                           style: TextStyle(
                             color: Color(0xFFE05252),
@@ -121,7 +138,7 @@ class PersonalInfoCard extends StatelessWidget {
               const SizedBox(width: 12),
 
               // Gender → Dropdown
-              Expanded(child: _buildGenderDropdown()),
+              Expanded(child: _buildGenderDropdown(textSecondary, textPrimary, inputBg, borderColor)),
             ],
           ),
           const SizedBox(height: 14),
@@ -161,22 +178,22 @@ class PersonalInfoCard extends StatelessWidget {
     );
   }
 
-  Widget _buildGenderDropdown() {
+  Widget _buildGenderDropdown(Color textSecondary, Color textPrimary, Color inputBg, Color borderColor) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Row(
+        Row(
           children: [
             Text(
               'Gender',
               style: TextStyle(
                 fontSize: 13.5,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF2C4A5A),
+                color: textSecondary,
               ),
             ),
-            SizedBox(width: 3),
-            Text(
+            const SizedBox(width: 3),
+            const Text(
               '*',
               style: TextStyle(color: Color(0xFFE05252), fontSize: 13),
             ),
@@ -184,7 +201,7 @@ class PersonalInfoCard extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         DropdownButtonFormField<String>(
-          value: selectedGender,
+          initialValue: selectedGender,
           hint: const Text(
             'Select',
             style: TextStyle(fontSize: 14, color: Color(0xFF8A9BAB)),
@@ -194,20 +211,20 @@ class PersonalInfoCard extends StatelessWidget {
               .toList(),
           onChanged: onGenderChanged,
           validator: (val) => val == null ? 'Required' : null,
-          style: const TextStyle(fontSize: 14, color: Color(0xFF1A2E3B)),
+          style: TextStyle(fontSize: 14, color: textPrimary),
           decoration: InputDecoration(
             filled: true,
-            fillColor: const Color(0xFFFAFCFE),
+            fillColor: inputBg,
             contentPadding: const EdgeInsets.symmetric(horizontal: 12),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide:
-                  const BorderSide(color: Color(0xFFD8E4EC), width: 1.5),
+                  BorderSide(color: borderColor, width: 1.5),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide:
-                  const BorderSide(color: Color(0xFFD8E4EC), width: 1.5),
+                  BorderSide(color: borderColor, width: 1.5),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),

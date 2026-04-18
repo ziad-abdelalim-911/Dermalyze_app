@@ -42,10 +42,10 @@ class PrimaryButton extends StatelessWidget {
                 ],
                 Text(
                   text,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                   ),
                 ),
               ],

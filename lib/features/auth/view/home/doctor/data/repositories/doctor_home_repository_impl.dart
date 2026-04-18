@@ -16,7 +16,7 @@ class DoctorHomeRepositoryImpl implements DoctorHomeRepository {
 
   @override
   Future<List<PatientEntity>> getPatients() async {
-    final response = await _apiService.get('patients');
+    final response = await _apiService.get('doctor/patients');
     final List list = response is List ? response : (response['patients'] ?? []);
     return list.map((e) => PatientModel.fromJson(e)).toList();
   }
@@ -26,7 +26,7 @@ class DoctorHomeRepositoryImpl implements DoctorHomeRepository {
     // We already fetch patients, so doing it again here is redundant if called together.
     // However, to satisfy the interface, we keep the call but filter it.
     // A better approach is to filter it in the BLoC to avoid two network calls.
-    final response = await _apiService.get('patients');
+    final response = await _apiService.get('doctor/patients');
     final List list = response is List ? response : (response['patients'] ?? []);
     return list
         .map((e) => PatientModel.fromJson(e))

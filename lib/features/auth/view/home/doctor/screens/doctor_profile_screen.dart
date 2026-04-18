@@ -83,30 +83,31 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                       child: Column(
                         children: [
                           // Back row
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.pop(context);
-                              },
-                              child: const Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.arrow_back_ios_new,
-                                      color: Colors.white, size: 16),
-                                  SizedBox(width: 6),
-                                  Text(
-                                    'Profile',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
+                          if (Navigator.canPop(context))
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.arrow_back_ios_new,
+                                        color: Colors.white, size: 16),
+                                    SizedBox(width: 6),
+                                    Text(
+                                      'Profile',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
                           const SizedBox(height: 24),
                           // Avatar circle
                           Container(

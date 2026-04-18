@@ -12,7 +12,7 @@ class KeyMetricsCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
 
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
 
         boxShadow: [
@@ -48,7 +48,7 @@ class KeyMetricsCard extends StatelessWidget {
                   value: "17",
                   label: "Days in Treatment",
 
-                  backgroundColor: const Color(0xFFE6F4F1),
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                   iconColor: const Color(0xFF14B8A6),
                   textColor: const Color(0xFF0F766E),
                 ),
@@ -62,7 +62,7 @@ class KeyMetricsCard extends StatelessWidget {
                   value: "+28%",
                   label: "Overall Improvement",
 
-                  backgroundColor: const Color(0xFFEAF7EE),
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                   iconColor: const Color(0xFF16A34A),
                   textColor: const Color(0xFF166534),
                 ),
@@ -81,7 +81,7 @@ class KeyMetricsCard extends StatelessWidget {
                   value: "3",
                   label: "Doctor Checkups",
 
-                  backgroundColor: const Color(0xFFEFF3FA),
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                   iconColor: const Color(0xFF2563EB),
                   textColor: const Color(0xFF1D4ED8),
                 ),
@@ -95,7 +95,7 @@ class KeyMetricsCard extends StatelessWidget {
                   value: "95%",
                   label: "Medication Adherence",
 
-                  backgroundColor: const Color(0xFFF3ECFA),
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                   iconColor: const Color(0xFF9333EA),
                   textColor: const Color(0xFF7E22CE),
                 ),

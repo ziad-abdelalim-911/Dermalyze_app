@@ -61,7 +61,7 @@ class ProgressTimelineCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-          ...items.map((item) => _buildTimelineItem(context, item)).toList(),
+          ...items.map((item) => _buildTimelineItem(context, item)),
         ],
       ),
     );

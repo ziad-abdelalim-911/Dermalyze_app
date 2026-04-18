@@ -65,8 +65,12 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = Theme.of(context).cardColor;
+    final inputBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: CustomScrollView(
         slivers: [
           _buildHeaderSliver(),
@@ -75,7 +79,7 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: inputBg,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
@@ -87,6 +91,7 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
                 ),
                 child: TextField(
                   controller: _searchController,
+                  style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                   decoration: InputDecoration(
                     hintText: 'Search by drug name, ingredient, or category...',
                     hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
@@ -154,7 +159,7 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.25),
+                  color: Theme.of(context).cardColor.withOpacity(0.25),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: Colors.white.withOpacity(0.5), width: 1),
                 ),
@@ -185,6 +190,7 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
   }
 
   Widget _buildMedicationCard(Map<String, dynamic> med) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     Color catColor = _getCategoryColor(med['category']);
     
     return GestureDetector(
@@ -193,7 +199,7 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
@@ -212,7 +218,7 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
                 Expanded(
                   child: Text(
                     med['name'],
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -232,9 +238,9 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
                 style: TextStyle(color: catColor, fontSize: 11, fontWeight: FontWeight.w600),
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Divider(height: 1, color: Color(0xFFF3F4F6)),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Divider(height: 1, color: isDark ? Colors.white24 : const Color(0xFFF3F4F6)),
             ),
             _buildInfoRow('Active Ingredient', med['activeIngredient']),
             const SizedBox(height: 8),
@@ -260,7 +266,7 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(color: Colors.black87, fontSize: 12),
+            style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87, fontSize: 12),
           ),
         ),
       ],
@@ -278,7 +284,7 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
           child: Container(
             width: double.infinity,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(24),
             ),
             child: Column(
@@ -314,7 +320,7 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
                             child: Container(
                               padding: const EdgeInsets.all(4),
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.3),
+                                color: Theme.of(context).cardColor.withOpacity(0.3),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(Icons.close, color: Colors.white, size: 18),
@@ -328,7 +334,7 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
                         decoration: BoxDecoration(
                           color: Colors.black.withOpacity(0.05),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.white.withOpacity(0.5)),
+                          border: Border.all(color: Theme.of(context).cardColor.withOpacity(0.5)),
                         ),
                         child: Text(
                           med['category'],

@@ -48,8 +48,8 @@ class TreatmentStepCard extends StatelessWidget {
 
             child: Text(
               stepNumber.toString(),
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: Theme.of(context).cardColor,
                 fontWeight: FontWeight.bold,
               ),
             ),

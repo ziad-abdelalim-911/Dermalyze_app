@@ -1,5 +1,7 @@
 import 'package:dermalyze/core/constants/app_colors.dart';
+import 'package:dermalyze/features/auth/view/notifications/notifications_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class DoctorHomeHeader extends StatelessWidget {
   final String doctorName;
@@ -41,7 +43,7 @@ class DoctorHomeHeader extends StatelessWidget {
                       Text(
                         'Welcome, Dr.',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.85),
+                          color: Theme.of(context).cardColor.withOpacity(0.85),
                           fontSize: 13,
                         ),
                       ),
@@ -58,37 +60,61 @@ class DoctorHomeHeader extends StatelessWidget {
                   Row(
                     children: [
                       // Notification
-                      Stack(
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: IconButton(
-                              onPressed: onNotification,
-                              icon: const Icon(
-                                Icons.notifications_outlined,
-                                color: Colors.white,
-                                size: 20,
+                      BlocBuilder<NotificationsCubit, NotificationsState>(
+                        builder: (context, state) {
+                          int unreadCount = 0;
+                          if (state is NotificationsLoaded) {
+                            unreadCount = state.unreadCount;
+                          }
+
+                          return Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).cardColor.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: IconButton(
+                                  onPressed: onNotification,
+                                  icon: const Icon(
+                                    Icons.notifications_outlined,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                          Positioned(
-                            top: 6,
-                            right: 6,
-                            child: Container(
-                              width: 8,
-                              height: 8,
-                              decoration: const BoxDecoration(
-                                color: Colors.red,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
-                        ],
+                              if (unreadCount > 0)
+                                Positioned(
+                                  top: -4,
+                                  right: -4,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    constraints: const BoxConstraints(
+                                      minWidth: 16,
+                                      minHeight: 16,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        unreadCount > 9 ? '9+' : '$unreadCount',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          );
+                        },
                       ),
                       const SizedBox(width: 10),
                       // Settings
@@ -96,7 +122,7 @@ class DoctorHomeHeader extends StatelessWidget {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Theme.of(context).cardColor.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: IconButton(

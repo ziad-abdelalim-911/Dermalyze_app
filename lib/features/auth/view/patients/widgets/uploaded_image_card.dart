@@ -18,7 +18,7 @@ class UploadedImageCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -62,7 +62,7 @@ class UploadedImageCard extends StatelessWidget {
                     width: double.infinity,
                     height: 200,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF0F4F8),
+                      color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
                         color: AppColors.SkyBlue,

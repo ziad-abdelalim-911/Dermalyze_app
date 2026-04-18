@@ -12,7 +12,10 @@ class ConversationsLoading extends ConversationsState {}
 
 class ConversationsLoaded extends ConversationsState {
   final List<ConversationModel> conversations;
-  ConversationsLoaded(this.conversations);
+  final int totalUnreadCount;
+  
+  ConversationsLoaded(this.conversations) 
+    : totalUnreadCount = conversations.fold(0, (sum, conv) => sum + conv.unreadCount);
 }
 
 class ConversationsError extends ConversationsState {
@@ -74,6 +77,23 @@ class ConversationsCubit extends Cubit<ConversationsState> {
     _pollingTimer = Timer.periodic(const Duration(seconds: 10), (_) {
       loadConversations();
     });
+  }
+
+  void markConversationAsRead(String conversationId) {
+    if (state is ConversationsLoaded) {
+      final currentState = state as ConversationsLoaded;
+      final updatedConversations = currentState.conversations.map((conv) {
+        if (conv.receiverId == conversationId) {
+          return conv.copyWith(unreadCount: 0);
+        }
+        return conv;
+      }).toList();
+
+      emit(ConversationsLoaded(updatedConversations));
+      
+      // Optional: Hit API to mark as read on server
+      // _chatRepository.markMessagesAsRead(conversationId);
+    }
   }
 
   @override

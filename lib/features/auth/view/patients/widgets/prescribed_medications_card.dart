@@ -71,10 +71,10 @@ class PrescribedMedicationsCard extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    padding: EdgeInsets.symmetric(horizontal: 12),
                     elevation: 0,
                   ),
-                  icon: const Icon(Icons.add, color: Colors.white, size: 16),
+                  icon: Icon(Icons.add, color: Theme.of(context).cardColor, size: 16),
                   label: const Text(
                     'Add\nMedication',
                     textAlign: TextAlign.center,
@@ -91,7 +91,7 @@ class PrescribedMedicationsCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           // Medications List
-          ...medications.map((med) => _buildMedicationItem(context, med)).toList(),
+          ...medications.map((med) => _buildMedicationItem(context, med)),
         ],
       ),
     );

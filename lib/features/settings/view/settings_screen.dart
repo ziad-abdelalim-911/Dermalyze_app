@@ -434,7 +434,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       child: Row(
         children: [
-          Icon(icon, color: Colors.white, size: 18),
+          Icon(icon, color: Theme.of(context).cardColor, size: 18),
           const SizedBox(width: 10),
           Text(
             label,
@@ -667,8 +667,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('Got it',
-                    style: TextStyle(color: Colors.white)),
+                child: Text('Got it',
+                    style: TextStyle(color: Theme.of(context).cardColor)),
               ),
             ),
           ],

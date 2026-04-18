@@ -17,7 +17,7 @@ class MedicalInfoCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
@@ -30,16 +30,18 @@ class MedicalInfoCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.assignment_outlined, color: Color(0xFF3AABB0), size: 20),
-              SizedBox(width: 8),
+              const Icon(Icons.assignment_outlined, color: Color(0xFF3AABB0), size: 20),
+              const SizedBox(width: 8),
               Text(
                 'Medical Information',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF1A2E3B),
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.white 
+                      : const Color(0xFF1A2E3B),
                 ),
               ),
             ],

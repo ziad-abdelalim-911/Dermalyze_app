@@ -37,11 +37,17 @@ class _ScheduleFollowupBottomSheetState
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final inputBg = isDark ? const Color(0xFF0F172A) : Colors.white;
+    final textPrimary = isDark ? Colors.white : AppColors.Black;
+    final textSecondary = isDark ? Colors.grey.shade400 : AppColors.Gray;
+
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Form(
         key: _formKey,
@@ -58,19 +64,19 @@ class _ScheduleFollowupBottomSheetState
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.Black,
+                    color: textPrimary,
                   ),
                 ),
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
-                  child: Icon(Icons.close, color: AppColors.Gray, size: 22),
+                  child: Icon(Icons.close, color: textSecondary, size: 22),
                 ),
               ],
             ),
             const SizedBox(height: 6),
             Text(
               'Schedule next appointment for ${widget.patientName}',
-              style: TextStyle(fontSize: 13, color: AppColors.Gray),
+              style: TextStyle(fontSize: 13, color: textSecondary),
             ),
             const SizedBox(height: 16),
 
@@ -80,7 +86,7 @@ class _ScheduleFollowupBottomSheetState
               style: TextStyle(
                 fontSize: 13.5,
                 fontWeight: FontWeight.w500,
-                color: AppColors.Black,
+                color: textPrimary,
               ),
             ),
             const SizedBox(height: 6),
@@ -97,7 +103,7 @@ class _ScheduleFollowupBottomSheetState
               style: TextStyle(
                 fontSize: 13.5,
                 fontWeight: FontWeight.w500,
-                color: AppColors.Black,
+                color: textPrimary,
               ),
             ),
             const SizedBox(height: 6),
@@ -106,12 +112,12 @@ class _ScheduleFollowupBottomSheetState
               readOnly: true,
               validator: (v) =>
                   (v == null || v.isEmpty) ? 'Please select time' : null,
-              style: TextStyle(fontSize: 14, color: AppColors.Black),
+              style: TextStyle(fontSize: 14, color: textPrimary),
               decoration: InputDecoration(
                 hintText: '--:--:--',
-                hintStyle: TextStyle(fontSize: 14, color: AppColors.Gray),
+                hintStyle: TextStyle(fontSize: 14, color: textSecondary),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: inputBg,
                 isDense: true,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 12,
@@ -213,7 +219,7 @@ class _ScheduleFollowupBottomSheetState
                       child: Text(
                         'Cancel',
                         style: TextStyle(
-                          color: AppColors.Black,
+                          color: textPrimary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:dermalyze/features/auth/view/chat/model/message_type.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dermalyze/features/auth/view/chat/data/repositories/chat_repository.dart';
 import 'package:dermalyze/features/auth/view/chat/model/message_model.dart';
@@ -12,7 +13,8 @@ class ChatLoading extends ChatState {}
 
 class ChatLoaded extends ChatState {
   final List<MessageModel> messages;
-  ChatLoaded(this.messages);
+  final bool isRecording;
+  ChatLoaded(this.messages, {this.isRecording = false});
 }
 
 class ChatError extends ChatState {
@@ -26,7 +28,6 @@ class ChatCubit extends Cubit<ChatState> {
   String? currentUserId;
   Timer? _pollingTimer;
 
-  // Local fallback state to ensure UI works even if backend throws 500 or 404
   final List<MessageModel> _localMessages = [];
 
   ChatCubit(this._chatRepository, {required this.receiverId}) : super(ChatInitial()) {
@@ -35,10 +36,8 @@ class ChatCubit extends Cubit<ChatState> {
 
   Future<void> _init() async {
     final prefs = await SharedPreferences.getInstance();
-    // Use an arbitrary id if token/id is not saved yet, to enable chat testing.
-    currentUserId = prefs.getString('user_id') ?? 'current_user_123';
+    currentUserId = prefs.getString('user_id') ?? 'doctor_456';
 
-    // Mock initial messages for the UI when the API fails
     _localMessages.addAll([
       MessageModel(
         id: '1',
@@ -47,6 +46,7 @@ class ChatCubit extends Cubit<ChatState> {
         content: "Hello! How are you feeling today?",
         timestamp: DateTime.now().subtract(const Duration(minutes: 5)).toIso8601String(),
         isMe: false,
+        status: MessageStatus.read,
       ),
       MessageModel(
         id: '2',
@@ -55,11 +55,13 @@ class ChatCubit extends Cubit<ChatState> {
         content: "Good morning! I'm feeling much better!",
         timestamp: DateTime.now().subtract(const Duration(minutes: 2)).toIso8601String(),
         isMe: true,
+        status: MessageStatus.read,
       ),
     ]);
 
     await loadMessages();
     _startPolling();
+    markMessagesAsRead();
   }
 
   Future<void> loadMessages() async {
@@ -73,15 +75,18 @@ class ChatCubit extends Cubit<ChatState> {
         _localMessages.clear();
         _localMessages.addAll(messages);
       }
-      emit(ChatLoaded(List.from(_localMessages)));
+      _emitLoaded();
     } catch (e) {
-      // If API fails (e.g. 500/404), fall back to local mock state to keep the app functional
-      emit(ChatLoaded(List.from(_localMessages)));
+      _emitLoaded();
     }
   }
 
-  Future<void> sendMessage(String content) async {
-    if (content.trim().isEmpty) return;
+  void _emitLoaded({bool isRecording = false}) {
+    emit(ChatLoaded(List.from(_localMessages), isRecording: isRecording));
+  }
+
+  Future<void> sendMessage(String content, {MessageType type = MessageType.text, String? mediaUrl}) async {
+    if (content.trim().isEmpty && type == MessageType.text) return;
 
     final newMessage = MessageModel(
       senderId: currentUserId!,
@@ -89,27 +94,75 @@ class ChatCubit extends Cubit<ChatState> {
       content: content.trim(),
       timestamp: DateTime.now().toIso8601String(),
       isMe: true,
+      type: type,
+      mediaUrl: mediaUrl,
+      status: MessageStatus.pending,
     );
 
-    // Optimistic UI Update
     _localMessages.add(newMessage);
-    emit(ChatLoaded(List.from(_localMessages)));
+    _emitLoaded();
 
     try {
       final sentMessage = await _chatRepository.sendMessage(newMessage);
-      // Replace optimistic message with confirmed message if needed (by ID usually)
-      final index = _localMessages.indexWhere((m) => m == newMessage);
+      final index = _localMessages.indexOf(newMessage);
       if (index != -1) {
-        _localMessages[index] = sentMessage;
-        emit(ChatLoaded(List.from(_localMessages)));
+        _localMessages[index] = sentMessage.copyWith(status: MessageStatus.sent);
+        _emitLoaded();
+        
+        // Simulation: Deliver after 1 second, Read after 3 seconds
+        _simulateStatusUpdates(index);
       }
     } catch (e) {
-      // Message stays in local state even if api failed since we simulate for now
+       final index = _localMessages.indexOf(newMessage);
+       if (index != -1) {
+         _localMessages[index] = newMessage.copyWith(status: MessageStatus.sent);
+         _emitLoaded();
+         _simulateStatusUpdates(index);
+       }
     }
   }
 
+  void _simulateStatusUpdates(int index) {
+    Future.delayed(const Duration(seconds: 1), () {
+      if (index < _localMessages.length) {
+        _localMessages[index] = _localMessages[index].copyWith(status: MessageStatus.delivered);
+        _emitLoaded();
+      }
+    });
+    Future.delayed(const Duration(seconds: 3), () {
+      if (index < _localMessages.length) {
+        _localMessages[index] = _localMessages[index].copyWith(status: MessageStatus.read);
+        _emitLoaded();
+      }
+    });
+  }
+
+  Future<void> sendMedia(String path, MessageType type) async {
+    // Simulation: Create a local message representing the media
+    await sendMessage("Sent a ${type.name}", type: type, mediaUrl: path);
+  }
+
+  void setRecording(bool recording) {
+    if (state is ChatLoaded) {
+      _emitLoaded(isRecording: recording);
+    }
+  }
+
+  Future<void> markMessagesAsRead() async {
+    // Notify backend that messages are read
+    try {
+      // Typically: await _chatRepository.markAsRead(receiverId);
+      // For now we just update local state if any messages were unread from the other party
+      for (int i = 0; i < _localMessages.length; i++) {
+        if (!_localMessages[i].isMe && _localMessages[i].status != MessageStatus.read) {
+          // This would usually be updated by the server on next poll
+        }
+      }
+    } catch (_) {}
+  }
+
   void _startPolling() {
-    _pollingTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+    _pollingTimer = Timer.periodic(const Duration(seconds: 10), (_) {
       loadMessages();
     });
   }

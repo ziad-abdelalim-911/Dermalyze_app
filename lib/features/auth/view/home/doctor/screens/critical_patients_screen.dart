@@ -34,10 +34,12 @@ class CriticalPatientsScreen extends StatelessWidget {
             ? state.criticalPatients
             : <PatientEntity>[];
 
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+
         return Scaffold(
-          backgroundColor: const Color(0xFFF0F4F8),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
-            backgroundColor: const Color(0xFFE05252),
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             elevation: 0,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -109,7 +111,7 @@ class CriticalPatientsScreen extends StatelessWidget {
                               padding: const EdgeInsets.all(14),
                               margin: const EdgeInsets.only(bottom: 16),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFE05252).withOpacity(0.08),
+                                color: Theme.of(context).cardColor.withOpacity(0.08),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
                                     color: const Color(0xFFE05252)
@@ -131,7 +133,7 @@ class CriticalPatientsScreen extends StatelessWidget {
                                           style: TextStyle(
                                             fontSize: 13,
                                             fontWeight: FontWeight.bold,
-                                            color: AppColors.Black,
+                                            color: isDark ? Colors.white : AppColors.Black,
                                           ),
                                         ),
                                         const SizedBox(height: 3),
@@ -139,7 +141,7 @@ class CriticalPatientsScreen extends StatelessWidget {
                                           'These patients require urgent monitoring and immediate medical intervention.',
                                           style: TextStyle(
                                               fontSize: 12,
-                                              color: AppColors.Gray,
+                                              color: isDark ? Colors.grey.shade400 : AppColors.Gray,
                                               height: 1.4),
                                         ),
                                       ],
@@ -174,7 +176,15 @@ class CriticalPatientsScreen extends StatelessWidget {
                                 onCall: p.phone.isNotEmpty
                                     ? () => _launchCall(p.phone)
                                     : () {},
-                                onMessage: () {},
+                                onMessage: () => Navigator.pushNamed(
+                                  context,
+                                  AppRoutes.chat,
+                                  arguments: {
+                                    'receiverId': p.id,
+                                    'receiverName': p.name,
+                                    'receiverRole': 'Patient',
+                                  },
+                                ),
                               ),
                             ),
                             const SizedBox(height: 16),

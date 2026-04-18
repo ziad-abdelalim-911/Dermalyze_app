@@ -41,7 +41,7 @@ class ChatRepository {
   }
 
   Future<List<ConversationModel>> getConversations(String currentUserId) async {
-    List<ConversationModel> _fallbackMocks = [
+    List<ConversationModel> fallbackMocks = [
       ConversationModel(
         id: 'c1',
         receiverId: 'doctor_123',
@@ -76,13 +76,13 @@ class ChatRepository {
 
       // If backend returns empty list (no real chats yet), force mocks for UI testing purposes
       if (parsedList.isEmpty) {
-        return _fallbackMocks;
+        return fallbackMocks;
       }
       return parsedList;
 
     } catch (e) {
       print("Error fetching conversations: $e");
-      return _fallbackMocks;
+      return fallbackMocks;
     }
   }
 }

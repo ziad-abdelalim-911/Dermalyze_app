@@ -23,7 +23,7 @@ class MedicationCompletedCard extends StatelessWidget {
 
       decoration: BoxDecoration(
 
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
 
         borderRadius: BorderRadius.circular(16),
 
@@ -46,7 +46,7 @@ class MedicationCompletedCard extends StatelessWidget {
 
             decoration: BoxDecoration(
 
-              color: const Color(0xFFE5E7EB),
+              color: Theme.of(context).cardColor,
 
               borderRadius: BorderRadius.circular(12),
             ),

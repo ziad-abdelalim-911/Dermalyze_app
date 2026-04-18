@@ -9,7 +9,7 @@ class AppTheme {
       scaffoldBackgroundColor: const Color(0xFFF9FAFC),
       canvasColor: Colors.white, // Used for cards
       cardColor: Colors.white,
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
@@ -19,7 +19,6 @@ class AppTheme {
         secondary: AppColors.Turqouoise,
         surface: Colors.white,
         onSurface: Colors.black,
-        background: const Color(0xFFF9FAFC),
       ),
       dividerColor: Colors.grey.shade200,
     );
@@ -42,7 +41,6 @@ class AppTheme {
         secondary: AppColors.Turqouoise,
         surface: const Color(0xFF1E293B),
         onSurface: Colors.white,
-        background: const Color(0xFF0F172A),
       ),
       dividerColor: Colors.grey.shade800,
     );

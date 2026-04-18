@@ -4,7 +4,6 @@ import 'package:dermalyze/core/routes/app_routes.dart';
 import 'package:dermalyze/features/auth/bloc/register_bloc.dart';
 import 'package:dermalyze/features/auth/bloc/register_event.dart';
 import 'package:dermalyze/features/auth/bloc/register_state.dart';
-import 'package:dermalyze/features/auth/view/login/login_view.dart';
 import 'package:dermalyze/features/shared/custom_date_textformfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -134,8 +133,8 @@ class _PatientSignupState extends State<PatientSignup> {
                             alignment: Alignment.centerLeft,
                             child: TextButton.icon(
                               onPressed: () => Navigator.pop(context),
-                              icon: const Icon(Icons.arrow_back, color: Colors.white),
-                              label: const Text('Back',
+                              icon: Icon(Icons.arrow_back, color: Theme.of(context).cardColor),
+                              label: Text('Back',
                                   style: TextStyle(color: Colors.white)),
                             ),
                           ),
@@ -143,7 +142,7 @@ class _PatientSignupState extends State<PatientSignup> {
                           Container(
                             width: 72, height: 72,
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.2),
+                              color: Theme.of(context).cardColor.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: const Icon(Icons.person_add_alt_1,
@@ -619,7 +618,7 @@ class _PatientSignupState extends State<PatientSignup> {
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -652,7 +651,7 @@ class _PatientSignupState extends State<PatientSignup> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFFEFF6FF),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFFBFDBFE)),
       ),

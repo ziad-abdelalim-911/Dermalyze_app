@@ -25,7 +25,7 @@ class ReadyForAnalysisCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -60,7 +60,7 @@ class ReadyForAnalysisCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFFF0FDFA),
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(color: AppColors.Turqouoise, width: 1),
             ),
@@ -76,8 +76,8 @@ class ReadyForAnalysisCard extends StatelessWidget {
                   child: Center(
                     child: Text(
                       initials,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: Theme.of(context).cardColor,
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),

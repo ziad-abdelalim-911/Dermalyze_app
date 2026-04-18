@@ -11,6 +11,7 @@ import 'package:dermalyze/features/auth/view/home/doctor/presentation/bloc/docto
 import 'package:dermalyze/features/auth/view/home/doctor/domain/entities/patient_entity.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/screens/smart_history_screen.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/screens/medications_guide_screen.dart';
+import 'package:dermalyze/features/auth/view/chat/view/chat_view.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/screens/diseases_library_screen.dart';
 import 'package:dermalyze/features/settings/view/settings_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -76,7 +77,7 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const ProgressReportView());
 
       case AppRoutes.notifications:
-        return MaterialPageRoute(builder: (_) => const NotificationsView());
+        return MaterialPageRoute(builder: (_) => NotificationsView());
 
       case AppRoutes.medicationList:
         return MaterialPageRoute(builder: (_) => const MedicationListView());
@@ -150,6 +151,16 @@ class AppRouter {
 
       case AppRoutes.Settings:
         return MaterialPageRoute(builder: (_) => const SettingsScreen());
+
+      case AppRoutes.chat:
+        final args = settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(
+          builder: (_) => ChatView(
+            receiverId: args['receiverId'] as String,
+            receiverName: args['receiverName'] as String,
+            receiverRole: args['receiverRole'] as String,
+          ),
+        );
 
       default:
         return MaterialPageRoute(

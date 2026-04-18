@@ -14,9 +14,9 @@ class ChatHeader extends StatelessWidget {
           /// ===== BACK BUTTON =====
           GestureDetector(
             onTap: () => Navigator.pop(context),
-            child: const Icon(
+            child: Icon(
               Icons.arrow_back,
-              color: Colors.white,
+              color: Theme.of(context).cardColor,
               size: 26,
             ),
           ),
@@ -31,9 +31,9 @@ class ChatHeader extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(color: Colors.white70, width: 2),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.person_outline,
-              color: Colors.white,
+              color: Theme.of(context).cardColor,
             ),
           ),
 

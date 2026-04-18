@@ -25,7 +25,7 @@ class AccountTypeCard extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.Gray2, width: 1),
         boxShadow: [

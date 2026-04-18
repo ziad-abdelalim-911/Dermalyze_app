@@ -26,11 +26,16 @@ class _UpdateStatusBottomSheetState extends State<UpdateStatusBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final textPrimary = isDark ? Colors.white : AppColors.Black;
+    final textSecondary = isDark ? Colors.grey.shade400 : AppColors.Gray;
+    
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -45,19 +50,19 @@ class _UpdateStatusBottomSheetState extends State<UpdateStatusBottomSheet> {
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.Black,
+                  color: textPrimary,
                 ),
               ),
               GestureDetector(
                 onTap: () => Navigator.pop(context),
-                child: Icon(Icons.close, color: AppColors.Gray, size: 22),
+                child: Icon(Icons.close, color: textSecondary, size: 22),
               ),
             ],
           ),
           const SizedBox(height: 6),
           Text(
             'Change the medical status for ${widget.patientName}',
-            style: TextStyle(fontSize: 13, color: AppColors.Gray),
+            style: TextStyle(fontSize: 13, color: textSecondary),
           ),
           const SizedBox(height: 16),
 
@@ -102,7 +107,7 @@ class _UpdateStatusBottomSheetState extends State<UpdateStatusBottomSheet> {
                     child: Text(
                       'Cancel',
                       style: TextStyle(
-                        color: AppColors.Black,
+                        color: textPrimary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -177,15 +182,16 @@ class _UpdateStatusBottomSheetState extends State<UpdateStatusBottomSheet> {
     required String subtitle,
   }) {
     final isSelected = _selectedStatus == status;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     Color borderColor;
     Color bgColor;
     Color radioColor;
 
     if (!isSelected) {
-      borderColor = AppColors.Gray2;
-      bgColor = Colors.white;
-      radioColor = AppColors.Gray2;
+      borderColor = isDark ? Colors.white24 : AppColors.Gray2;
+      bgColor = isDark ? const Color(0xFF0F172A) : Colors.white;
+      radioColor = isDark ? Colors.white38 : AppColors.Gray2;
     } else if (status == PatientStatus.critical) {
       borderColor = Colors.red;
       bgColor = Colors.red.withOpacity(0.05);
@@ -216,13 +222,13 @@ class _UpdateStatusBottomSheetState extends State<UpdateStatusBottomSheet> {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.Black,
+                      color: isDark ? Colors.white : AppColors.Black,
                     ),
                   ),
                   const SizedBox(height: 3),
                   Text(
                     subtitle,
-                    style: TextStyle(fontSize: 12, color: AppColors.Gray),
+                    style: TextStyle(fontSize: 12, color: isDark ? Colors.grey.shade400 : AppColors.Gray),
                   ),
                 ],
               ),

@@ -25,17 +25,18 @@ class ProfileHeader extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
+          if (Navigator.canPop(context))
+            Align(
+              alignment: Alignment.centerLeft,
+              child: IconButton(
+                icon: Icon(Icons.arrow_back, color: Theme.of(context).cardColor),
+                onPressed: () => Navigator.pop(context),
+              ),
             ),
-          ),
           const SizedBox(height: 16),
           CircleAvatar(
             radius: 42,
-            backgroundColor: Colors.white,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             child: Icon(
               Icons.person_outline,
               size: 42,

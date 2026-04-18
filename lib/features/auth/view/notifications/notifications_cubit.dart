@@ -10,7 +10,7 @@ class NotificationsLoaded extends NotificationsState {
   final List<NotificationModel> notifications;
   final int unreadCount;
 
-  NotificationsLoaded(this.notifications) 
+  NotificationsLoaded(this.notifications)
     : unreadCount = notifications.where((n) => n.isUnread).length;
 }
 
@@ -30,7 +30,11 @@ class NotificationsCubit extends Cubit<NotificationsState> {
       final notifications = await _repository.getNotifications();
       emit(NotificationsLoaded(notifications));
     } catch (e) {
-      emit(NotificationsError('Failed to load notifications. Please check your connection.'));
+      emit(
+        NotificationsError(
+          'Failed to load notifications. Please check your connection.',
+        ),
+      );
     }
   }
 
@@ -51,7 +55,35 @@ class NotificationsCubit extends Cubit<NotificationsState> {
             isUnread: false,
           );
         }).toList();
-        
+
+        emit(NotificationsLoaded(updatedList));
+      } catch (e) {
+        // Silently fail or handle error
+      }
+    }
+  }
+
+  Future<void> markAsRead(String id) async {
+    final currentState = state;
+    if (currentState is NotificationsLoaded) {
+      try {
+        await _repository.markAsRead(id);
+        // Update local state optimistically
+        final updatedList = currentState.notifications.map((n) {
+          if (n.id == id) {
+            return NotificationModel(
+              id: n.id,
+              title: n.title,
+              subtitle: n.subtitle,
+              time: n.time,
+              priority: n.priority,
+              type: n.type,
+              isUnread: false,
+            );
+          }
+          return n;
+        }).toList();
+
         emit(NotificationsLoaded(updatedList));
       } catch (e) {
         // Silently fail or handle error

@@ -64,13 +64,13 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                 children: [
                   // ================= Header =================
                   Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(16),
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: IconButton(
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.arrow_back,
-                          color: Colors.white,
+                          color: Theme.of(context).cardColor,
                         ),
                         onPressed: () => Navigator.pop(context),
                       ),
@@ -81,7 +81,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Theme.of(context).cardColor.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Center(
@@ -123,7 +123,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                     ),
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(24),
                     ),
                     child: Column(
@@ -260,13 +260,13 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                                   16,
                                 ),
                               ),
-                              child: const Center(
+                              child: Center(
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(
                                       Icons.send,
-                                      color: Colors.white,
+                                      color: Theme.of(context).cardColor,
                                     ),
                                     SizedBox(width: 8),
                                     Text(
@@ -289,7 +289,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFEFF6FF),
+                            color: Theme.of(context).cardColor,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: const Color(0xFFBFDBFE),

@@ -49,7 +49,7 @@ class ClinicalResourcesCard extends StatelessWidget {
                   width: 46,
                   height: 46,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Theme.of(context).cardColor.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(13),
                   ),
                   child: const Icon(

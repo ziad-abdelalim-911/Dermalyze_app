@@ -46,12 +46,12 @@ class ProgressHeaderCard extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 6),
+                SizedBox(height: 6),
 
                 Text(
                   "$recoveryPercent%",
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: Theme.of(context).cardColor,
                     fontSize: 36,
                     fontWeight: FontWeight.w500,
                   ),

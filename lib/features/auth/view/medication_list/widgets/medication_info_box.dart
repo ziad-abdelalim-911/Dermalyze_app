@@ -23,7 +23,7 @@ class MedicationInfoBox extends StatelessWidget {
 
       decoration: BoxDecoration(
 
-        color: const Color(0xFFF1F5F9),
+        color: Theme.of(context).cardColor,
 
         borderRadius: BorderRadius.circular(12),
       ),

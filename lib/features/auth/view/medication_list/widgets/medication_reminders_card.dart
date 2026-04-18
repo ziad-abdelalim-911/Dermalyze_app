@@ -10,7 +10,7 @@ class ImportantRemindersCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
 
       decoration: BoxDecoration(
-        color: const Color(0xFFE6F4F1),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
 
         border: Border.all(color: const Color(0xFF2DD4BF)),

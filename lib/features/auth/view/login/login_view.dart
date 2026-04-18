@@ -114,12 +114,12 @@ class _LoginViewState extends State<LoginView> {
                         ShaderMask(
                           shaderCallback: (bounds) =>
                               AppColors.primaryGradient2.createShader(bounds),
-                          child: const Text(
+                          child: Text(
                             'DERMALYZE',
                             style: TextStyle(
                               fontSize: 30,
                               fontWeight: FontWeight.w700,
-                              color: Colors.white,
+                              color: Theme.of(context).cardColor,
                               letterSpacing: 1.5,
                             ),
                           ),
@@ -139,7 +139,7 @@ class _LoginViewState extends State<LoginView> {
                           width: double.infinity,
                           padding: const EdgeInsets.all(24),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: Theme.of(context).cardColor,
                             borderRadius: BorderRadius.circular(24),
                             boxShadow: [
                               BoxShadow(

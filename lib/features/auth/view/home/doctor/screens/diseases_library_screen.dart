@@ -54,8 +54,11 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final inputBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: CustomScrollView(
         slivers: [
           _buildHeaderSliver(),
@@ -64,7 +67,7 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: inputBg,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
@@ -76,6 +79,7 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
                 ),
                 child: TextField(
                   controller: _searchController,
+                  style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                   decoration: InputDecoration(
                     hintText: 'Search by disease name, tag, or...',
                     hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
@@ -143,7 +147,7 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
                  width: 60,
                  height: 60,
                  decoration: BoxDecoration(
-                   color: Colors.white.withOpacity(0.25),
+                   color: Theme.of(context).cardColor.withOpacity(0.25),
                    borderRadius: BorderRadius.circular(16),
                    border: Border.all(color: Colors.white.withOpacity(0.5), width: 1),
                  ),
@@ -174,12 +178,14 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
   }
 
   Widget _buildDiseaseCard(Map<String, dynamic> disease) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: () => _showDiseaseDetails(context, disease),
       child: Container(
         margin: const EdgeInsets.only(bottom: 20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
@@ -215,14 +221,14 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
                     children: (disease['tags'] as List).map((tag) {
                       return Container(
                         margin: const EdgeInsets.only(left: 6),
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.9),
+                          color: Theme.of(context).cardColor.withOpacity(0.9),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
                           tag,
-                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFFE06C4C)),
+                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Theme.of(context).cardColor),
                         ),
                       );
                     }).toList(),
@@ -241,7 +247,7 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
                     children: [
                       Text(
                         disease['name'],
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87),
                       ),
                       const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
                     ],
@@ -264,12 +270,12 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
                       return Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF3F4F6),
+                          color: isDark ? Colors.white12 : const Color(0xFFF3F4F6),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           sym.toString(),
-                          style: TextStyle(fontSize: 11, color: Colors.grey.shade700),
+                          style: TextStyle(fontSize: 11, color: isDark ? Colors.grey.shade300 : Colors.grey.shade700),
                         ),
                       );
                     }).toList(),
@@ -296,7 +302,7 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
              child: Container(
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(24),
               ),
               child: SingleChildScrollView(
@@ -335,9 +341,9 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
                           child: GestureDetector(
                             onTap: () => Navigator.pop(ctx),
                             child: Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
+                              padding: EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).cardColor,
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(Icons.close, color: Colors.black87, size: 16),
@@ -379,7 +385,7 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
                              margin: const EdgeInsets.only(right: 8),
                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                              decoration: BoxDecoration(
-                               color: Colors.white.withOpacity(0.25),
+                               color: Theme.of(context).cardColor.withOpacity(0.25),
                                borderRadius: BorderRadius.circular(16),
                                border: Border.all(color: Colors.white.withOpacity(0.5)),
                              ),
@@ -419,7 +425,7 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFEFF6FF), // Light blue box
+                              color: Theme.of(context).cardColor, // Light blue box
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(color: const Color(0xFFBFDBFE)), // Light outline
                             ),
@@ -444,7 +450,7 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
                                margin: const EdgeInsets.only(bottom: 10),
                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                decoration: BoxDecoration(
-                                 color: const Color(0xFFF0FDFA), // Light cyan bg
+                                 color: Theme.of(context).cardColor, // Light cyan bg
                                  borderRadius: BorderRadius.circular(12),
                                  border: Border.all(color: const Color(0xFFA5F3FC)), // Cyan outline
                                ),
@@ -478,7 +484,7 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFFAF5FF), // Light purple background
+                              color: Theme.of(context).cardColor, // Light purple background
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(color: const Color(0xFFE9D5FF)), // Purple outline
                             ),

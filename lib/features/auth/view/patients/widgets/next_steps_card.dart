@@ -9,7 +9,7 @@ class NextStepsCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFEAF0F8),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: const Color(0xFFC5D8EC), width: 1.5),
       ),

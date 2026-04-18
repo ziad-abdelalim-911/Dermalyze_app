@@ -25,7 +25,7 @@ class ProgressStatisticsCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -61,7 +61,7 @@ class ProgressStatisticsCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFF5F5),
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
                         color: const Color(0xFFFFCDD2), width: 1),
@@ -98,7 +98,7 @@ class ProgressStatisticsCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF0FDFA),
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
                         color: AppColors.Turqouoise, width: 1),

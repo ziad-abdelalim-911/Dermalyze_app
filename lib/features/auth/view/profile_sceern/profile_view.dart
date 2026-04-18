@@ -91,25 +91,26 @@ class _ProfileViewState extends State<ProfileView> {
                       child: Column(
                         children: [
                           // Title row
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: const [
-                                Icon(Icons.arrow_back_ios_new,
-                                    color: Colors.white, size: 16),
-                                SizedBox(width: 8),
-                                Text(
-                                  'Profile',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
+                          if (Navigator.canPop(context))
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.arrow_back_ios_new,
+                                      color: Theme.of(context).cardColor, size: 16),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Profile',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
                           const SizedBox(height: 24),
                           // Avatar
                           Container(
@@ -367,8 +368,8 @@ class _ProfileViewState extends State<ProfileView> {
                           child: OutlinedButton.icon(
                             onPressed: _logout,
                             style: OutlinedButton.styleFrom(
-                              side: const BorderSide(
-                                  color: Color(0xFFE05252), width: 1.5),
+                              side: BorderSide(
+                                  color: Theme.of(context).cardColor, width: 1.5),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
                               ),

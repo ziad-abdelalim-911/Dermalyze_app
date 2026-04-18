@@ -26,7 +26,7 @@ class MedicationListCard extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: 16),
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
@@ -146,7 +146,7 @@ class _MedicationItem extends StatelessWidget {
               vertical: 4,
             ),
             decoration: BoxDecoration(
-              color: const Color(0xFFE6F6FA),
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(

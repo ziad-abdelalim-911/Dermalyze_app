@@ -45,7 +45,7 @@
 //                       : Colors.grey,
 //                   tail: true,
 //                   textStyle: TextStyle(
-//                     color: Colors.white,
+//                     color: Theme.of(context).cardColor,
 //                     fontSize: 16,
 //                   ),
 //                 ),

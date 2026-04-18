@@ -113,7 +113,7 @@ class _OnBoardingViewState extends State<OnBoardingView> {
                                       style: TextStyle(
                                         fontFamily: "Inter",
                                         fontSize: 16,
-                                        color: Colors.white,
+                                        color: Theme.of(context).cardColor,
                                       ),
                                     ),
                                     const SizedBox(width: 8),

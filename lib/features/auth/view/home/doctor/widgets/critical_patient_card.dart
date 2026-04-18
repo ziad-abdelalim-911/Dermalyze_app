@@ -41,10 +41,12 @@ class CriticalPatientCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: _riskColor.withOpacity(0.3), width: 1.5),
         boxShadow: [
@@ -122,13 +124,13 @@ class CriticalPatientCard extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.Black,
+                              color: isDark ? Colors.white : AppColors.Black,
                             ),
                           ),
                           Text(
                             diagnosis,
                             style: TextStyle(
-                                fontSize: 12, color: AppColors.Gray),
+                                fontSize: 12, color: isDark ? Colors.grey.shade400 : AppColors.Gray),
                           ),
                         ],
                       ),
@@ -144,12 +146,12 @@ class CriticalPatientCard extends StatelessWidget {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                          padding: EdgeInsets.symmetric(horizontal: 14),
                         ),
-                        child: const Text(
+                        child: Text(
                           'View',
                           style: TextStyle(
-                              color: Colors.white,
+                              color: Theme.of(context).cardColor,
                               fontSize: 13,
                               fontWeight: FontWeight.w600),
                         ),
@@ -163,17 +165,17 @@ class CriticalPatientCard extends StatelessWidget {
                   children: [
                     Text('Age: $age',
                         style:
-                            TextStyle(fontSize: 12, color: AppColors.Gray)),
+                            TextStyle(fontSize: 12, color: isDark ? Colors.grey.shade400 : AppColors.Gray)),
                     const SizedBox(width: 6),
                     Container(
                         width: 4,
                         height: 4,
                         decoration: BoxDecoration(
-                            color: AppColors.Gray, shape: BoxShape.circle)),
+                            color: isDark ? Colors.grey.shade400 : AppColors.Gray, shape: BoxShape.circle)),
                     const SizedBox(width: 6),
                     Text('Last visit: $lastVisit',
                         style:
-                            TextStyle(fontSize: 12, color: AppColors.Gray)),
+                            TextStyle(fontSize: 12, color: isDark ? Colors.grey.shade400 : AppColors.Gray)),
                   ],
                 ),
                 const SizedBox(height: 10),
@@ -195,7 +197,7 @@ class CriticalPatientCard extends StatelessWidget {
                         style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.Gray3),
+                            color: isDark ? Colors.grey.shade400 : AppColors.Gray3),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -216,7 +218,7 @@ class CriticalPatientCard extends StatelessWidget {
                     const SizedBox(width: 6),
                     Text('Recovery Rate',
                         style:
-                            TextStyle(fontSize: 12, color: AppColors.Gray)),
+                            TextStyle(fontSize: 12, color: isDark ? Colors.grey.shade400 : AppColors.Gray)),
                     const Spacer(),
                     Text(
                       '${(recoveryRate * 100).toInt()}%',
@@ -290,7 +292,7 @@ class CriticalPatientCard extends StatelessWidget {
                     Text(
                       'Next Appointment: ',
                       style:
-                          TextStyle(fontSize: 12, color: AppColors.Gray),
+                          TextStyle(fontSize: 12, color: isDark ? Colors.grey.shade400 : AppColors.Gray),
                     ),
                     Text(
                       nextAppointment,

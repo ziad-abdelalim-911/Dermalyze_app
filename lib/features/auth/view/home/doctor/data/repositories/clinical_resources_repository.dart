@@ -6,7 +6,7 @@ class ClinicalResourcesRepository {
   /// جلب البيانات والإحصائيات الخاصة بالمرض للسجل الذكي
   Future<Map<String, dynamic>> getSmartHistoryInsights(String diseaseName) async {
     try {
-      final response = await _api.get('resources/smart-history?disease=$diseaseName');
+      final response = await _api.get('doctor/history?disease=$diseaseName');
       return response is Map<String, dynamic> ? response : {};
     } catch (_) {
       return {};

@@ -27,7 +27,7 @@ class FollowupImageCard extends StatelessWidget {
                   width: 52,
                   height: 52,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.25),
+                    color: Theme.of(context).cardColor.withOpacity(0.25),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: const Icon(

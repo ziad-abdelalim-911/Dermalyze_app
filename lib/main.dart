@@ -6,6 +6,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dermalyze/core/theme/app_theme.dart';
 import 'package:dermalyze/core/theme/cubit/theme_cubit.dart';
 
+import 'package:dermalyze/features/auth/view/notifications/notifications_cubit.dart';
+import 'package:dermalyze/features/auth/view/notifications/notifications_repository.dart';
+import 'package:dermalyze/features/auth/view/chat/logic/conversations_cubit.dart';
+import 'package:dermalyze/features/auth/view/chat/data/repositories/chat_repository.dart';
+import 'package:dermalyze/core/network/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
@@ -22,8 +27,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => ThemeCubit(isDark: isDark),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => ThemeCubit(isDark: isDark)),
+        BlocProvider(
+          create: (_) => NotificationsCubit(NotificationsRepository())..fetchNotifications(),
+        ),
+        BlocProvider(
+          create: (_) => ConversationsCubit(ChatRepository(ApiService())),
+        ),
+      ],
       child: BlocBuilder<ThemeCubit, ThemeMode>(
         builder: (context, themeMode) {
           return MaterialApp(

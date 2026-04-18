@@ -121,8 +121,8 @@ class _DoctorSignupState extends State<DoctorSignup> {
                             alignment: Alignment.centerLeft,
                             child: TextButton.icon(
                               onPressed: () => Navigator.pop(context),
-                              icon: const Icon(Icons.arrow_back,
-                                  color: Colors.white),
+                              icon: Icon(Icons.arrow_back,
+                                  color: Theme.of(context).cardColor),
                               label: const Text('Back',
                                   style: TextStyle(color: Colors.white)),
                             ),
@@ -131,7 +131,7 @@ class _DoctorSignupState extends State<DoctorSignup> {
                           Container(
                             width: 72, height: 72,
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.2),
+                              color: Theme.of(context).cardColor.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: const Icon(Icons.medical_services_outlined,
@@ -204,7 +204,7 @@ class _DoctorSignupState extends State<DoctorSignup> {
                             width: double.infinity,
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFEFF6FF),
+                              color: Theme.of(context).cardColor,
                               borderRadius: BorderRadius.circular(16),
                               border:
                                   Border.all(color: const Color(0xFFBFDBFE)),
@@ -322,8 +322,8 @@ class _DoctorSignupState extends State<DoctorSignup> {
                                 ),
                                 child: Center(
                                   child: state is RegisterLoading
-                                      ? const CircularProgressIndicator(
-                                          color: Colors.white)
+                                      ? CircularProgressIndicator(
+                                          color: Theme.of(context).cardColor)
                                       : Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.center,
@@ -546,7 +546,7 @@ class _DoctorSignupState extends State<DoctorSignup> {
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(

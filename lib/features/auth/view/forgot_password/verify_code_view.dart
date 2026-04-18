@@ -87,13 +87,13 @@ class _VerifyCodeViewState extends State<VerifyCodeView> {
                 children: [
                   // ===== Back =====
                   Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(16),
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: IconButton(
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.arrow_back,
-                          color: Colors.white,
+                          color: Theme.of(context).cardColor,
                         ),
                         onPressed: () => Navigator.pop(context),
                       ),
@@ -105,7 +105,7 @@ class _VerifyCodeViewState extends State<VerifyCodeView> {
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Theme.of(context).cardColor.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: const Icon(
@@ -147,7 +147,7 @@ class _VerifyCodeViewState extends State<VerifyCodeView> {
                     ),
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(24),
                     ),
                     child: Column(
@@ -247,8 +247,9 @@ class _VerifyCodeViewState extends State<VerifyCodeView> {
                                         ));
                                       }
                                     } finally {
-                                      if (mounted)
+                                      if (mounted) {
                                         setState(() => _isVerifying = false);
+                                      }
                                     }
                                   },
                             style: ElevatedButton.styleFrom(
@@ -267,13 +268,13 @@ class _VerifyCodeViewState extends State<VerifyCodeView> {
                                   16,
                                 ),
                               ),
-                              child: const Center(
+                              child: Center(
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(
                                       Icons.verified_user,
-                                      color: Colors.white,
+                                      color: Theme.of(context).cardColor,
                                     ),
                                     SizedBox(width: 8),
                                     Text(
@@ -323,8 +324,9 @@ class _VerifyCodeViewState extends State<VerifyCodeView> {
                                       } catch (e) {
                                         // silently fail (timer restarted)
                                       } finally {
-                                        if (mounted)
+                                        if (mounted) {
                                           setState(() => _isResending = false);
+                                        }
                                       }
                                     },
                               child: Row(

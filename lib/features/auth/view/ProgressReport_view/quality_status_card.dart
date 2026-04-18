@@ -18,7 +18,7 @@ class QualityStatusCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
 
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
 
         boxShadow: [
@@ -51,7 +51,7 @@ class QualityStatusCard extends StatelessWidget {
           _buildRow(
             title: "Last Month",
             value: lastMonth,
-            color: const Color(0xFFF59E0B),
+            color: Theme.of(context).cardColor,
             bgColor: const Color(0xFFFEF3C7),
           ),
 
