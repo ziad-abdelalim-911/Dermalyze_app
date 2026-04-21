@@ -45,9 +45,10 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
     final query = _searchController.text.toLowerCase();
     setState(() {
       _filteredDiseases = _allDiseases.where((disease) {
-        return disease['name'].toLowerCase().contains(query) ||
-               disease['type'].toLowerCase().contains(query) ||
-               (disease['tags'] as List).any((tag) => tag.toString().toLowerCase().contains(query));
+        final tags = (disease['tags'] as List? ?? []);
+        return (disease['name'] as String? ?? '').toLowerCase().contains(query) ||
+               (disease['type'] as String? ?? '').toLowerCase().contains(query) ||
+               tags.any((tag) => tag.toString().toLowerCase().contains(query));
       }).toList();
     });
   }
@@ -205,29 +206,34 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
                 SizedBox(
                   height: 160,
                   width: double.infinity,
-                  child: Image.network(
-                    disease['image'],
-                    fit: BoxFit.cover,
-                    errorBuilder: (ctx, err, stack) => Container(
-                      color: Colors.grey.shade300,
-                      child: const Center(child: Icon(Icons.image_not_supported, color: Colors.grey)),
-                    ),
-                  ),
+                  child: disease['image'] != null
+                    ? Image.network(
+                        disease['image'] as String,
+                        fit: BoxFit.cover,
+                        errorBuilder: (ctx, err, stack) => Container(
+                          color: Colors.grey.shade300,
+                          child: const Center(child: Icon(Icons.image_not_supported, color: Colors.grey)),
+                        ),
+                      )
+                    : Container(
+                        color: Colors.grey.shade300,
+                        child: const Center(child: Icon(Icons.image_not_supported, color: Colors.grey)),
+                      ),
                 ),
                 Positioned(
                   top: 12,
                   right: 12,
                   child: Row(
-                    children: (disease['tags'] as List).map((tag) {
+                    children: (disease['tags'] as List? ?? []).map((tag) {
                       return Container(
                         margin: const EdgeInsets.only(left: 6),
-                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
                           color: Theme.of(context).cardColor.withOpacity(0.9),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          tag,
+                          tag.toString(),
                           style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Theme.of(context).cardColor),
                         ),
                       );
@@ -246,7 +252,7 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        disease['name'],
+                        disease['name'] as String? ?? 'Unknown',
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87),
                       ),
                       const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
@@ -254,7 +260,7 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    disease['type'],
+                    disease['type'] as String? ?? '',
                     style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
                   ),
                   const SizedBox(height: 12),
@@ -266,7 +272,7 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
                   Wrap(
                     spacing: 6,
                     runSpacing: 6,
-                    children: (disease['symptoms'] as List).take(2).map((sym) {
+                    children: (disease['symptoms'] as List? ?? []).take(2).map((sym) {
                       return Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
@@ -315,13 +321,15 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
                         SizedBox(
                           height: 200,
                           width: double.infinity,
-                          child: Image.network(
-                            disease['image'],
-                            fit: BoxFit.cover,
-                            errorBuilder: (ctx, err, stack) => Container(
-                              color: Colors.grey.shade300,
-                            ),
-                          ),
+                          child: disease['image'] != null
+                            ? Image.network(
+                                disease['image'] as String,
+                                fit: BoxFit.cover,
+                                errorBuilder: (ctx, err, stack) => Container(
+                                  color: Colors.grey.shade300,
+                                ),
+                              )
+                            : Container(color: Colors.grey.shade300),
                         ),
                         // Dark gradient overlay for text readability
                         Positioned.fill(
@@ -357,11 +365,11 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                disease['name'],
+                                disease['name'] as String? ?? 'Unknown',
                                 style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
                               ),
                               Text(
-                                '(${disease['type']})',
+                                '(${disease['type'] as String? ?? ''})',
                                 style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 14),
                               ),
                             ],
@@ -380,7 +388,8 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
                         ),
                       ),
                       child: Row(
-                         children: (disease['tags'] as List).map((tag) {
+                         children: (disease['tags'] as List? ?? []).map((tag) {
+                           final tagStr = tag.toString();
                            return Container(
                              margin: const EdgeInsets.only(right: 8),
                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
@@ -391,13 +400,13 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
                              ),
                              child: Row(
                                children: [
-                                 if (tag == 'Moderate' || tag == 'Common')
+                                 if (tagStr == 'Moderate' || tagStr == 'Common')
                                     const Padding(
                                       padding: EdgeInsets.only(right: 4),
                                       child: Icon(Icons.info_outline, color: Colors.white, size: 14),
                                     ),
                                  Text(
-                                   tag,
+                                   tagStr,
                                    style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
                                  ),
                                ],
@@ -430,7 +439,7 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
                               border: Border.all(color: const Color(0xFFBFDBFE)), // Light outline
                             ),
                             child: Text(
-                              disease['description'],
+                              disease['description'] as String? ?? 'No description available.',
                               style: const TextStyle(fontSize: 14, height: 1.5, color: Color(0xFF1E3A8A)),
                             ),
                           ),
@@ -445,14 +454,15 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
                             ],
                           ),
                           const SizedBox(height: 12),
-                          ...List.generate((disease['symptoms'] as List).length, (index) {
+                          ...List.generate((disease['symptoms'] as List? ?? []).length, (index) {
+                            final symptoms = disease['symptoms'] as List? ?? [];
                             return Container(
                                margin: const EdgeInsets.only(bottom: 10),
                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                decoration: BoxDecoration(
-                                 color: Theme.of(context).cardColor, // Light cyan bg
+                                 color: Theme.of(context).cardColor,
                                  borderRadius: BorderRadius.circular(12),
-                                 border: Border.all(color: const Color(0xFFA5F3FC)), // Cyan outline
+                                 border: Border.all(color: const Color(0xFFA5F3FC)),
                                ),
                                child: Row(
                                  children: [
@@ -470,7 +480,7 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
                                    const SizedBox(width: 12),
                                    Expanded(
                                       child: Text(
-                                        disease['symptoms'][index],
+                                        symptoms[index].toString(),
                                         style: const TextStyle(fontSize: 14, color: Color(0xFF134E4A)),
                                       ),
                                    ),
@@ -500,7 +510,7 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  disease['pattern'],
+                                  disease['pattern'] as String? ?? 'N/A',
                                   style: const TextStyle(fontSize: 13, height: 1.4, color: Color(0xFF6B21A8)),
                                 ),
                               ],

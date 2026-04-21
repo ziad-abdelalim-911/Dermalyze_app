@@ -311,10 +311,11 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
 
   Widget _buildResults() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final drugName = _insights!['bestPerformingDrug']['name'];
-    final drugRecovery = _insights!['bestPerformingDrug']['avgRecovery'];
-    final casesUsed = _insights!['bestPerformingDrug']['casesUsed'];
-    final patients = _insights!['patientEvidence'] as List;
+    final bestDrug   = _insights!['bestPerformingDrug'] as Map<String, dynamic>? ?? {};
+    final drugName   = bestDrug['name']     as String? ?? 'N/A';
+    final drugRecovery = (bestDrug['avgRecovery'] as num? ?? 0).toDouble();
+    final casesUsed  = bestDrug['casesUsed'] ?? 0;
+    final patients   = (_insights!['patientEvidence'] as List?) ?? [];
 
     return Column(
       children: [
@@ -349,10 +350,10 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
                          'My Success Insights',
                          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                        ),
-                       Text(
-                         'For: ${_insights!['disease']}',
-                         style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 13),
-                       ),
+                        Text(
+                          'For: ${_insights!['disease'] as String? ?? ''}',
+                          style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 13),
+                        ),
                      ],
                    ),
                 ],
@@ -375,7 +376,7 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${_insights!['totalPatientsTreated']} Patients',
+                      '${_insights!['totalPatientsTreated'] ?? 0} Patients',
                       style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                   ],
@@ -479,7 +480,7 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(4),
                       child: LinearProgressIndicator(
-                        value: drugRecovery / 100,
+                        value: (drugRecovery / 100).clamp(0.0, 1.0),
                         backgroundColor: Colors.grey.shade200,
                         color: const Color(0xFF00C853),
                         minHeight: 8,
@@ -570,7 +571,7 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '${_insights!['highestRecovery']}%',
+                            '${_insights!['highestRecovery'] ?? 0}%',
                             style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
                           ),
                         ],
@@ -595,7 +596,7 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '${_insights!['averageRecovery']}%',
+                            '${_insights!['averageRecovery'] ?? 0}%',
                             style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
                           ),
                         ],
@@ -611,9 +612,11 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
     );
   }
 
-  Widget _buildPatientEvidenceCard(Map<String, dynamic> patient) {
+  Widget _buildPatientEvidenceCard(dynamic patientData) {
+    final patient = patientData as Map<String, dynamic>? ?? {};
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    bool isBest = patient['recoveryRate'] > 92;
+    final recoveryRate = (patient['recoveryRate'] as num? ?? 0).toDouble();
+    bool isBest = recoveryRate > 92;
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -634,27 +637,27 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
                    color: Color(0xFF5BAED0),
                    shape: BoxShape.circle,
                  ),
-                 child: Center(
-                   child: Text(
-                     _getInitials(patient['patientName']),
-                     style: TextStyle(color: Theme.of(context).cardColor, fontWeight: FontWeight.bold),
-                   ),
-                 ),
+                  child: Center(
+                    child: Text(
+                      _getInitials(patient['patientName'] as String?),
+                      style: TextStyle(color: Theme.of(context).cardColor, fontWeight: FontWeight.bold),
+                    ),
+                  ),
                ),
                const SizedBox(width: 12),
                Expanded(
                  child: Column(
                    crossAxisAlignment: CrossAxisAlignment.start,
-                   children: [
-                     Text(
-                       patient['patientName'],
-                       style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87),
-                     ),
-                     Text(
-                       patient['treatmentDuration'],
-                       style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
-                     ),
-                   ],
+                    children: [
+                      Text(
+                        patient['patientName'] as String? ?? 'Unknown',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87),
+                      ),
+                      Text(
+                        patient['treatmentDuration'] as String? ?? '',
+                        style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                      ),
+                    ],
                  ),
                ),
                Container(
@@ -663,10 +666,10 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
                    color: const Color(0xFFD1FAE5),
                    borderRadius: BorderRadius.circular(20),
                  ),
-                 child: Text(
-                   '${patient['recoveryRate']}%',
-                   style: const TextStyle(color: Color(0xFF059669), fontSize: 12, fontWeight: FontWeight.bold),
-                 ),
+                  child: Text(
+                    '${recoveryRate.toStringAsFixed(0)}%',
+                    style: const TextStyle(color: Color(0xFF059669), fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
                ),
             ],
           ),
@@ -683,10 +686,10 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
                   style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
                   children: [
                     const TextSpan(text: 'Treated with: '),
-                    TextSpan(
-                      text: patient['drugUsed'],
+                     TextSpan(
+                      text: patient['drugUsed'] as String? ?? 'N/A',
                       style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black),
-                    ),
+                     ),
                   ],
                 ),
               ),
@@ -718,7 +721,8 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
     );
   }
 
-  String _getInitials(String name) {
+  String _getInitials(String? name) {
+    if (name == null || name.trim().isEmpty) return '?';
     List<String> p = name.split(' ');
     if (p.isEmpty) return '?';
     if (p.length == 1) return p[0][0].toUpperCase();

@@ -45,9 +45,9 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
     final query = _searchController.text.toLowerCase();
     setState(() {
       _filteredMedications = _allMedications.where((med) {
-        return med['name'].toLowerCase().contains(query) ||
-               med['activeIngredient'].toLowerCase().contains(query) ||
-               med['category'].toLowerCase().contains(query);
+        return (med['name'] as String? ?? '').toLowerCase().contains(query) ||
+               (med['activeIngredient'] as String? ?? '').toLowerCase().contains(query) ||
+               (med['category'] as String? ?? '').toLowerCase().contains(query);
       }).toList();
     });
   }
@@ -191,7 +191,7 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
 
   Widget _buildMedicationCard(Map<String, dynamic> med) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    Color catColor = _getCategoryColor(med['category']);
+    Color catColor = _getCategoryColor(med['category'] as String? ?? '');
     
     return GestureDetector(
       onTap: () => _showMedicationDetails(context, med, catColor),
@@ -217,7 +217,7 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    med['name'],
+                    med['name'] as String? ?? 'Unknown',
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -234,7 +234,7 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
-                med['category'],
+                med['category'] as String? ?? 'General',
                 style: TextStyle(color: catColor, fontSize: 11, fontWeight: FontWeight.w600),
               ),
             ),
@@ -242,9 +242,9 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Divider(height: 1, color: isDark ? Colors.white24 : const Color(0xFFF3F4F6)),
             ),
-            _buildInfoRow('Active Ingredient', med['activeIngredient']),
+            _buildInfoRow('Active Ingredient', med['activeIngredient'] as String? ?? 'N/A'),
             const SizedBox(height: 8),
-            _buildInfoRow('Standard Dosage', med['standardDosage']),
+            _buildInfoRow('Standard Dosage', med['standardDosage'] as String? ?? 'N/A'),
           ],
         ),
       ),
@@ -311,7 +311,7 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              med['name'],
+                              med['name'] as String? ?? 'Unknown',
                               style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                             ),
                           ),
@@ -337,7 +337,7 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
                           border: Border.all(color: Theme.of(context).cardColor.withOpacity(0.5)),
                         ),
                         child: Text(
-                          med['category'],
+                          med['category'] as String? ?? 'General',
                           style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
                         ),
                       ),
@@ -355,25 +355,25 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
                         icon: Icons.info_outline,
                         iconColor: const Color(0xFF4A90E2),
                         title: 'Active Ingredient',
-                        content: med['activeIngredient'],
+                        content: med['activeIngredient'] as String? ?? 'N/A',
                         bgColor: const Color(0xFFEFF6FF),
                         borderColor: const Color(0xFFBFDBFE),
                       ),
                       const SizedBox(height: 16),
                       _buildDetailSection(
                         icon: Icons.link,
-                        iconColor: const Color(0xFF4A90E2), // Pill link
+                        iconColor: const Color(0xFF4A90E2),
                         title: 'Standard Dosage',
-                        content: med['standardDosage'],
+                        content: med['standardDosage'] as String? ?? 'N/A',
                         bgColor: const Color(0xFFECFEFF),
                         borderColor: const Color(0xFFA5F3FC),
                       ),
                       const SizedBox(height: 16),
-                       _buildDetailSection(
+                      _buildDetailSection(
                         icon: Icons.info_outline,
                         iconColor: const Color(0xFF4A90E2),
                         title: 'Common Uses',
-                        content: med['commonUses'],
+                        content: med['commonUses'] as String? ?? 'N/A',
                         bgColor: const Color(0xFFEFF6FF),
                         borderColor: const Color(0xFFBFDBFE),
                       ),

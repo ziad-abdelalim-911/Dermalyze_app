@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:dermalyze/features/auth/view/chat/model/message_type.dart';
+import 'package:dermalyze/features/auth/view/chat/widgets/voice_message_player.dart';
+import 'package:dermalyze/features/auth/view/chat/widgets/voice_recorder_button.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
@@ -317,23 +319,10 @@ class MessageBubble extends StatelessWidget {
   }
 
   Widget _buildAudioContent(BuildContext context) {
-    return Container(
-      width: 220,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      child: Row(
-        children: [
-          const Icon(Icons.play_arrow, size: 30, color: Colors.grey),
-          Expanded(
-            child: Slider(
-              value: 0.3,
-              onChanged: (_) {},
-              activeColor: AppColors.SkyBlue,
-              inactiveColor: Colors.grey[400],
-            ),
-          ),
-          const Text("0:12", style: TextStyle(fontSize: 12, color: Colors.grey)),
-        ],
-      ),
+    return VoiceMessagePlayer(
+      audioPath: message.mediaUrl ?? '',
+      isMe: message.isMe,
+      durationMs: message.durationMs,
     );
   }
 
@@ -399,6 +388,7 @@ class MessageInputBar extends StatefulWidget {
 
 class _MessageInputBarState extends State<MessageInputBar> {
   bool _isTextEmpty = true;
+  bool _isRecording = false;
 
   @override
   void initState() {
@@ -473,82 +463,94 @@ class _MessageInputBarState extends State<MessageInputBar> {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      child: Row(
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.bottomRight,
         children: [
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                borderRadius: BorderRadius.circular(25),
-              ),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: Icon(
-                      widget.showEmoji ? Icons.keyboard : Icons.emoji_emotions_outlined,
-                      color: Colors.grey[600],
-                    ),
-                    onPressed: widget.onEmojiToggle,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                    borderRadius: BorderRadius.circular(25),
                   ),
-                  Expanded(
-                    child: TextField(
-                      controller: widget.controller,
-                      focusNode: widget.focusNode,
-                      maxLines: null,
-                      decoration: const InputDecoration(
-                        hintText: "Message",
-                        border: InputBorder.none,
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          widget.showEmoji ? Icons.keyboard : Icons.emoji_emotions_outlined,
+                          color: Colors.grey[600],
+                        ),
+                        onPressed: widget.onEmojiToggle,
                       ),
-                    ),
+                      Expanded(
+                        child: TextField(
+                          controller: widget.controller,
+                          focusNode: widget.focusNode,
+                          maxLines: null,
+                          decoration: const InputDecoration(
+                            hintText: "Message",
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.attach_file, color: Colors.grey[600]),
+                        onPressed: () => _showAttachmentMenu(context),
+                      ),
+                      if (_isTextEmpty)
+                        IconButton(
+                          icon: Icon(Icons.camera_alt, color: Colors.grey[600]),
+                          onPressed: () async {
+                            final image = await ImagePicker().pickImage(source: ImageSource.camera);
+                            if (image != null && context.mounted) {
+                              context.read<ChatCubit>().sendMedia(image.path, MessageType.image);
+                            }
+                          },
+                        ),
+                    ],
                   ),
-                  IconButton(
-                    icon: Icon(Icons.attach_file, color: Colors.grey[600]),
-                    onPressed: () => _showAttachmentMenu(context),
-                  ),
-                  if (_isTextEmpty)
-                    IconButton(
-                      icon: Icon(Icons.camera_alt, color: Colors.grey[600]),
-                      onPressed: () async {
-                        final image = await ImagePicker().pickImage(source: ImageSource.camera);
-                        if (image != null && context.mounted) {
-                          context.read<ChatCubit>().sendMedia(image.path, MessageType.image);
-                        }
-                      },
-                    ),
-                ],
+                ),
               ),
-            ),
+              const SizedBox(width: 8),
+              
+              Opacity(
+                opacity: _isTextEmpty ? 0.0 : 1.0,
+                child: GestureDetector(
+                  onTap: _isTextEmpty ? null : () {
+                    context.read<ChatCubit>().sendMessage(widget.controller.text);
+                    widget.controller.clear();
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF4A90E2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.send, color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
-          GestureDetector(
-            onLongPressStart: (_) => context.read<ChatCubit>().setRecording(true),
-            onLongPressEnd: (_) => context.read<ChatCubit>().setRecording(false),
-            onTap: () {
-              if (!_isTextEmpty) {
-                context.read<ChatCubit>().sendMessage(widget.controller.text);
-                widget.controller.clear();
-              }
-            },
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: const BoxDecoration(
-                color: Color(0xFF4A90E2),
-                shape: BoxShape.circle,
-              ),
-              child: BlocBuilder<ChatCubit, ChatState>(
-                builder: (context, state) {
-                  bool isRecording = false;
-                  if (state is ChatLoaded) isRecording = state.isRecording;
-                  return Icon(
-                    _isTextEmpty 
-                       ? (isRecording ? Icons.mic : Icons.mic_none) 
-                       : Icons.send,
-                    color: Colors.white,
-                  );
+          
+          if (_isTextEmpty)
+            Positioned(
+              right: 0,
+              bottom: 0,
+              left: _isRecording ? 0 : null,
+              child: VoiceRecorderButton(
+                onSend: () {},
+                onCancel: () => setState(() => _isRecording = false),
+                onRecordingStart: () => setState(() => _isRecording = true),
+                onRecordingComplete: (path, durationMs) {
+                  setState(() => _isRecording = false);
+                  context.read<ChatCubit>().sendVoice(path, durationMs);
                 },
               ),
             ),
-          ),
         ],
       ),
     );

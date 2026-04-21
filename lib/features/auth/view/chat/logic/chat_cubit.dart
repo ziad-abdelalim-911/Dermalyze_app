@@ -142,6 +142,40 @@ class ChatCubit extends Cubit<ChatState> {
     await sendMessage("Sent a ${type.name}", type: type, mediaUrl: path);
   }
 
+  Future<void> sendVoice(String path, int durationMs) async {
+    final newMessage = MessageModel(
+      senderId: currentUserId!,
+      receiverId: receiverId,
+      content: '',
+      timestamp: DateTime.now().toIso8601String(),
+      isMe: true,
+      type: MessageType.audio,
+      mediaUrl: path,
+      status: MessageStatus.pending,
+      durationMs: durationMs,
+    );
+
+    _localMessages.add(newMessage);
+    _emitLoaded();
+
+    try {
+      final sentMessage = await _chatRepository.sendMessage(newMessage);
+      final index = _localMessages.indexOf(newMessage);
+      if (index != -1) {
+        _localMessages[index] = sentMessage.copyWith(status: MessageStatus.sent);
+        _emitLoaded();
+        _simulateStatusUpdates(index);
+      }
+    } catch (e) {
+      final index = _localMessages.indexOf(newMessage);
+      if (index != -1) {
+        _localMessages[index] = newMessage.copyWith(status: MessageStatus.sent);
+        _emitLoaded();
+        _simulateStatusUpdates(index);
+      }
+    }
+  }
+
   void setRecording(bool recording) {
     if (state is ChatLoaded) {
       _emitLoaded(isRecording: recording);

@@ -10,6 +10,7 @@ class MessageModel {
   final MessageType type;
   final String? mediaUrl;
   final MessageStatus status;
+  final int durationMs; // for audio messages
 
   MessageModel({
     this.id,
@@ -21,6 +22,7 @@ class MessageModel {
     this.type = MessageType.text,
     this.mediaUrl,
     this.status = MessageStatus.sent,
+    this.durationMs = 0,
   });
 
   factory MessageModel.fromJson(Map<String, dynamic> json, String currentUserId) {
@@ -34,6 +36,7 @@ class MessageModel {
       type: _parseType(json['type']?.toString()),
       mediaUrl: json['mediaUrl']?.toString(),
       status: _parseStatus(json['status']?.toString()),
+      durationMs: json['durationMs'] as int? ?? 0,
     );
   }
 
@@ -77,6 +80,7 @@ class MessageModel {
       type: type,
       mediaUrl: mediaUrl,
       status: status ?? this.status,
+      durationMs: durationMs,
     );
   }
 }
