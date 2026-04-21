@@ -398,15 +398,16 @@ class _MessageInputBarState extends State<MessageInputBar> {
     });
   }
 
-  void _showAttachmentMenu(BuildContext context) {
+  void _showAttachmentMenu(BuildContext parentContext) {
+    final chatCubit = parentContext.read<ChatCubit>();
     showModalBottomSheet(
-      context: context,
+      context: parentContext,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
+      builder: (sheetContext) => Container(
         padding: const EdgeInsets.all(20),
         margin: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
+          color: Theme.of(sheetContext).cardColor,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Wrap(
@@ -414,21 +415,24 @@ class _MessageInputBarState extends State<MessageInputBar> {
           runSpacing: 20,
           children: [
             _buildActionItem(Icons.insert_drive_file, "Document", Colors.indigo, () async {
-              Navigator.pop(context);
-              await FilePicker.pickFiles();
+              Navigator.pop(sheetContext);
+              final result = await FilePicker.pickFiles();
+              if (result != null && result.files.single.path != null && mounted) {
+                chatCubit.sendMedia(result.files.single.path!, MessageType.file);
+              }
             }),
             _buildActionItem(Icons.camera_alt, "Camera", Colors.pink, () async {
-              Navigator.pop(context);
+              Navigator.pop(sheetContext);
               final image = await ImagePicker().pickImage(source: ImageSource.camera);
               if (image != null && mounted) {
-                context.read<ChatCubit>().sendMedia(image.path, MessageType.image);
+                chatCubit.sendMedia(image.path, MessageType.image);
               }
             }),
             _buildActionItem(Icons.image, "Gallery", Colors.purple, () async {
-              Navigator.pop(context);
+              Navigator.pop(sheetContext);
               final image = await ImagePicker().pickImage(source: ImageSource.gallery);
               if (image != null && mounted) {
-                context.read<ChatCubit>().sendMedia(image.path, MessageType.image);
+                chatCubit.sendMedia(image.path, MessageType.image);
               }
             }),
             _buildActionItem(Icons.headset, "Audio", Colors.orange, () {}),
