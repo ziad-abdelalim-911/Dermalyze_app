@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dermalyze/features/auth/view/chat/data/repositories/chat_repository.dart';
 import 'package:dermalyze/features/auth/view/chat/model/message_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:dermalyze/core/storage/token_storage.dart';
 
 abstract class ChatState {}
 
@@ -35,29 +36,8 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   Future<void> _init() async {
-    final prefs = await SharedPreferences.getInstance();
-    currentUserId = prefs.getString('user_id') ?? 'doctor_456';
-
-    _localMessages.addAll([
-      MessageModel(
-        id: '1',
-        senderId: receiverId,
-        receiverId: currentUserId!,
-        content: "Hello! How are you feeling today?",
-        timestamp: DateTime.now().subtract(const Duration(minutes: 5)).toIso8601String(),
-        isMe: false,
-        status: MessageStatus.read,
-      ),
-      MessageModel(
-        id: '2',
-        senderId: currentUserId!,
-        receiverId: receiverId,
-        content: "Good morning! I'm feeling much better!",
-        timestamp: DateTime.now().subtract(const Duration(minutes: 2)).toIso8601String(),
-        isMe: true,
-        status: MessageStatus.read,
-      ),
-    ]);
+    final user = await TokenStorage().getUser();
+    currentUserId = user?['_id']?.toString() ?? 'mock_user_123';
 
     await loadMessages();
     _startPolling();
@@ -71,9 +51,21 @@ class ChatCubit extends Cubit<ChatState> {
 
     try {
       final messages = await _chatRepository.getMessages(receiverId, currentUserId!);
+      _localMessages.clear();
       if (messages.isNotEmpty) {
-        _localMessages.clear();
         _localMessages.addAll(messages);
+      } else {
+        _localMessages.add(
+          MessageModel(
+            id: 'welcome_1',
+            senderId: receiverId,
+            receiverId: currentUserId!,
+            content: "Welcome! You can start chatting now.",
+            timestamp: DateTime.now().toIso8601String(),
+            isMe: false,
+            status: MessageStatus.read,
+          )
+        );
       }
       _emitLoaded();
     } catch (e) {

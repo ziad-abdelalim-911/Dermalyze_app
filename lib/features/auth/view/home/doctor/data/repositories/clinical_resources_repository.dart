@@ -13,12 +13,19 @@ class ClinicalResourcesRepository {
     }
   }
 
-  /// جلب دليل الأدوية الكامل
-  Future<List<Map<String, dynamic>>> getMedicationsGuide() async {
+  /// جلب دليل الأدوية الكامل مع إمكانية البحث
+  Future<List<Map<String, dynamic>>> getMedicationsGuide({String? query}) async {
     try {
-      final response = await _api.get('resources/medications');
+      print('Fetching medications with query: $query');
+      final queryParams = query != null && query.isNotEmpty ? {'search': query} : null;
+      final response = await _api.get('resources/medications', queryParameters: queryParams);
+      print('Response received: $response');
+      if (response is Map && response.containsKey('data')) {
+          return (response['data'] as List).cast<Map<String, dynamic>>();
+      }
       return (response is List) ? response.cast<Map<String, dynamic>>() : [];
-    } catch (_) {
+    } catch (e) {
+      print('Error in getMedicationsGuide: $e');
       return [];
     }
   }

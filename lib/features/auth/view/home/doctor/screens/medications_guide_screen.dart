@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:dermalyze/core/constants/app_colors.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/data/repositories/clinical_resources_repository.dart';
 import 'package:flutter/material.dart';
@@ -13,9 +14,9 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ClinicalResourcesRepository _repo = ClinicalResourcesRepository();
 
-  List<Map<String, dynamic>> _allMedications = [];
   List<Map<String, dynamic>> _filteredMedications = [];
   bool _isLoading = true;
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -27,28 +28,32 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
-  Future<void> _loadData() async {
-    final data = await _repo.getMedicationsGuide();
+  Future<void> _loadData([String? query]) async {
+    print('MedicationsGuide: Starting _loadData with query: $query');
+    setState(() {
+      _isLoading = true;
+    });
+    final data = await _repo.getMedicationsGuide(query: query);
+    print('MedicationsGuide: _loadData completed, data length: ${data.length}');
     if (mounted) {
       setState(() {
-        _allMedications = data;
         _filteredMedications = data;
         _isLoading = false;
       });
+      print('MedicationsGuide: UI Updated, _isLoading set to false');
     }
   }
 
   void _onSearch() {
-    final query = _searchController.text.toLowerCase();
-    setState(() {
-      _filteredMedications = _allMedications.where((med) {
-        return (med['name'] as String? ?? '').toLowerCase().contains(query) ||
-               (med['activeIngredient'] as String? ?? '').toLowerCase().contains(query) ||
-               (med['category'] as String? ?? '').toLowerCase().contains(query);
-      }).toList();
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        _loadData(_searchController.text);
+      }
     });
   }
 
@@ -242,9 +247,7 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Divider(height: 1, color: isDark ? Colors.white24 : const Color(0xFFF3F4F6)),
             ),
-            _buildInfoRow('Active Ingredient', med['activeIngredient'] as String? ?? 'N/A'),
-            const SizedBox(height: 8),
-            _buildInfoRow('Standard Dosage', med['standardDosage'] as String? ?? 'N/A'),
+            _buildInfoRow('Description', med['description'] as String? ?? 'N/A'),
           ],
         ),
       ),
@@ -354,26 +357,17 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
                       _buildDetailSection(
                         icon: Icons.info_outline,
                         iconColor: const Color(0xFF4A90E2),
-                        title: 'Active Ingredient',
-                        content: med['activeIngredient'] as String? ?? 'N/A',
+                        title: 'Description',
+                        content: med['description'] as String? ?? 'N/A',
                         bgColor: const Color(0xFFEFF6FF),
                         borderColor: const Color(0xFFBFDBFE),
                       ),
                       const SizedBox(height: 16),
                       _buildDetailSection(
-                        icon: Icons.link,
-                        iconColor: const Color(0xFF4A90E2),
-                        title: 'Standard Dosage',
-                        content: med['standardDosage'] as String? ?? 'N/A',
-                        bgColor: const Color(0xFFECFEFF),
-                        borderColor: const Color(0xFFA5F3FC),
-                      ),
-                      const SizedBox(height: 16),
-                      _buildDetailSection(
-                        icon: Icons.info_outline,
+                        icon: Icons.check_circle_outline,
                         iconColor: const Color(0xFF4A90E2),
                         title: 'Common Uses',
-                        content: med['commonUses'] as String? ?? 'N/A',
+                        content: (med['uses'] as List<dynamic>?)?.join(', ') ?? 'N/A',
                         bgColor: const Color(0xFFEFF6FF),
                         borderColor: const Color(0xFFBFDBFE),
                       ),

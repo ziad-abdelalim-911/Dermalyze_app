@@ -49,8 +49,8 @@ class _PatientSignupState extends State<PatientSignup> {
 
   String? _validatePhone(String? v) {
     if (v == null || v.isEmpty) return 'Mobile number is required';
-    if (!RegExp(r'^01[0-9]{9}$').hasMatch(v)) {
-      return 'Enter a valid Egyptian mobile (01x + 9 digits)';
+    if (v.length != 11) {
+      return 'Mobile number must be exactly 11 digits';
     }
     return null;
   }
@@ -78,6 +78,9 @@ class _PatientSignupState extends State<PatientSignup> {
 
   String? _validateDoctorCode(String? v) {
     if (v == null || v.trim().isEmpty) return 'Doctor code is required';
+    if (!RegExp(r'^DOC-[a-zA-Z0-9]+$').hasMatch(v.trim())) {
+      return 'Code must be in format DOC-XXXXXX';
+    }
     return null;
   }
 
@@ -215,7 +218,7 @@ class _PatientSignupState extends State<PatientSignup> {
                           // Doctor Code
                           _buildValidatedField(
                             label: 'Doctor Code *',
-                            hint: 'Enter doctor\'s code',
+                            hint: 'e.g. DOC-OFV1VO',
                             icon: Icons.person_add_alt,
                             controller: _doctorCodeController,
                             validator: _validateDoctorCode,

@@ -1,88 +1,124 @@
+import 'dart:convert';
 import 'package:dermalyze/core/network/api_service.dart';
 import 'package:dermalyze/features/auth/view/chat/model/message_model.dart';
 import 'package:dermalyze/features/auth/view/chat/model/conversation_model.dart';
+import 'package:dermalyze/core/storage/token_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatRepository {
   final ApiService _apiService;
+  final TokenStorage _tokenStorage = TokenStorage();
 
   ChatRepository(this._apiService);
 
   Future<List<MessageModel>> getMessages(String receiverId, String currentUserId) async {
     try {
-      // Typically: /api/chat/messages/{receiverId}
-      final response = await _apiService.get('chat/messages/$receiverId');
+      final prefs = await SharedPreferences.getInstance();
+      final key = 'chat_msgs_$receiverId';
+      List<String> savedStr = prefs.getStringList(key) ?? [];
       
-      if (response != null && response is List) {
-        return response.map((json) => MessageModel.fromJson(json, currentUserId)).toList();
-      } else if (response != null && response['data'] is List) {
-        return (response['data'] as List).map((json) => MessageModel.fromJson(json, currentUserId)).toList();
+      if (savedStr.isNotEmpty) {
+        return savedStr.map((e) {
+          final json = jsonDecode(e);
+          return MessageModel.fromJson(json, currentUserId);
+        }).toList();
       }
       return [];
     } catch (e) {
-      // Return empty list if endpoint fails (graceful degradation since endpoint might not exist yet)
       print("Error fetching messages: $e");
-      throw Exception('Failed to fetch messages');
+      return [];
     }
   }
 
   Future<MessageModel> sendMessage(MessageModel message) async {
     try {
-      // Typically: /api/chat/send
-      final response = await _apiService.post('chat/send', message.toJson());
+      final prefs = await SharedPreferences.getInstance();
+      final receiver = message.receiverId ?? '';
+      final key = 'chat_msgs_$receiver';
+      List<String> savedStr = prefs.getStringList(key) ?? [];
       
-      if (response != null) {
-         Map<String, dynamic> data = response is Map<String, dynamic> ? response : (response['data'] ?? {});
-         return MessageModel.fromJson(data, message.senderId);
-      }
-      return message;
+      final msgJson = {
+        'id': DateTime.now().millisecondsSinceEpoch.toString(),
+        'senderId': message.senderId,
+        'receiverId': message.receiverId,
+        'content': message.content,
+        'timestamp': DateTime.now().toIso8601String(),
+        'type': message.type.name,
+        'mediaUrl': message.mediaUrl,
+        'status': 'read',
+        'durationMs': message.durationMs,
+      };
+      
+      savedStr.add(jsonEncode(msgJson));
+      await prefs.setStringList(key, savedStr);
+
+      return MessageModel.fromJson(msgJson, message.senderId);
     } catch (e) {
       return message;
     }
   }
 
   Future<List<ConversationModel>> getConversations(String currentUserId) async {
-    List<ConversationModel> fallbackMocks = [
-      ConversationModel(
-        id: 'c1',
-        receiverId: 'doctor_123',
-        name: 'Dr. Ahmed Hassan',
-        role: 'Dermatologist',
-        lastMessage: 'Good progress! Continue...',
-        time: '5 min ago',
-        isOnline: true,
-        unreadCount: 0,
-      ),
-      ConversationModel(
-        id: 'c2',
-        receiverId: 'doctor_456',
-        name: 'Dr. Sarah Mitchell',
-        role: 'Dermatologist',
-        lastMessage: 'Your lab results are ready.',
-        time: '2 hours ago',
-        isOnline: false,
-        unreadCount: 2,
-      ),
-    ];
-
     try {
-      final response = await _apiService.get('chat/conversations');
-      List<ConversationModel> parsedList = [];
+      final user = await _tokenStorage.getUser();
+      final role = user?['role'];
 
-      if (response != null && response is List) {
-        parsedList = response.map((json) => ConversationModel.fromJson(json)).toList();
-      } else if (response != null && response['data'] is List) {
-        parsedList = (response['data'] as List).map((json) => ConversationModel.fromJson(json)).toList();
+      if (role == 'patient') {
+        String docCode = user?['doctorCode'] ?? '';
+        if (docCode.isEmpty) docCode = 'Ahmed Hassan';
+        final prefs = await SharedPreferences.getInstance();
+        final key = 'chat_msgs_$docCode';
+        List<String> savedStr = prefs.getStringList(key) ?? [];
+        
+        String lastMsg = 'Start chatting now';
+        String time = 'Just now';
+        
+        if (savedStr.isNotEmpty) {
+          final lastJson = jsonDecode(savedStr.last);
+          lastMsg = lastJson['content'] ?? 'Media';
+          time = 'Recently';
+        }
+
+        return [
+          ConversationModel(
+            id: docCode,
+            receiverId: docCode,
+            name: 'Dr. $docCode',
+            role: 'Dermatologist',
+            lastMessage: lastMsg,
+            time: time,
+            isOnline: true,
+            unreadCount: 0,
+          )
+        ];
+      } else {
+        // Mock list for Doctor
+        return [
+          ConversationModel(
+            id: 'patient_1',
+            receiverId: 'patient_1',
+            name: 'Ahmed (Patient)',
+            role: 'Patient',
+            lastMessage: 'Tap to chat',
+            time: '2 hours ago',
+            isOnline: false,
+            unreadCount: 1,
+          ),
+          ConversationModel(
+            id: 'patient_2',
+            receiverId: 'patient_2',
+            name: 'Sara (Patient)',
+            role: 'Patient',
+            lastMessage: 'Thanks doctor',
+            time: 'Yesterday',
+            isOnline: true,
+            unreadCount: 0,
+          ),
+        ];
       }
-
-      // If backend returns empty list (no real chats yet), force mocks for UI testing purposes
-      if (parsedList.isEmpty) {
-        return fallbackMocks;
-      }
-      return parsedList;
-
     } catch (e) {
       print("Error fetching conversations: $e");
-      return fallbackMocks;
+      return [];
     }
   }
 }
