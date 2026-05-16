@@ -4,7 +4,7 @@
 # ============================================================
 
 $EmulatorExe = "D:\AndroidSdk\Sdk\emulator\emulator.exe"
-$AvdName     = "Pixel_7_Pro"
+$AvdName = "Pixel_10_Pro"
 
 # -- Win32 API to read and move windows -----------------------
 Add-Type @"
@@ -41,7 +41,7 @@ public class WinAPI {
 # -- Launch emulator in background ----------------------------
 Write-Host "[*] Launching emulator: $AvdName ..." -ForegroundColor Cyan
 $proc = Start-Process -FilePath $EmulatorExe `
-                      -ArgumentList "-avd", $AvdName `
+                      -ArgumentList "-avd", $AvdName, "-scale", "0.7" `
                       -PassThru
 
 # -- Wait for emulator window to appear -----------------------
