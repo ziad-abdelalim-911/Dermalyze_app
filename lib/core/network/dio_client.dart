@@ -11,7 +11,7 @@ class DioClient {
   DioClient._internal() {
     dio = Dio(
       BaseOptions(
-        baseUrl: "https://dermalyze-backend-production.up.railway.app/api/",
+        baseUrl: "https://dermalyze-backend-final-main-production.up.railway.app/api/",
         connectTimeout: const Duration(seconds: 15),
         receiveTimeout: const Duration(seconds: 15),
         sendTimeout: const Duration(seconds: 15),

@@ -41,7 +41,8 @@ public class WinAPI {
 # -- Launch emulator in background ----------------------------
 Write-Host "[*] Launching emulator: $AvdName ..." -ForegroundColor Cyan
 $proc = Start-Process -FilePath $EmulatorExe `
-                      -ArgumentList "-avd", $AvdName, "-scale", "0.7" `
+                      -ArgumentList "-avd", $AvdName, "-scale", "0.5" `
+                      -WindowStyle Normal `
                       -PassThru
 
 # -- Wait for emulator window to appear -----------------------
@@ -88,7 +89,7 @@ if ($emulatorHwnd -eq [IntPtr]::Zero) {
 Write-Host "[*] Window found! Waiting for it to fully load..." -ForegroundColor Yellow
 Start-Sleep -Seconds 4
 
-# -- Calculate center position --------------------------------
+# -- Resize & center the emulator window ----------------------
 $screenW = [WinAPI]::GetSystemMetrics(0)   # SM_CXSCREEN
 $screenH = [WinAPI]::GetSystemMetrics(1)   # SM_CYSCREEN
 
@@ -98,17 +99,24 @@ $rect = New-Object WinAPI+RECT
 $winW = $rect.Right  - $rect.Left
 $winH = $rect.Bottom - $rect.Top
 
-$newX = [int](($screenW - $winW) / 2)
-$newY = [int](($screenH - $winH) / 2)
+# Scale down to 65% of screen height (keeps aspect ratio)
+$targetH = [int]($screenH * 0.90)
+$ratio    = $targetH / $winH
+$targetW  = [int]($winW * $ratio)
+
+# Center on screen
+$newX = [int](($screenW - $targetW) / 2)
+$newY = [int](($screenH - $targetH) / 2)
 
 if ($newX -lt 0) { $newX = 0 }
 if ($newY -lt 0) { $newY = 0 }
 
-Write-Host "[+] Screen  : ${screenW} x ${screenH}" -ForegroundColor Green
-Write-Host "[+] Emulator: ${winW} x ${winH}" -ForegroundColor Green
-Write-Host "[+] Moving to center: ($newX, $newY)" -ForegroundColor Green
+Write-Host "[+] Screen   : ${screenW} x ${screenH}" -ForegroundColor Green
+Write-Host "[+] Original : ${winW} x ${winH}" -ForegroundColor Green
+Write-Host "[+] Resized  : ${targetW} x ${targetH}" -ForegroundColor Cyan
+Write-Host "[+] Position : ($newX, $newY)" -ForegroundColor Cyan
 
-[WinAPI]::MoveWindow($emulatorHwnd, $newX, $newY, $winW, $winH, $true) | Out-Null
+[WinAPI]::MoveWindow($emulatorHwnd, $newX, $newY, $targetW, $targetH, $true) | Out-Null
 [WinAPI]::SetForegroundWindow($emulatorHwnd) | Out-Null
 
-Write-Host "[OK] Emulator centered on screen!" -ForegroundColor Green
+Write-Host "[OK] Emulator resized and centered!" -ForegroundColor Green

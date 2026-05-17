@@ -1,10 +1,11 @@
 import 'dart:async';
-import 'package:dermalyze/features/auth/view/chat/model/message_type.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dermalyze/features/auth/view/chat/data/repositories/chat_repository.dart';
 import 'package:dermalyze/features/auth/view/chat/model/message_model.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:dermalyze/features/auth/view/chat/model/message_type.dart';
 import 'package:dermalyze/core/storage/token_storage.dart';
+
+// ─────────────────────────────────── States ──────────────────────────────────
 
 abstract class ChatState {}
 
@@ -23,6 +24,8 @@ class ChatError extends ChatState {
   ChatError(this.message);
 }
 
+// ─────────────────────────────────── Cubit ───────────────────────────────────
+
 class ChatCubit extends Cubit<ChatState> {
   final ChatRepository _chatRepository;
   final String receiverId;
@@ -31,57 +34,81 @@ class ChatCubit extends Cubit<ChatState> {
 
   final List<MessageModel> _localMessages = [];
 
-  ChatCubit(this._chatRepository, {required this.receiverId}) : super(ChatInitial()) {
+  ChatCubit(this._chatRepository, {required this.receiverId})
+      : super(ChatInitial()) {
     _init();
   }
 
   Future<void> _init() async {
     final user = await TokenStorage().getUser();
-    currentUserId = user?['_id']?.toString() ?? 'mock_user_123';
-
+    currentUserId = user?['_id']?.toString() ?? '';
     await loadMessages();
     _startPolling();
-    markMessagesAsRead();
   }
 
+  // ─────────────────────────────────────────────────────────────────
+  // Load messages from backend
+  // ─────────────────────────────────────────────────────────────────
   Future<void> loadMessages() async {
-    if (state is ChatInitial) {
-      emit(ChatLoading());
-    }
+    if (state is ChatInitial) emit(ChatLoading());
 
     try {
-      final messages = await _chatRepository.getMessages(receiverId, currentUserId!);
-      _localMessages.clear();
-      if (messages.isNotEmpty) {
-        _localMessages.addAll(messages);
-      } else {
-        _localMessages.add(
-          MessageModel(
-            id: 'welcome_1',
-            senderId: receiverId,
-            receiverId: currentUserId!,
-            content: "Welcome! You can start chatting now.",
-            timestamp: DateTime.now().toIso8601String(),
-            isMe: false,
-            status: MessageStatus.read,
-          )
-        );
-      }
+      final messages =
+          await _chatRepository.getMessages(receiverId, currentUserId ?? '');
+
+      // Merge backend messages with local optimistic messages
+      _mergeMessages(messages);
       _emitLoaded();
     } catch (e) {
-      _emitLoaded();
+      // Keep showing local messages on error, don't flash error screen
+      if (_localMessages.isEmpty) {
+        emit(ChatError('Failed to load messages. Please try again.'));
+      } else {
+        _emitLoaded();
+      }
     }
+  }
+
+  /// Merges freshly fetched messages with local ones, keeping optimistic
+  /// messages that haven't been confirmed yet.
+  void _mergeMessages(List<MessageModel> fetched) {
+    final fetchedIds = fetched.map((m) => m.id).toSet();
+
+    // Keep any local optimistic messages (no id yet) not in fetched list
+    final optimistic = _localMessages
+        .where((m) => m.id == null || !fetchedIds.contains(m.id))
+        .where((m) =>
+            m.isMe &&
+            (m.status == MessageStatus.pending ||
+                m.status == MessageStatus.failed))
+        .toList();
+
+    _localMessages
+      ..clear()
+      ..addAll(fetched)
+      ..addAll(optimistic);
+
+    // Sort by timestamp
+    _localMessages.sort((a, b) {
+      final ta = DateTime.tryParse(a.timestamp ?? '') ?? DateTime(0);
+      final tb = DateTime.tryParse(b.timestamp ?? '') ?? DateTime(0);
+      return ta.compareTo(tb);
+    });
   }
 
   void _emitLoaded({bool isRecording = false}) {
     emit(ChatLoaded(List.from(_localMessages), isRecording: isRecording));
   }
 
-  Future<void> sendMessage(String content, {MessageType type = MessageType.text, String? mediaUrl}) async {
+  // ─────────────────────────────────────────────────────────────────
+  // Send text message
+  // ─────────────────────────────────────────────────────────────────
+  Future<void> sendMessage(String content,
+      {MessageType type = MessageType.text, String? mediaUrl}) async {
     if (content.trim().isEmpty && type == MessageType.text) return;
 
-    final newMessage = MessageModel(
-      senderId: currentUserId!,
+    final optimistic = MessageModel(
+      senderId: currentUserId ?? '',
       receiverId: receiverId,
       content: content.trim(),
       timestamp: DateTime.now().toIso8601String(),
@@ -91,52 +118,52 @@ class ChatCubit extends Cubit<ChatState> {
       status: MessageStatus.pending,
     );
 
-    _localMessages.add(newMessage);
+    _localMessages.add(optimistic);
     _emitLoaded();
 
     try {
-      final sentMessage = await _chatRepository.sendMessage(newMessage);
-      final index = _localMessages.indexOf(newMessage);
-      if (index != -1) {
-        _localMessages[index] = sentMessage.copyWith(status: MessageStatus.sent);
+      final sent = await _chatRepository.sendMessage(optimistic);
+      final idx = _localMessages.indexOf(optimistic);
+      if (idx != -1) {
+        _localMessages[idx] = sent.copyWith(status: MessageStatus.sent);
         _emitLoaded();
-        
-        // Simulation: Deliver after 1 second, Read after 3 seconds
-        _simulateStatusUpdates(index);
       }
-    } catch (e) {
-       final index = _localMessages.indexOf(newMessage);
-       if (index != -1) {
-         _localMessages[index] = newMessage.copyWith(status: MessageStatus.sent);
-         _emitLoaded();
-         _simulateStatusUpdates(index);
-       }
+    } catch (_) {
+      final idx = _localMessages.indexOf(optimistic);
+      if (idx != -1) {
+        _localMessages[idx] = optimistic.copyWith(status: MessageStatus.failed);
+        _emitLoaded();
+      }
     }
   }
 
-  void _simulateStatusUpdates(int index) {
-    Future.delayed(const Duration(seconds: 1), () {
-      if (index < _localMessages.length) {
-        _localMessages[index] = _localMessages[index].copyWith(status: MessageStatus.delivered);
-        _emitLoaded();
-      }
-    });
-    Future.delayed(const Duration(seconds: 3), () {
-      if (index < _localMessages.length) {
-        _localMessages[index] = _localMessages[index].copyWith(status: MessageStatus.read);
+  void _simulateDelivered(int index) {
+    Future.delayed(const Duration(seconds: 2), () {
+      if (index < _localMessages.length && !isClosed) {
+        _localMessages[index] =
+            _localMessages[index].copyWith(status: MessageStatus.delivered);
         _emitLoaded();
       }
     });
   }
 
+  // ─────────────────────────────────────────────────────────────────
+  // Send media (image / file)
+  // ─────────────────────────────────────────────────────────────────
   Future<void> sendMedia(String path, MessageType type) async {
-    // Simulation: Create a local message representing the media
-    await sendMessage("Sent a ${type.name}", type: type, mediaUrl: path);
+    await sendMessage(
+      type == MessageType.image ? 'Photo' : 'Document',
+      type: type,
+      mediaUrl: path,
+    );
   }
 
+  // ─────────────────────────────────────────────────────────────────
+  // Send voice
+  // ─────────────────────────────────────────────────────────────────
   Future<void> sendVoice(String path, int durationMs) async {
-    final newMessage = MessageModel(
-      senderId: currentUserId!,
+    final optimistic = MessageModel(
+      senderId: currentUserId ?? '',
       receiverId: receiverId,
       content: '',
       timestamp: DateTime.now().toIso8601String(),
@@ -147,50 +174,32 @@ class ChatCubit extends Cubit<ChatState> {
       durationMs: durationMs,
     );
 
-    _localMessages.add(newMessage);
+    _localMessages.add(optimistic);
     _emitLoaded();
 
     try {
-      final sentMessage = await _chatRepository.sendMessage(newMessage);
-      final index = _localMessages.indexOf(newMessage);
-      if (index != -1) {
-        _localMessages[index] = sentMessage.copyWith(status: MessageStatus.sent);
+      final sent = await _chatRepository.sendMessage(optimistic);
+      final idx = _localMessages.indexOf(optimistic);
+      if (idx != -1) {
+        _localMessages[idx] = sent.copyWith(status: MessageStatus.sent);
         _emitLoaded();
-        _simulateStatusUpdates(index);
       }
-    } catch (e) {
-      final index = _localMessages.indexOf(newMessage);
-      if (index != -1) {
-        _localMessages[index] = newMessage.copyWith(status: MessageStatus.sent);
+    } catch (_) {
+      final idx = _localMessages.indexOf(optimistic);
+      if (idx != -1) {
+        _localMessages[idx] = optimistic.copyWith(status: MessageStatus.failed);
         _emitLoaded();
-        _simulateStatusUpdates(index);
       }
     }
   }
 
   void setRecording(bool recording) {
-    if (state is ChatLoaded) {
-      _emitLoaded(isRecording: recording);
-    }
-  }
-
-  Future<void> markMessagesAsRead() async {
-    // Notify backend that messages are read
-    try {
-      // Typically: await _chatRepository.markAsRead(receiverId);
-      // For now we just update local state if any messages were unread from the other party
-      for (int i = 0; i < _localMessages.length; i++) {
-        if (!_localMessages[i].isMe && _localMessages[i].status != MessageStatus.read) {
-          // This would usually be updated by the server on next poll
-        }
-      }
-    } catch (_) {}
+    if (state is ChatLoaded) _emitLoaded(isRecording: recording);
   }
 
   void _startPolling() {
-    _pollingTimer = Timer.periodic(const Duration(seconds: 10), (_) {
-      loadMessages();
-    });
+    _pollingTimer =
+        Timer.periodic(const Duration(seconds: 5), (_) => loadMessages());
   }
 
   @override

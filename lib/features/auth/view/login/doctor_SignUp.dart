@@ -1,9 +1,11 @@
+import 'dart:io';
 import 'package:dermalyze/core/constants/app_assets.dart';
 import 'package:dermalyze/core/constants/app_colors.dart';
 import 'package:dermalyze/core/routes/app_routes.dart';
 import 'package:dermalyze/features/auth/bloc/register_bloc.dart';
 import 'package:dermalyze/features/auth/bloc/register_event.dart';
 import 'package:dermalyze/features/auth/bloc/register_state.dart';
+import 'package:dermalyze/features/auth/view/login/id_scanning_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,9 +26,34 @@ class _DoctorSignupState extends State<DoctorSignup> {
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _nationalIdController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
+
+  File? _idCardFront;
+  File? _idCardBack;
+  File? _selfie;
+
+  /// Opens the dedicated ID scanning screen which guides the user through
+  /// front → back → selfie in one flow, then returns all 3 files at once.
+  Future<void> _openIdScanner() async {
+    final result = await Navigator.push<IdScanResult>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const IdScanningScreen(),
+        fullscreenDialog: true,
+      ),
+    );
+
+    if (result == null) return;
+
+    setState(() {
+      _idCardFront = result.frontCard;
+      _idCardBack = result.backCard;
+      _selfie = result.selfie;
+    });
+  }
 
   // ── Validators ──────────────────────────────────────────────
 
@@ -43,10 +70,14 @@ class _DoctorSignupState extends State<DoctorSignup> {
     return null;
   }
 
+  String? _validatePhone(String? v) {
+    if (v == null || v.isEmpty) return 'Mobile Number is required';
+    if (v.length < 10) return 'Enter a valid mobile number';
+    return null;
+  }
+
   String? _validateNationalId(String? v) {
-    if (v == null || v.isEmpty) return 'National ID is required';
-    if (v.length != 14) return 'National ID must be exactly 14 digits';
-    if (!RegExp(r'^\d{14}$').hasMatch(v)) return 'Only numbers are allowed';
+    // We only require images now, text can be optional or kept for backup
     return null;
   }
 
@@ -70,6 +101,7 @@ class _DoctorSignupState extends State<DoctorSignup> {
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
     _nationalIdController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -175,68 +207,14 @@ class _DoctorSignupState extends State<DoctorSignup> {
                             keyboardType: TextInputType.emailAddress,
                             validator: _validateEmail,
                           ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // ── National ID Verification ──
-                    _buildCard(
-                      title: 'National ID Verification',
-                      icon: Icons.badge_outlined,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Enter your 14-digit National ID number for doctor verification.',
-                            style: TextStyle(fontSize: 13, color: Colors.grey),
-                          ),
                           const SizedBox(height: 16),
-
-                          // National ID Input with live counter
-                          _buildNationalIdField(),
-
-                          const SizedBox(height: 16),
-
-                          // Info box
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).cardColor,
-                              borderRadius: BorderRadius.circular(16),
-                              border:
-                                  Border.all(color: const Color(0xFFBFDBFE)),
-                            ),
-                            child: const Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(Icons.info_outline,
-                                        size: 18, color: Color(0xFF2563EB)),
-                                    SizedBox(width: 6),
-                                    Text(
-                                      'Why we need this:',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          color: Color(0xFF2563EB)),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 8),
-                                Text(
-                                  '• Used to verify your identity as a licensed doctor.\n'
-                                  '• Your National ID is kept secure and confidential.\n'
-                                  '• Used only for doctor verification purposes.',
-                                  style: TextStyle(
-                                      fontSize: 12,
-                                      color: Color(0xFF2563EB),
-                                      height: 1.5),
-                                ),
-                              ],
-                            ),
+                          _buildValidatedField(
+                            label: 'Mobile Number *',
+                            hint: '01234567890',
+                            icon: Icons.phone_outlined,
+                            controller: _phoneController,
+                            keyboardType: TextInputType.phone,
+                            validator: _validatePhone,
                           ),
                         ],
                       ),
@@ -279,6 +257,37 @@ class _DoctorSignupState extends State<DoctorSignup> {
                       ),
                     ),
 
+                    const SizedBox(height: 24),
+
+                    // ── National ID Verification ──
+                    _buildCard(
+                      title: 'National ID Verification',
+                      icon: Icons.badge_outlined,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Please capture clear photos of your National ID and a selfie for verification. Tap on each box to scan.',
+                            style: TextStyle(fontSize: 13, color: Colors.grey),
+                          ),
+                          const SizedBox(height: 16),
+                          // Tapping any of the boxes launches the full scanning flow
+                          GestureDetector(
+                            onTap: _openIdScanner,
+                            child: Row(
+                              children: [
+                                Expanded(child: _buildImagePickerBox('front', 'ID Front', _idCardFront)),
+                                const SizedBox(width: 12),
+                                Expanded(child: _buildImagePickerBox('back', 'ID Back', _idCardBack)),
+                                const SizedBox(width: 12),
+                                Expanded(child: _buildImagePickerBox('selfie', 'Selfie', _selfie)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
                     const SizedBox(height: 32),
 
                     // ── Register Button ──
@@ -294,14 +303,22 @@ class _DoctorSignupState extends State<DoctorSignup> {
                                   ? null
                                   : () {
                                       if (!_formKey.currentState!.validate()) return;
+                                      if (_idCardFront == null || _idCardBack == null || _selfie == null) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(content: Text('ID card front, back, and selfie are all required for doctor registration', style: TextStyle(color: Colors.white)), backgroundColor: Colors.red),
+                                        );
+                                        return;
+                                      }
                                       context.read<RegisterBloc>().add(
                                         RegisterSubmitted(
                                           name: _nameController.text.trim(),
                                           email: _emailController.text.trim(),
                                           password: _passwordController.text,
                                           role: 'doctor',
-                                          nationalId:
-                                              _nationalIdController.text.trim(),
+                                          phone: _phoneController.text.trim(),
+                                          idCardFront: _idCardFront,
+                                          idCardBack: _idCardBack,
+                                          selfie: _selfie,
                                         ),
                                       );
                                     },
@@ -380,6 +397,74 @@ class _DoctorSignupState extends State<DoctorSignup> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildStepIndicator(String title, bool isDone) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: isDone ? const Color(0xFF4ADE80) : Colors.grey[300],
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          color: isDone ? Colors.white : Colors.grey[600],
+        ),
+      ),
+    );
+  }
+
+  // ── Image Picker Box ───────────────────────────────────────
+  Widget _buildImagePickerBox(String type, String label, File? imageFile) {
+    return Column(
+      children: [
+        Container(
+          height: 90,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: imageFile != null ? Colors.transparent : Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: imageFile != null ? Colors.green : Colors.grey.shade300,
+              width: 1.5,
+            ),
+            image: imageFile != null
+                ? DecorationImage(
+                    image: FileImage(imageFile),
+                    fit: BoxFit.cover,
+                  )
+                : null,
+          ),
+          child: imageFile == null
+              ? const Center(
+                  child: Icon(Icons.camera_alt_outlined, color: Colors.grey, size: 28),
+                )
+              : Align(
+                  alignment: Alignment.topRight,
+                  child: Container(
+                    margin: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.check_circle, color: Colors.green, size: 22),
+                  ),
+                ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: imageFile != null ? Colors.green.shade700 : Colors.grey.shade800,
+          ),
+        ),
+      ],
     );
   }
 

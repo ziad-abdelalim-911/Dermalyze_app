@@ -53,8 +53,10 @@ class _ProfileViewState extends State<ProfileView> {
   Future<void> _logout() async {
     await _tokenStorage.clearToken();
     if (mounted) {
-      Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil(
-          AppRoutes.login, (route) => false);
+      Navigator.of(
+        context,
+        rootNavigator: true,
+      ).pushNamedAndRemoveUntil(AppRoutes.login, (route) => false);
     }
   }
 
@@ -63,13 +65,15 @@ class _ProfileViewState extends State<ProfileView> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
     final textPrimary = isDark ? Colors.white : const Color(0xFF1F2937);
-    final textSecondary =
-        isDark ? Colors.grey.shade400 : const Color(0xFF6B7280);
+    final textSecondary = isDark
+        ? Colors.grey.shade400
+        : const Color(0xFF6B7280);
     final dividerColor = isDark ? Colors.white12 : const Color(0xFFE5E7EB);
 
     return Scaffold(
-      backgroundColor:
-          isDark ? const Color(0xFF0F172A) : const Color(0xFFF4F6FA),
+      backgroundColor: isDark
+          ? const Color(0xFF0F172A)
+          : const Color(0xFFF4F6FA),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
@@ -97,8 +101,11 @@ class _ProfileViewState extends State<ProfileView> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.arrow_back_ios_new,
-                                      color: Theme.of(context).cardColor, size: 16),
+                                  Icon(
+                                    Icons.arrow_back_ios_new,
+                                    color: Theme.of(context).cardColor,
+                                    size: 16,
+                                  ),
                                   SizedBox(width: 8),
                                   Text(
                                     'Profile',
@@ -117,9 +124,14 @@ class _ProfileViewState extends State<ProfileView> {
                             width: 88,
                             height: 88,
                             decoration: const BoxDecoration(
-                                color: Colors.white, shape: BoxShape.circle),
-                            child: Icon(Icons.person_2_outlined,
-                                size: 46, color: AppColors.SkyBlue),
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.person_2_outlined,
+                              size: 46,
+                              color: AppColors.SkyBlue,
+                            ),
                           ),
                           const SizedBox(height: 14),
                           Text(
@@ -133,8 +145,10 @@ class _ProfileViewState extends State<ProfileView> {
                           const SizedBox(height: 4),
                           const Text(
                             'Patient Account',
-                            style:
-                                TextStyle(color: Colors.white70, fontSize: 13),
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 13,
+                            ),
                           ),
                           const SizedBox(height: 8),
                         ],
@@ -228,7 +242,9 @@ class _ProfileViewState extends State<ProfileView> {
                                 Container(
                                   width: double.infinity,
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 14, vertical: 12),
+                                    horizontal: 14,
+                                    vertical: 12,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: isDark
                                         ? Colors.red.withValues(alpha: 0.12)
@@ -270,16 +286,20 @@ class _ProfileViewState extends State<ProfileView> {
                                 Container(
                                   width: double.infinity,
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 14, vertical: 12),
+                                    horizontal: 14,
+                                    vertical: 12,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: isDark
-                                        ? AppColors.SkyBlue
-                                            .withValues(alpha: 0.12)
+                                        ? AppColors.SkyBlue.withValues(
+                                            alpha: 0.12,
+                                          )
                                         : const Color(0xFFF0FDFF),
                                     borderRadius: BorderRadius.circular(12),
                                     border: Border.all(
-                                      color: AppColors.Turqouoise
-                                          .withValues(alpha: 0.4),
+                                      color: AppColors.Turqouoise.withValues(
+                                        alpha: 0.4,
+                                      ),
                                     ),
                                   ),
                                   child: Column(
@@ -313,7 +333,9 @@ class _ProfileViewState extends State<ProfileView> {
                                   child: Text(
                                     'No medical information available',
                                     style: TextStyle(
-                                        fontSize: 13, color: textSecondary),
+                                      fontSize: 13,
+                                      color: textSecondary,
+                                    ),
                                   ),
                                 ),
                             ],
@@ -344,7 +366,9 @@ class _ProfileViewState extends State<ProfileView> {
                                 divider: dividerColor,
                                 showDivider: true,
                                 onTap: () => Navigator.pushNamed(
-                                    context, AppRoutes.notifications),
+                                  context,
+                                  AppRoutes.notifications,
+                                ),
                               ),
                               _buildSettingsTile(
                                 icon: Icons.shield_outlined,
@@ -353,7 +377,9 @@ class _ProfileViewState extends State<ProfileView> {
                                 divider: dividerColor,
                                 showDivider: false,
                                 onTap: () => Navigator.pushNamed(
-                                    context, AppRoutes.Settings),
+                                  context,
+                                  AppRoutes.Settings,
+                                ),
                               ),
                             ],
                           ),
@@ -369,13 +395,18 @@ class _ProfileViewState extends State<ProfileView> {
                             onPressed: _logout,
                             style: OutlinedButton.styleFrom(
                               side: BorderSide(
-                                  color: Theme.of(context).cardColor, width: 1.5),
+                                color: Theme.of(context).cardColor,
+                                width: 1.5,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
                               ),
                             ),
-                            icon: const Icon(Icons.logout,
-                                color: Color(0xFFE05252), size: 20),
+                            icon: const Icon(
+                              Icons.logout,
+                              color: Color(0xFFE05252),
+                              size: 20,
+                            ),
                             label: const Text(
                               'Logout',
                               style: TextStyle(
@@ -440,9 +471,10 @@ class _ProfileViewState extends State<ProfileView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(label,
-                        style:
-                            TextStyle(fontSize: 12, color: textSecondary)),
+                    Text(
+                      label,
+                      style: TextStyle(fontSize: 12, color: textSecondary),
+                    ),
                     const SizedBox(height: 3),
                     Text(
                       value,

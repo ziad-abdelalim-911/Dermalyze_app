@@ -1,4 +1,4 @@
-import 'dart:io';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 
@@ -188,7 +188,6 @@ class _VoiceMessagePlayerState extends State<VoiceMessagePlayer>
   Widget _buildWaveformBars(
       double progress, Color active, Color inactive) {
     const bars = 28;
-    // A fixed waveform pattern (similar to WhatsApp)
     const heights = [
       6, 10, 15, 8, 18, 12, 20, 9, 16, 7, 22, 11, 17, 8,
       20, 13, 18, 6, 15, 10, 19, 7, 16, 12, 20, 8, 14, 6,
@@ -196,26 +195,34 @@ class _VoiceMessagePlayerState extends State<VoiceMessagePlayer>
 
     return SizedBox(
       height: 28,
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: List.generate(bars, (i) {
-          final fraction = i / bars;
-          final isActive = fraction <= progress;
-          return Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 1),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 80),
-                height: heights[i % heights.length].toDouble(),
-                decoration: BoxDecoration(
-                  color: isActive ? active : inactive,
-                  borderRadius: BorderRadius.circular(2),
+      child: AnimatedBuilder(
+        animation: _waveController,
+        builder: (context, child) {
+          final scale = _playerState == PlayerState.playing
+              ? 0.8 + (_waveController.value * 0.4)
+              : 1.0;
+              
+          return Row(
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: List.generate(bars, (i) {
+              final fraction = i / bars;
+              final isActive = fraction <= progress;
+              return Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 1),
+                  child: Container(
+                    height: (heights[i % heights.length] * scale).toDouble(),
+                    decoration: BoxDecoration(
+                      color: isActive ? active : inactive,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
                 ),
-              ),
-            ),
+              );
+            }),
           );
-        }),
+        },
       ),
     );
   }

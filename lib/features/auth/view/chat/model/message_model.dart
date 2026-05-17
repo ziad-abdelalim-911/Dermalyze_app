@@ -25,17 +25,58 @@ class MessageModel {
     this.durationMs = 0,
   });
 
+  /// Parse from backend response.
+  /// Backend may return:
+  ///   { _id, sender, receiver, content, createdAt, isRead, type }
+  /// OR older format:
+  ///   { id, senderId, receiverId, content, timestamp, type, status }
   factory MessageModel.fromJson(Map<String, dynamic> json, String currentUserId) {
+    // ── ID ───────────────────────────────────────────
+    final id = json['_id']?.toString() ?? json['id']?.toString();
+
+    // ── Sender / Receiver ────────────────────────────
+    // Backend may store sender as nested object or plain ID string
+    final senderRaw = json['sender'];
+    final String senderId;
+    if (senderRaw is Map<String, dynamic>) {
+      senderId = senderRaw['_id']?.toString() ?? senderRaw['id']?.toString() ?? '';
+    } else {
+      senderId = senderRaw?.toString()
+          ?? json['senderId']?.toString()
+          ?? '';
+    }
+
+    final receiverRaw = json['receiver'];
+    final String? receiverId;
+    if (receiverRaw is Map<String, dynamic>) {
+      receiverId = receiverRaw['_id']?.toString() ?? receiverRaw['id']?.toString();
+    } else {
+      receiverId = receiverRaw?.toString() ?? json['receiverId']?.toString();
+    }
+
+    // ── Timestamp ─────────────────────────────────────
+    final timestamp = json['createdAt']?.toString()
+        ?? json['timestamp']?.toString()
+        ?? DateTime.now().toIso8601String();
+
+    // ── Read status ───────────────────────────────────
+    MessageStatus status;
+    if (json.containsKey('isRead')) {
+      status = (json['isRead'] == true) ? MessageStatus.read : MessageStatus.sent;
+    } else {
+      status = _parseStatus(json['status']?.toString());
+    }
+
     return MessageModel(
-      id: json['id']?.toString(),
-      senderId: json['senderId']?.toString() ?? '',
-      receiverId: json['receiverId']?.toString(),
+      id: id,
+      senderId: senderId,
+      receiverId: receiverId,
       content: json['content']?.toString() ?? '',
-      timestamp: json['timestamp']?.toString() ?? DateTime.now().toIso8601String(),
-      isMe: json['senderId']?.toString() == currentUserId,
+      timestamp: timestamp,
+      isMe: senderId == currentUserId,
       type: _parseType(json['type']?.toString()),
       mediaUrl: json['mediaUrl']?.toString(),
-      status: _parseStatus(json['status']?.toString()),
+      status: status,
       durationMs: json['durationMs'] as int? ?? 0,
     );
   }

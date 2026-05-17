@@ -1,3 +1,5 @@
+import 'dart:io';
+
 class RegisterRequestModel {
   final String name;
   final String email;
@@ -7,6 +9,9 @@ class RegisterRequestModel {
   final String? phone;
   final String? nationalId;
   final String? birthDate;
+  final File? idCardFront;
+  final File? idCardBack;
+  final File? selfie;
 
   RegisterRequestModel({
     required this.name,
@@ -17,6 +22,9 @@ class RegisterRequestModel {
     this.phone,
     this.nationalId,
     this.birthDate,
+    this.idCardFront,
+    this.idCardBack,
+    this.selfie,
   });
 
   Map<String, dynamic> toJson() {
@@ -41,4 +49,5 @@ class RegisterRequestModel {
     return map;
   }
 }
+
 

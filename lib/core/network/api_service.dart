@@ -19,9 +19,9 @@ class ApiService {
   }
 
   /// POST
-  Future<dynamic> post(String endPoint, [dynamic body]) async {
+  Future<dynamic> post(String endPoint, [dynamic body, Options? options]) async {
     try {
-      final response = await _dioClient.dio.post(endPoint, data: body);
+      final response = await _dioClient.dio.post(endPoint, data: body, options: options);
       return response.data;
     } on DioException catch (e) {
       throw ApiExceptions.handleError(e);
