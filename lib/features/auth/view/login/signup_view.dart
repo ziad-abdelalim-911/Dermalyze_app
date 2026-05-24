@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:dermalyze/core/routes/app_routes.dart';
 import 'package:gap/gap.dart';
+import 'package:dermalyze/core/theme/theme_extensions.dart';
 
 class SignupView extends StatefulWidget {
   const SignupView({super.key});
@@ -51,7 +52,7 @@ class _SignupViewState extends State<SignupView> {
 
     return Container(
       decoration: BoxDecoration(
-        gradient: AppColors.primaryGradient1,
+        gradient: context.dynamicBgGradient,
       ),
 
       child: Scaffold(
@@ -281,17 +282,16 @@ class PasswordRequirementsBox extends StatelessWidget {
     required this.hasSpecialChar,
   });
 
-  Widget _row(bool ok, String text) {
-
+  Widget _row(BuildContext context, bool ok, String text) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     const Color checkColor = Color(0xFF34C759); // green check
-    const Color inactiveDot = Color(0xFFC2CDD9); // inactive circle
-    const Color bodyColor = Color(0xFF4A5568);
+    final Color inactiveDot = isDark ? Colors.grey.shade600 : const Color(0xFFC2CDD9); // inactive circle
+    final Color bodyColor = isDark ? Colors.grey.shade400 : const Color(0xFF4A5568);
 
     return Row(
       children: [
-
         if (ok)
-          Icon(
+          const Icon(
             Icons.check_circle,
             size: 18,
             color: checkColor,
@@ -307,7 +307,7 @@ class PasswordRequirementsBox extends StatelessWidget {
           text,
           style: TextStyle(
             fontSize: 14,
-            color: ok ? const Color(0xFF1E2D3D) : bodyColor,
+            color: ok ? (isDark ? Colors.white : const Color(0xFF1E2D3D)) : bodyColor,
             fontWeight: FontWeight.w400,
           ),
         ),
@@ -317,9 +317,10 @@ class PasswordRequirementsBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Colors from Figma
-    const Color boxBg = Color(0xFFF0F7FF);
-    const Color border20 = Color(0x334A90E2);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color boxBg = isDark ? const Color(0xFF1E293B) : const Color(0xFFF0F7FF);
+    final Color border20 = isDark ? Colors.white24 : const Color(0x334A90E2);
+    final Color titleColor = isDark ? Colors.white : const Color(0xFF1E2D3D);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -332,22 +333,22 @@ class PasswordRequirementsBox extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             "Password must contain:",
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF1E2D3D),
+              color: titleColor,
             ),
           ),
           const Gap(12),
-          _row(isLengthOk, "At least 8 characters"),
+          _row(context, isLengthOk, "At least 8 characters"),
           const Gap(8),
-          _row(hasUppercase, "One uppercase letter"),
+          _row(context, hasUppercase, "One uppercase letter"),
           const Gap(8),
-          _row(hasNumber, "One number"),
+          _row(context, hasNumber, "One number"),
           const Gap(8),
-          _row(hasSpecialChar, "One special character"),
+          _row(context, hasSpecialChar, "One special character"),
         ],
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:dermalyze/core/constants/app_colors.dart';
+import 'package:dermalyze/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
 class AiRecommendationCard extends StatelessWidget {
@@ -29,7 +30,7 @@ class AiRecommendationCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.Black,
+                  color: context.dynamicTextColorPrimary,
                 ),
               ),
             ],
@@ -39,7 +40,7 @@ class AiRecommendationCard extends StatelessWidget {
             recommendation,
             style: TextStyle(
               fontSize: 13,
-              color: AppColors.Gray3,
+              color: context.dynamicTextColorSecondary,
               height: 1.5,
             ),
           ),

@@ -1,4 +1,5 @@
 import 'package:dermalyze/core/constants/app_colors.dart';
+import 'package:dermalyze/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
 class DetailedAnalysisItem {
@@ -47,7 +48,7 @@ class DetailedAnalysisCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.Black,
+                  color: context.dynamicTextColorPrimary,
                 ),
               ),
             ],
@@ -58,11 +59,14 @@ class DetailedAnalysisCard extends StatelessWidget {
             final item = entry.value;
             return Column(
               children: [
-                _buildAnalysisRow(item),
+                _buildAnalysisRow(context, item),
                 if (i < items.length - 1)
                   Divider(
-                      height: 20,
-                      color: AppColors.Gray2.withOpacity(0.5)),
+                    height: 20,
+                    color: context.isDarkMode
+                        ? Colors.white10
+                        : AppColors.Gray2.withOpacity(0.5),
+                  ),
               ],
             );
           }),
@@ -71,7 +75,7 @@ class DetailedAnalysisCard extends StatelessWidget {
     );
   }
 
-  Widget _buildAnalysisRow(DetailedAnalysisItem item) {
+  Widget _buildAnalysisRow(BuildContext context, DetailedAnalysisItem item) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -80,7 +84,7 @@ class DetailedAnalysisCard extends StatelessWidget {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
-            color: AppColors.Black,
+            color: context.dynamicTextColorPrimary,
           ),
         ),
         Row(
@@ -95,8 +99,11 @@ class DetailedAnalysisCard extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: Icon(Icons.arrow_forward,
-                  size: 12, color: AppColors.Gray),
+              child: Icon(
+                Icons.arrow_forward,
+                size: 12,
+                color: context.dynamicTextColorSecondary,
+              ),
             ),
             Text(
               item.newValue,

@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:dermalyze/core/theme/theme_extensions.dart';
 
 class PatientSignup extends StatefulWidget {
   const PatientSignup({super.key});
@@ -111,7 +112,7 @@ class _PatientSignupState extends State<PatientSignup> {
           }
         },
         child: Scaffold(
-          backgroundColor: AppColors.primaryColor,
+          backgroundColor: context.dynamicBgColor,
           body: GestureDetector(
             onTap: () => FocusScope.of(context).unfocus(),
             child: Form(
@@ -378,8 +379,8 @@ class _PatientSignupState extends State<PatientSignup> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('National ID *',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+        Text('National ID *',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: context.dynamicTextColorPrimary)),
         const SizedBox(height: 6),
         ValueListenableBuilder<TextEditingValue>(
           valueListenable: _nationalIdController,
@@ -389,6 +390,8 @@ class _PatientSignupState extends State<PatientSignup> {
               controller: _nationalIdController,
               keyboardType: TextInputType.number,
               maxLength: 14,
+              cursorColor: context.dynamicTextColorPrimary,
+              style: TextStyle(color: context.dynamicTextColorPrimary),
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
                 LengthLimitingTextInputFormatter(14),
@@ -396,21 +399,29 @@ class _PatientSignupState extends State<PatientSignup> {
               validator: _validateNationalId,
               decoration: InputDecoration(
                 hintText: 'Enter 14-digit National ID',
-                hintStyle: TextStyle(color: AppColors.Gray),
-                prefixIcon: const Icon(Icons.badge_outlined),
+                hintStyle: TextStyle(color: context.dynamicTextColorSecondary),
+                prefixIcon: Icon(Icons.badge_outlined, color: context.dynamicTextColorSecondary),
                 // counter inside the suffix
                 suffixText: '$count / 14',
                 suffixStyle: TextStyle(
                   fontSize: 12,
-                  color: count == 14 ? Colors.green : AppColors.Gray,
+                  color: count == 14 ? Colors.green : context.dynamicTextColorSecondary,
                   fontWeight: FontWeight.w500,
                 ),
                 counterText: '', // hide default counter
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: context.dynamicInputColor,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
+                  borderSide: BorderSide(color: context.dynamicBorderColor),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: context.dynamicBorderColor),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: AppColors.SkyBlue, width: 1.5),
                 ),
                 errorBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -425,11 +436,11 @@ class _PatientSignupState extends State<PatientSignup> {
           },
         ),
         const SizedBox(height: 4),
-        const Align(
+        Align(
           alignment: Alignment.centerLeft,
           child: Text(
             'Numbers only • Must be exactly 14 digits',
-            style: TextStyle(fontSize: 12, color: Colors.grey),
+            style: TextStyle(fontSize: 12, color: context.dynamicTextColorSecondary),
           ),
         ),
       ],
@@ -441,12 +452,14 @@ class _PatientSignupState extends State<PatientSignup> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Mobile *',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+        Text('Mobile *',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: context.dynamicTextColorPrimary)),
         const SizedBox(height: 6),
         TextFormField(
           keyboardType: TextInputType.phone,
           maxLength: 11,
+          cursorColor: context.dynamicTextColorPrimary,
+          style: TextStyle(color: context.dynamicTextColorPrimary),
           inputFormatters: [
             FilteringTextInputFormatter.digitsOnly,
             LengthLimitingTextInputFormatter(11),
@@ -454,14 +467,22 @@ class _PatientSignupState extends State<PatientSignup> {
           validator: _validatePhone,
           decoration: InputDecoration(
             hintText: '01xxxxxxxxx',
-            hintStyle: TextStyle(color: AppColors.Gray),
-            prefixIcon: const Icon(Icons.phone_outlined),
+            hintStyle: TextStyle(color: context.dynamicTextColorSecondary),
+            prefixIcon: Icon(Icons.phone_outlined, color: context.dynamicTextColorSecondary),
             counterText: '',
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.dynamicInputColor,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
+              borderSide: BorderSide(color: context.dynamicBorderColor),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: context.dynamicBorderColor),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: AppColors.SkyBlue, width: 1.5),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
@@ -482,25 +503,40 @@ class _PatientSignupState extends State<PatientSignup> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Email Address *',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+        Text('Email Address *',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: context.dynamicTextColorPrimary)),
         const SizedBox(height: 6),
         TextFormField(
           controller: _emailController,
           keyboardType: TextInputType.emailAddress,
           validator: _validateEmail,
+          cursorColor: context.dynamicTextColorPrimary,
+          style: TextStyle(color: context.dynamicTextColorPrimary),
           decoration: InputDecoration(
             hintText: 'your.email@example.com',
-            hintStyle: TextStyle(color: AppColors.Gray),
+            hintStyle: TextStyle(color: context.dynamicTextColorSecondary),
             prefixIcon: Padding(
               padding: const EdgeInsets.only(left: 16, right: 12),
-              child: SvgPicture.asset(AppAssets.Massage, width: 20, height: 20),
+              child: SvgPicture.asset(
+                AppAssets.Massage,
+                width: 20,
+                height: 20,
+                colorFilter: ColorFilter.mode(context.dynamicTextColorSecondary, BlendMode.srcIn),
+              ),
             ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.dynamicInputColor,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
+              borderSide: BorderSide(color: context.dynamicBorderColor),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: context.dynamicBorderColor),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: AppColors.SkyBlue, width: 1.5),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
@@ -529,21 +565,31 @@ class _PatientSignupState extends State<PatientSignup> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: context.dynamicTextColorPrimary)),
         const SizedBox(height: 6),
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
           validator: validator,
+          cursorColor: context.dynamicTextColorPrimary,
+          style: TextStyle(color: context.dynamicTextColorPrimary),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: AppColors.Gray),
-            prefixIcon: Icon(icon),
+            hintStyle: TextStyle(color: context.dynamicTextColorSecondary),
+            prefixIcon: Icon(icon, color: context.dynamicTextColorSecondary),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.dynamicInputColor,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
+              borderSide: BorderSide(color: context.dynamicBorderColor),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: context.dynamicBorderColor),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: AppColors.SkyBlue, width: 1.5),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
@@ -572,30 +618,46 @@ class _PatientSignupState extends State<PatientSignup> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: context.dynamicTextColorPrimary)),
         const SizedBox(height: 6),
         TextFormField(
           controller: controller,
           obscureText: hidden,
           validator: validator,
+          cursorColor: context.dynamicTextColorPrimary,
+          style: TextStyle(color: context.dynamicTextColorPrimary),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: AppColors.Gray),
+            hintStyle: TextStyle(color: context.dynamicTextColorSecondary),
             prefixIcon: Padding(
               padding: const EdgeInsets.only(left: 16, right: 12),
-              child: SvgPicture.asset(AppAssets.Lock, width: 20, height: 20),
+              child: SvgPicture.asset(
+                AppAssets.Lock,
+                width: 20,
+                height: 20,
+                colorFilter: ColorFilter.mode(context.dynamicTextColorSecondary, BlendMode.srcIn),
+              ),
             ),
             suffixIcon: IconButton(
               icon: Icon(hidden
                   ? Icons.visibility_off_outlined
-                  : Icons.visibility_outlined),
+                  : Icons.visibility_outlined,
+                  color: context.dynamicTextColorSecondary),
               onPressed: toggle,
             ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.dynamicInputColor,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
+              borderSide: BorderSide(color: context.dynamicBorderColor),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: context.dynamicBorderColor),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: AppColors.SkyBlue, width: 1.5),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
@@ -625,7 +687,7 @@ class _PatientSignupState extends State<PatientSignup> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withValues(alpha: context.isDarkMode ? 0.20 : 0.05),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -639,8 +701,8 @@ class _PatientSignupState extends State<PatientSignup> {
               Icon(icon, color: Colors.blue),
               const SizedBox(width: 8),
               Text(title,
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.w600)),
+                  style: TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.w600, color: context.dynamicTextColorPrimary)),
             ],
           ),
           const SizedBox(height: 20),
@@ -651,21 +713,25 @@ class _PatientSignupState extends State<PatientSignup> {
   }
 
   Widget _infoBox() {
+    final isDark = context.isDarkMode;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: isDark ? AppColors.SkyBlue.withValues(alpha: 0.1) : const Color(0xFFEFF6FF),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFBFDBFE)),
+        border: Border.all(color: isDark ? AppColors.SkyBlue.withValues(alpha: 0.3) : const Color(0xFFBFDBFE)),
       ),
-      child: const Row(
+      child: Row(
         children: [
-          Icon(Icons.info_outline, size: 18, color: Color(0xFF2563EB)),
-          SizedBox(width: 8),
+          Icon(Icons.info_outline, size: 18, color: AppColors.SkyBlue),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               'Required to link with your supervising dermatologist. Contact your doctor if you don\'t have this code.',
-              style: TextStyle(fontSize: 12, color: Color(0xFF2563EB)),
+              style: TextStyle(
+                fontSize: 12,
+                color: isDark ? Colors.grey.shade300 : const Color(0xFF2563EB),
+              ),
             ),
           ),
         ],

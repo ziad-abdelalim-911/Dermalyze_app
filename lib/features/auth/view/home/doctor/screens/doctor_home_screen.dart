@@ -15,7 +15,6 @@ import 'package:dermalyze/features/auth/view/home/doctor/widgets/patient_search_
 import 'package:dermalyze/features/auth/view/home/doctor/widgets/quick_actions_card.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/widgets/stats_grid_card.dart';
 import 'package:dermalyze/features/auth/view/notifications/notifications_cubit.dart';
-import 'package:dermalyze/features/auth/view/notifications/notifications_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -306,7 +305,7 @@ class _DoctorHomeViewState extends State<_DoctorHomeView> {
                   )
                 else if (state is DoctorHomeLoaded)
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 30),
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -353,6 +352,7 @@ class _DoctorHomeViewState extends State<_DoctorHomeView> {
                         PatientListCard(
                           patients: state.filteredPatients
                               .map((p) => PatientListItem(
+                                    id: p.id,
                                     name: p.name,
                                     diagnosis: p.diagnosis,
                                     qualityBadge: p.qualityBadge,
@@ -361,6 +361,17 @@ class _DoctorHomeViewState extends State<_DoctorHomeView> {
                                     lastVisit: p.lastVisit,
                                   ))
                               .toList(),
+                          onChatTap: (item) {
+                            Navigator.pushNamed(
+                              context,
+                              AppRoutes.chat,
+                              arguments: {
+                                'receiverId': item.id,
+                                'receiverName': item.name,
+                                'receiverRole': 'patient',
+                              },
+                            );
+                          },
                           onPatientTap: (item) async {
                             // نلاقي الـ PatientEntity المناسب
                             final patient = state.filteredPatients

@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:dermalyze/core/theme/theme_extensions.dart';
 
 class DoctorSignup extends StatefulWidget {
   const DoctorSignup({super.key});
@@ -130,7 +131,7 @@ class _DoctorSignupState extends State<DoctorSignup> {
         child: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),
           child: Scaffold(
-            backgroundColor: AppColors.primaryColor,
+            backgroundColor: context.dynamicBgColor,
             body: Form(
               key: _formKey,
               child: SingleChildScrollView(
@@ -401,10 +402,11 @@ class _DoctorSignupState extends State<DoctorSignup> {
   }
 
   Widget _buildStepIndicator(String title, bool isDone) {
+    final isDark = context.isDarkMode;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: isDone ? const Color(0xFF4ADE80) : Colors.grey[300],
+        color: isDone ? const Color(0xFF4ADE80) : (isDark ? Colors.grey.shade800 : Colors.grey[300]),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
@@ -412,7 +414,7 @@ class _DoctorSignupState extends State<DoctorSignup> {
         style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.bold,
-          color: isDone ? Colors.white : Colors.grey[600],
+          color: isDone ? Colors.white : (isDark ? Colors.grey.shade400 : Colors.grey[600]),
         ),
       ),
     );
@@ -420,16 +422,17 @@ class _DoctorSignupState extends State<DoctorSignup> {
 
   // ── Image Picker Box ───────────────────────────────────────
   Widget _buildImagePickerBox(String type, String label, File? imageFile) {
+    final isDark = context.isDarkMode;
     return Column(
       children: [
         Container(
           height: 90,
           width: double.infinity,
           decoration: BoxDecoration(
-            color: imageFile != null ? Colors.transparent : Colors.grey.shade100,
+            color: imageFile != null ? Colors.transparent : (isDark ? const Color(0xFF0F172A) : Colors.grey.shade100),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: imageFile != null ? Colors.green : Colors.grey.shade300,
+              color: imageFile != null ? Colors.green : (isDark ? Colors.white24 : Colors.grey.shade300),
               width: 1.5,
             ),
             image: imageFile != null
@@ -440,15 +443,15 @@ class _DoctorSignupState extends State<DoctorSignup> {
                 : null,
           ),
           child: imageFile == null
-              ? const Center(
-                  child: Icon(Icons.camera_alt_outlined, color: Colors.grey, size: 28),
+              ? Center(
+                  child: Icon(Icons.camera_alt_outlined, color: context.dynamicTextColorSecondary, size: 28),
                 )
               : Align(
                   alignment: Alignment.topRight,
                   child: Container(
                     margin: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.check_circle, color: Colors.green, size: 22),
@@ -461,7 +464,7 @@ class _DoctorSignupState extends State<DoctorSignup> {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: imageFile != null ? Colors.green.shade700 : Colors.grey.shade800,
+            color: imageFile != null ? Colors.green.shade700 : context.dynamicTextColorSecondary,
           ),
         ),
       ],
@@ -473,8 +476,8 @@ class _DoctorSignupState extends State<DoctorSignup> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('National ID *',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+        Text('National ID *',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: context.dynamicTextColorPrimary)),
         const SizedBox(height: 6),
         ValueListenableBuilder<TextEditingValue>(
           valueListenable: _nationalIdController,
@@ -484,6 +487,8 @@ class _DoctorSignupState extends State<DoctorSignup> {
               controller: _nationalIdController,
               keyboardType: TextInputType.number,
               maxLength: 14,
+              cursorColor: context.dynamicTextColorPrimary,
+              style: TextStyle(color: context.dynamicTextColorPrimary),
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
                 LengthLimitingTextInputFormatter(14),
@@ -491,20 +496,28 @@ class _DoctorSignupState extends State<DoctorSignup> {
               validator: _validateNationalId,
               decoration: InputDecoration(
                 hintText: 'Enter 14-digit National ID',
-                hintStyle: TextStyle(color: AppColors.Gray),
-                prefixIcon: const Icon(Icons.badge_outlined),
+                hintStyle: TextStyle(color: context.dynamicTextColorSecondary),
+                prefixIcon: Icon(Icons.badge_outlined, color: context.dynamicTextColorSecondary),
                 suffixText: '$count / 14',
                 suffixStyle: TextStyle(
                   fontSize: 12,
-                  color: count == 14 ? Colors.green : AppColors.Gray,
+                  color: count == 14 ? Colors.green : context.dynamicTextColorSecondary,
                   fontWeight: FontWeight.w500,
                 ),
                 counterText: '',
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: context.dynamicInputColor,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
+                  borderSide: BorderSide(color: context.dynamicBorderColor),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: context.dynamicBorderColor),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: AppColors.SkyBlue, width: 1.5),
                 ),
                 errorBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -519,9 +532,9 @@ class _DoctorSignupState extends State<DoctorSignup> {
           },
         ),
         const SizedBox(height: 4),
-        const Text(
+        Text(
           'Numbers only • Must be exactly 14 digits',
-          style: TextStyle(fontSize: 12, color: Colors.grey),
+          style: TextStyle(fontSize: 12, color: context.dynamicTextColorSecondary),
         ),
       ],
     );
@@ -540,22 +553,31 @@ class _DoctorSignupState extends State<DoctorSignup> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label,
-            style:
-                const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: context.dynamicTextColorPrimary)),
         const SizedBox(height: 6),
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
           validator: validator,
+          cursorColor: context.dynamicTextColorPrimary,
+          style: TextStyle(color: context.dynamicTextColorPrimary),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: AppColors.Gray),
-            prefixIcon: Icon(icon),
+            hintStyle: TextStyle(color: context.dynamicTextColorSecondary),
+            prefixIcon: Icon(icon, color: context.dynamicTextColorSecondary),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.dynamicInputColor,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
+              borderSide: BorderSide(color: context.dynamicBorderColor),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: context.dynamicBorderColor),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: AppColors.SkyBlue, width: 1.5),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
@@ -584,28 +606,38 @@ class _DoctorSignupState extends State<DoctorSignup> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label,
-            style:
-                const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: context.dynamicTextColorPrimary)),
         const SizedBox(height: 6),
         TextFormField(
           controller: controller,
           obscureText: hidden,
           validator: validator,
+          cursorColor: context.dynamicTextColorPrimary,
+          style: TextStyle(color: context.dynamicTextColorPrimary),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: AppColors.Gray),
-            prefixIcon: const Icon(Icons.lock_outline),
+            hintStyle: TextStyle(color: context.dynamicTextColorSecondary),
+            prefixIcon: Icon(Icons.lock_outline, color: context.dynamicTextColorSecondary),
             suffixIcon: IconButton(
               icon: Icon(hidden
                   ? Icons.visibility_off_outlined
-                  : Icons.visibility_outlined),
+                  : Icons.visibility_outlined,
+                  color: context.dynamicTextColorSecondary),
               onPressed: toggle,
             ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.dynamicInputColor,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
+              borderSide: BorderSide(color: context.dynamicBorderColor),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: context.dynamicBorderColor),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: AppColors.SkyBlue, width: 1.5),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
@@ -635,7 +667,7 @@ class _DoctorSignupState extends State<DoctorSignup> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
+            color: Colors.black.withValues(alpha: context.isDarkMode ? 0.20 : 0.05),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -649,8 +681,8 @@ class _DoctorSignupState extends State<DoctorSignup> {
               Icon(icon, color: Colors.blue),
               const SizedBox(width: 8),
               Text(title,
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.w600)),
+                  style: TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.w600, color: context.dynamicTextColorPrimary)),
             ],
           ),
           const SizedBox(height: 20),

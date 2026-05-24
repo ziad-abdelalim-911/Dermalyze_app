@@ -1,8 +1,21 @@
+import 'dart:io';
 import 'package:dermalyze/core/constants/app_colors.dart';
+import 'package:dermalyze/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
 class SliderComparisonCard extends StatefulWidget {
-  const SliderComparisonCard({super.key});
+  final File? currentImageFile;
+  final String? previousImageUrl;
+  final String previousSeverity;
+  final String currentSeverity;
+
+  const SliderComparisonCard({
+    super.key,
+    this.currentImageFile,
+    this.previousImageUrl,
+    required this.previousSeverity,
+    required this.currentSeverity,
+  });
 
   @override
   State<SliderComparisonCard> createState() => _SliderComparisonCardState();
@@ -35,7 +48,7 @@ class _SliderComparisonCardState extends State<SliderComparisonCard> {
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: AppColors.Black,
+              color: context.dynamicTextColorPrimary,
             ),
           ),
           const SizedBox(height: 14),
@@ -58,38 +71,21 @@ class _SliderComparisonCardState extends State<SliderComparisonCard> {
                     },
                     child: Stack(
                       children: [
-                        // Previous (Red)
-                        Container(
-                          color: const Color(0xFFF5F5F5),
-                          child: Center(
-                            child: Container(
-                              width: 100,
-                              height: 100,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFFFCDD2),
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
+                        // Previous
+                        SizedBox(
+                          width: width,
+                          height: 180,
+                          child: _buildPreviousImage(context),
                         ),
-                        // Current (Green) - clipped
+                        // Current - clipped
                         ClipRect(
                           child: Align(
                             alignment: Alignment.centerLeft,
                             widthFactor: _sliderValue,
-                            child: Container(
+                            child: SizedBox(
                               width: width,
-                              color: const Color(0xFFF0FFF0),
-                              child: Center(
-                                child: Container(
-                                  width: 100,
-                                  height: 100,
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFFC8F5C8),
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                              ),
+                              height: 180,
+                              child: _buildCurrentImage(context, width),
                             ),
                           ),
                         ),
@@ -98,16 +94,16 @@ class _SliderComparisonCardState extends State<SliderComparisonCard> {
                           top: 8,
                           left: 8,
                           child: Container(
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: Colors.red,
+                              color: Colors.red.withOpacity(0.85),
                               borderRadius: BorderRadius.circular(6),
                             ),
-                            child: Text(
+                            child: const Text(
                               'Previous',
                               style: TextStyle(
-                                  color: Theme.of(context).cardColor, fontSize: 11),
+                                  color: Colors.white, fontSize: 11),
                             ),
                           ),
                         ),
@@ -115,16 +111,16 @@ class _SliderComparisonCardState extends State<SliderComparisonCard> {
                           top: 8,
                           right: 8,
                           child: Container(
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: Colors.green,
+                              color: Colors.green.withOpacity(0.85),
                               borderRadius: BorderRadius.circular(6),
                             ),
-                            child: Text(
+                            child: const Text(
                               'Current',
                               style: TextStyle(
-                                  color: Theme.of(context).cardColor, fontSize: 11),
+                                  color: Colors.white, fontSize: 11),
                             ),
                           ),
                         ),
@@ -150,10 +146,17 @@ class _SliderComparisonCardState extends State<SliderComparisonCard> {
                               decoration: BoxDecoration(
                                 color: AppColors.SkyBlue,
                                 shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
-                              child: Icon(
+                              child: const Icon(
                                 Icons.compare_arrows,
-                                color: Theme.of(context).cardColor,
+                                color: Colors.white,
                                 size: 16,
                               ),
                             ),
@@ -170,10 +173,98 @@ class _SliderComparisonCardState extends State<SliderComparisonCard> {
           Center(
             child: Text(
               'Drag or click to compare',
-              style: TextStyle(fontSize: 12, color: AppColors.Gray),
+              style: TextStyle(fontSize: 12, color: context.dynamicTextColorSecondary),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPreviousImage(BuildContext context) {
+    if (widget.previousImageUrl != null && widget.previousImageUrl!.isNotEmpty) {
+      final fullUrl = widget.previousImageUrl!.startsWith('http')
+          ? widget.previousImageUrl!
+          : 'https://dermalyze-backend-final-main-production.up.railway.app/${widget.previousImageUrl}';
+      return Image.network(
+        fullUrl,
+        width: double.infinity,
+        height: 180,
+        fit: BoxFit.cover,
+        errorBuilder: (c, e, s) => _buildPreviousFallback(context),
+      );
+    }
+    return _buildPreviousFallback(context);
+  }
+
+  Widget _buildPreviousFallback(BuildContext context) {
+    return Container(
+      color: context.isDarkMode ? const Color(0xFF1E293B) : const Color(0xFFF5F5F5),
+      child: Center(
+        child: Container(
+          width: 100,
+          height: 100,
+          decoration: BoxDecoration(
+            color: Colors.red.withOpacity(context.isDarkMode ? 0.35 : 0.75),
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 28),
+                const SizedBox(height: 4),
+                Text(
+                  widget.previousSeverity,
+                  style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCurrentImage(BuildContext context, double width) {
+    if (widget.currentImageFile != null) {
+      return Image.file(
+        widget.currentImageFile!,
+        width: width,
+        height: 180,
+        fit: BoxFit.cover,
+        errorBuilder: (c, e, s) => _buildCurrentFallback(context, width),
+      );
+    }
+    return _buildCurrentFallback(context, width);
+  }
+
+  Widget _buildCurrentFallback(BuildContext context, double width) {
+    return Container(
+      width: width,
+      color: context.isDarkMode ? const Color(0xFF0F172A) : const Color(0xFFF0FFF0),
+      child: Center(
+        child: Container(
+          width: 100,
+          height: 100,
+          decoration: BoxDecoration(
+            color: Colors.green.withOpacity(context.isDarkMode ? 0.35 : 0.75),
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.check_circle_outline, color: Colors.white, size: 28),
+                const SizedBox(height: 4),
+                Text(
+                  widget.currentSeverity,
+                  style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

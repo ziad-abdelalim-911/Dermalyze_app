@@ -1,107 +1,62 @@
+import 'package:dermalyze/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
-import 'package:dermalyze/core/constants/app_assets.dart';
 
 class KeyMetricsCard extends StatelessWidget {
-  const KeyMetricsCard({super.key, required List<MetricItem> MetricItems});
+  final List<MetricItem> MetricItems;
+
+  const KeyMetricsCard({super.key, required this.MetricItems});
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = context.isDarkMode;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(16),
-
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.05),
+            color: Colors.black.withOpacity(isDark ? .1 : .05),
             blurRadius: 10,
           ),
         ],
       ),
-
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           /// TITLE
-          const Text(
+          Text(
             "Key Metrics",
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
+              color: context.dynamicTextColorPrimary,
             ),
           ),
-
           const SizedBox(height: 16),
 
           /// GRID
-          Row(
-            children: [
-
-              Expanded(
-                child: MetricItem(
-                  iconPath: AppAssets.calendarIcon,
-                  value: "17",
-                  label: "Days in Treatment",
-
-                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                  iconColor: const Color(0xFF14B8A6),
-                  textColor: const Color(0xFF0F766E),
-                ),
-              ),
-
-              const SizedBox(width: 12),
-
-              Expanded(
-                child: MetricItem(
-                  iconPath: AppAssets.progress_icon,
-                  value: "+28%",
-                  label: "Overall Improvement",
-
-                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                  iconColor: const Color(0xFF16A34A),
-                  textColor: const Color(0xFF166534),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 12),
-
-          Row(
-            children: [
-
-              Expanded(
-                child: MetricItem(
-                  iconPath: AppAssets.pulse_icon,
-                  value: "3",
-                  label: "Doctor Checkups",
-
-                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                  iconColor: const Color(0xFF2563EB),
-                  textColor: const Color(0xFF1D4ED8),
-                ),
-              ),
-
-              const SizedBox(width: 12),
-
-              Expanded(
-                child: MetricItem(
-                  iconPath: AppAssets.award_Icon,
-                  value: "95%",
-                  label: "Medication Adherence",
-
-                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                  iconColor: const Color(0xFF9333EA),
-                  textColor: const Color(0xFF7E22CE),
-                ),
-              ),
-            ],
-          ),
+          if (MetricItems.length >= 4) ...[
+            Row(
+              children: [
+                Expanded(child: MetricItems[0]),
+                const SizedBox(width: 12),
+                Expanded(child: MetricItems[1]),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(child: MetricItems[2]),
+                const SizedBox(width: 12),
+                Expanded(child: MetricItems[3]),
+              ],
+            ),
+          ] else ...[
+            const Center(child: Text("Insufficient metric data")),
+          ],
         ],
       ),
     );
@@ -109,7 +64,6 @@ class KeyMetricsCard extends StatelessWidget {
 }
 
 class MetricItem extends StatelessWidget {
-
   final String iconPath;
   final String value;
   final String label;
@@ -130,27 +84,45 @@ class MetricItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = context.isDarkMode;
+
+    // Resolve readable high-contrast colors dynamically in Dark Mode
+    Color resolvedTextColor = textColor;
+    Color resolvedIconColor = iconColor;
+
+    if (isDark) {
+      if (textColor.value == 0xFF0F766E || textColor.value == 0xFF166534) {
+        resolvedTextColor = Colors.green.shade300;
+        resolvedIconColor = Colors.green.shade300;
+      } else if (textColor.value == 0xFF1D4ED8) {
+        resolvedTextColor = Colors.blue.shade300;
+        resolvedIconColor = Colors.blue.shade300;
+      } else if (textColor.value == 0xFF7E22CE || textColor.value == 0xFF6D28D9) {
+        resolvedTextColor = const Color(0xFFB57BEE);
+        resolvedIconColor = const Color(0xFFB57BEE);
+      } else {
+        resolvedTextColor = context.dynamicTextColorPrimary;
+        resolvedIconColor = context.dynamicTextColorPrimary;
+      }
+    }
 
     return Container(
       padding: const EdgeInsets.all(16),
-
       decoration: BoxDecoration(
-        color: backgroundColor,
+        color: isDark ? context.dynamicInputColor : backgroundColor,
         borderRadius: BorderRadius.circular(16),
+        border: isDark ? Border.all(color: Colors.white10) : null,
       ),
-
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           /// ICON
           Image.asset(
             iconPath,
             width: 24,
             height: 24,
-            color: iconColor,
+            color: resolvedIconColor,
           ),
-
           const SizedBox(height: 12),
 
           /// VALUE
@@ -159,10 +131,9 @@ class MetricItem extends StatelessWidget {
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: textColor,
+              color: resolvedTextColor,
             ),
           ),
-
           const SizedBox(height: 4),
 
           /// LABEL
@@ -170,7 +141,7 @@ class MetricItem extends StatelessWidget {
             label,
             style: TextStyle(
               fontSize: 13,
-              color: textColor.withOpacity(.8),
+              color: isDark ? Colors.grey.shade400 : resolvedTextColor.withOpacity(.8),
             ),
           ),
         ],
@@ -178,4 +149,3 @@ class MetricItem extends StatelessWidget {
     );
   }
 }
-

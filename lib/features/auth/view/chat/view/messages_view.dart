@@ -83,7 +83,7 @@ class _MessagesViewState extends State<MessagesView> {
                         context.read<ConversationsCubit>().loadConversations(),
                     child: ListView.separated(
                       physics: const AlwaysScrollableScrollPhysics(),
-                      padding: EdgeInsets.zero,
+                      padding: const EdgeInsets.only(bottom: 120),
                       itemCount: state.conversations.length,
                       separatorBuilder: (_, __) => Divider(
                         height: 1,

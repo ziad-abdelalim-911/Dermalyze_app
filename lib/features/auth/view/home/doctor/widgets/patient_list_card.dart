@@ -2,6 +2,7 @@ import 'package:dermalyze/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class PatientListItem {
+  final String id;
   final String name;
   final String diagnosis;
   final String qualityBadge;
@@ -10,6 +11,7 @@ class PatientListItem {
   final String lastVisit;
 
   const PatientListItem({
+    required this.id,
     required this.name,
     required this.diagnosis,
     required this.qualityBadge,
@@ -22,11 +24,13 @@ class PatientListItem {
 class PatientListCard extends StatelessWidget {
   final List<PatientListItem> patients;
   final ValueChanged<PatientListItem> onPatientTap;
+  final ValueChanged<PatientListItem>? onChatTap;
 
   const PatientListCard({
     super.key,
     required this.patients,
     required this.onPatientTap,
+    this.onChatTap,
   });
 
   Color _qualityColor(String badge) {
@@ -122,6 +126,33 @@ class PatientListCard extends StatelessWidget {
                   patient.statusBadge,
                   _statusColor(patient.statusBadge),
                 ),
+                if (onChatTap != null) ...[
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: () => onChatTap!(patient),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.SkyBlue.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.chat_bubble_outline, size: 16, color: AppColors.SkyBlue),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Chat',
+                            style: TextStyle(
+                              color: AppColors.SkyBlue,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
             const SizedBox(height: 4),

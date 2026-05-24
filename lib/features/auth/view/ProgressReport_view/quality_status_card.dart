@@ -1,3 +1,4 @@
+import 'package:dermalyze/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
 class QualityStatusCard extends StatelessWidget {
@@ -14,55 +15,68 @@ class QualityStatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = context.isDarkMode;
+
     return Container(
       padding: const EdgeInsets.all(16),
-
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(.2), blurRadius: 10),
+          BoxShadow(
+              color: Colors.black.withOpacity(isDark ? .3 : .2),
+              blurRadius: 10),
         ],
       ),
-
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           /// TITLE
-          const Text(
+          Text(
             "Quality Status",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: context.dynamicTextColorPrimary,
+            ),
           ),
-
           const SizedBox(height: 16),
 
           /// CURRENT
           _buildRow(
+            context: context,
             title: "Current",
             value: current,
-            color: const Color(0xFF22C55E),
-            bgColor: const Color(0xFFE7F6EC),
+            color: isDark ? Colors.green.shade300 : const Color(0xFF22C55E),
+            bgColor: isDark
+                ? Colors.green.withOpacity(0.2)
+                : const Color(0xFFE7F6EC),
           ),
 
           const SizedBox(height: 12),
 
           /// LAST MONTH
           _buildRow(
+            context: context,
             title: "Last Month",
             value: lastMonth,
-            color: Theme.of(context).cardColor,
-            bgColor: const Color(0xFFFEF3C7),
+            color: isDark ? Colors.amber.shade300 : const Color(0xFFD97706),
+            bgColor: isDark
+                ? Colors.amber.withOpacity(0.2)
+                : const Color(0xFFFEF3C7),
           ),
 
           const SizedBox(height: 12),
 
           /// INITIAL
           _buildRow(
+            context: context,
             title: "Initial",
             value: initial,
-            color: const Color(0xFFEF4444),
-            bgColor: const Color(0xFFFEE2E2),
+            color: isDark ? Colors.red.shade300 : const Color(0xFFEF4444),
+            bgColor: isDark
+                ? Colors.red.withOpacity(0.2)
+                : const Color(0xFFFEE2E2),
           ),
         ],
       ),
@@ -71,6 +85,7 @@ class QualityStatusCard extends StatelessWidget {
 
   /// reusable row
   Widget _buildRow({
+    required BuildContext context,
     required String title,
     required String value,
     required Color color,
@@ -81,17 +96,18 @@ class QualityStatusCard extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w400,
+            color: context.dynamicTextColorPrimary,
+          ),
         ),
-
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-
           decoration: BoxDecoration(
             color: bgColor,
             borderRadius: BorderRadius.circular(20),
           ),
-
           child: Text(
             value,
             style: TextStyle(color: color, fontWeight: FontWeight.w600),

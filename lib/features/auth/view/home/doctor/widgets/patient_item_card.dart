@@ -2,6 +2,7 @@ import 'package:dermalyze/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class PatientItemCard extends StatelessWidget {
+  final String id;
   final String name;
   final String diagnosis;
   final String statusBadge;
@@ -10,9 +11,11 @@ class PatientItemCard extends StatelessWidget {
   final String lastVisit;
   final int age;
   final VoidCallback onTap;
+  final VoidCallback? onChatTap;
 
   const PatientItemCard({
     super.key,
+    required this.id,
     required this.name,
     required this.diagnosis,
     required this.statusBadge,
@@ -21,6 +24,7 @@ class PatientItemCard extends StatelessWidget {
     required this.lastVisit,
     required this.age,
     required this.onTap,
+    this.onChatTap,
   });
 
   Color _statusColor(String status) {
@@ -110,10 +114,28 @@ class PatientItemCard extends StatelessWidget {
                           color: AppColors.Black,
                         ),
                       ),
-                      Icon(
-                        Icons.arrow_forward_ios,
-                        size: 14,
-                        color: AppColors.Gray,
+                      Row(
+                        children: [
+                          if (onChatTap != null)
+                            GestureDetector(
+                              onTap: onChatTap,
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: AppColors.SkyBlue.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(Icons.chat_bubble_outline, size: 16, color: AppColors.SkyBlue),
+                              ),
+                            ),
+                          if (onChatTap != null)
+                            const SizedBox(width: 8),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: 14,
+                            color: AppColors.Gray,
+                          ),
+                        ],
                       ),
                     ],
                   ),

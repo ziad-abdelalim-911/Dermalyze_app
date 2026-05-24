@@ -17,6 +17,15 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // try {
+  //   await Firebase.initializeApp();
+  //   await PushNotificationService.initialize(navigatorKey);
+  // } catch (e) {
+  //   print("⚠️ Firebase initialization failed: $e");
+  //   print("⚠️ Please make sure you have run 'flutterfire configure' and provided google-services.json");
+  // }
+
   final prefs = await SharedPreferences.getInstance();
   final isDark = prefs.getBool('app_theme_mode') ?? false;
   

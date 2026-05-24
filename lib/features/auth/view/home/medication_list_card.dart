@@ -60,12 +60,20 @@ class MedicationListCard extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white12
+                          : Colors.grey.shade200,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       "${medications.length} Active",
-                      style: const TextStyle(fontSize: 12),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : Colors.black87,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],

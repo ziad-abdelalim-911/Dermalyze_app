@@ -175,6 +175,7 @@ class _AllPatientsScreenState extends State<AllPatientsScreen> {
                       itemBuilder: (_, i) {
                         final p = filtered[i];
                         return PatientItemCard(
+                          id: p.id,
                           name: p.name,
                           diagnosis: p.diagnosis,
                           statusBadge: p.statusBadge,
@@ -182,6 +183,17 @@ class _AllPatientsScreenState extends State<AllPatientsScreen> {
                           recoveryRate: p.recoveryRate,
                           lastVisit: p.lastVisit,
                           age: p.age,
+                          onChatTap: () {
+                            Navigator.pushNamed(
+                              context,
+                              AppRoutes.chat,
+                              arguments: {
+                                'receiverId': p.id,
+                                'receiverName': p.name,
+                                'receiverRole': 'patient',
+                              },
+                            );
+                          },
                           // ✅ يمرر الـ PatientEntity الحقيقي
                           onTap: () async {
                             await Navigator.pushNamed(

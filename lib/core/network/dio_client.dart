@@ -48,14 +48,17 @@ class DioClient {
               
               final context = navigatorKey.currentContext;
               if (context != null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Session expired. Please log in again.')),
-                );
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                  AppRoutes.login,
-                  (route) => false,
-                );
+                // Use root scaffold messenger if available, or ignore
+                try {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Session expired. Please log in again.')),
+                  );
+                } catch (_) {}
               }
+              navigatorKey.currentState?.pushNamedAndRemoveUntil(
+                AppRoutes.login,
+                (route) => false,
+              );
               
               // Reset flag after 3 seconds to allow future logins
               Future.delayed(const Duration(seconds: 3), () {

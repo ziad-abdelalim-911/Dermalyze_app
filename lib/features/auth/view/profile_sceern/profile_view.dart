@@ -76,9 +76,10 @@ class _ProfileViewState extends State<ProfileView> {
           : const Color(0xFFF4F6FA),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                // ── Gradient Header ──────────────────────────────
+          : SingleChildScrollView(
+              child: Column(
+                children: [
+                  // ── Gradient Header ──────────────────────────────
                 Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
@@ -95,18 +96,33 @@ class _ProfileViewState extends State<ProfileView> {
                       child: Column(
                         children: [
                           // Title row
-                          if (Navigator.canPop(context))
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.arrow_back_ios_new,
-                                    color: Theme.of(context).cardColor,
-                                    size: 16,
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    if (Navigator.canPop(context)) {
+                                      Navigator.pop(context);
+                                    } else {
+                                      Navigator.of(context, rootNavigator: true)
+                                          .pushNamedAndRemoveUntil(
+                                              AppRoutes.bottomNavBar,
+                                              (route) => false);
+                                    }
+                                  },
+                                    child: Container(
+                                      width: 40,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).cardColor,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
+                                    ),
                                   ),
-                                  SizedBox(width: 8),
+                                  SizedBox(width: 12),
                                   Text(
                                     'Profile',
                                     style: TextStyle(
@@ -158,13 +174,12 @@ class _ProfileViewState extends State<ProfileView> {
                 ),
 
                 // ── Body ────────────────────────────────────────
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // ── Personal Information ─────────────────
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 120),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // ── Personal Information ─────────────────
                         _buildCard(
                           cardBg: cardBg,
                           child: Column(
@@ -417,13 +432,12 @@ class _ProfileViewState extends State<ProfileView> {
                             ),
                           ),
                         ),
-
                         const SizedBox(height: 16),
                       ],
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
     );
   }

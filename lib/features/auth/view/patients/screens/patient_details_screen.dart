@@ -1,5 +1,6 @@
 import 'package:dermalyze/core/constants/app_colors.dart';
 import 'package:dermalyze/core/routes/app_routes.dart';
+import 'package:dermalyze/core/theme/theme_extensions.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/domain/entities/patient_entity.dart';
 import 'package:dermalyze/features/auth/view/patients/data/analysis_repository.dart';
 import 'package:dermalyze/features/auth/view/patients/data/review_repository.dart';
@@ -114,15 +115,60 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
         TimelineItem(label: 'No analyses yet', badge: 'N/A', date: '—'),
       ];
     }
-    return _analyses.take(5).map((a) {
-      final map = a as Map<String, dynamic>;
-      return TimelineItem(
-        label: map['stage'] ?? map['condition'] ?? 'Scan',
-        badge: map['severity'] ?? 'N/A',
-        date: map['createdAt'] ?? map['date'] ?? '—',
+
+    // Sort analyses by date ascending (oldest first)
+    final sortedAnalyses = List<dynamic>.from(_analyses)..sort((a, b) {
+      final dateA = DateTime.tryParse(a['createdAt'] ?? a['date'] ?? '') ?? DateTime.now();
+      final dateB = DateTime.tryParse(b['createdAt'] ?? b['date'] ?? '') ?? DateTime.now();
+      return dateA.compareTo(dateB);
+    });
+
+    final initialDate = DateTime.tryParse(sortedAnalyses.first['createdAt'] ?? sortedAnalyses.first['date'] ?? '');
+
+    List<TimelineItem> items = [];
+    for (int i = 0; i < sortedAnalyses.length; i++) {
+      final map = sortedAnalyses[i] as Map<String, dynamic>;
+      
+      String label;
+      if (i == 0) {
+        label = 'Initial';
+      } else if (i == sortedAnalyses.length - 1 && sortedAnalyses.length > 1) {
+        label = 'Current';
+      } else {
+        if (initialDate != null) {
+          final currentDate = DateTime.tryParse(map['createdAt'] ?? map['date'] ?? '');
+          if (currentDate != null) {
+            final days = currentDate.difference(initialDate).inDays;
+            final weeks = (days / 7).round();
+            label = weeks > 0 ? 'Week $weeks' : 'Follow up $i';
+          } else {
+            label = 'Follow up $i';
+          }
+        } else {
+          label = 'Follow up $i';
+        }
+      }
+
+      items.add(TimelineItem(
+        label: map['stage'] ?? label,
+        badge: map['severity'] ?? 'Medium',
+        date: _formatDateStr(map['createdAt'] ?? map['date']),
         improvement: map['improvement'],
-      );
-    }).toList();
+      ));
+    }
+
+    return items;
+  }
+
+  String _formatDateStr(String? isoString) {
+    if (isoString == null || isoString.isEmpty) return '—';
+    try {
+      final date = DateTime.parse(isoString);
+      final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return '${months[date.month - 1]} ${date.day.toString().padLeft(2, '0')}, ${date.year}';
+    } catch (_) {
+      return isoString;
+    }
   }
 
   // Build medications from real data
@@ -212,10 +258,53 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
           ),
           Text(
             'Review and manage case',
-            style: TextStyle(fontSize: 12, color: AppColors.Gray),
+            style: TextStyle(fontSize: 12, color: context.dynamicTextColorSecondary),
           ),
         ],
       ),
+      actions: [
+        if (_patient != null)
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: Center(
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.chat,
+                    arguments: {
+                      'receiverId': _patient!.id,
+                      'receiverName': _patient!.name,
+                      'receiverRole': 'Patient',
+                    },
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.SkyBlue.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.chat_bubble_outline,
+                          size: 18, color: AppColors.SkyBlue),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Chat',
+                        style: TextStyle(
+                          color: AppColors.SkyBlue,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 

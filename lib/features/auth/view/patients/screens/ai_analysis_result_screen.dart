@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:dermalyze/core/constants/app_colors.dart';
+import 'package:dermalyze/core/theme/theme_extensions.dart';
 import 'package:dermalyze/features/auth/view/patients/data/review_repository.dart';
 import 'package:dermalyze/features/auth/view/patients/widgets/ai_recommendation_card.dart';
 import 'package:dermalyze/features/auth/view/patients/widgets/detailed_analysis_card.dart';
@@ -184,8 +186,18 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
 
                         // Comparison View
                         _isSideBySide
-                            ? const ImageComparisonCard()
-                            : const SliderComparisonCard(),
+                            ? ImageComparisonCard(
+                                currentImageFile: _result?['currentImageFile'] as File?,
+                                previousImageUrl: (_result?['previousScan'] as Map<String, dynamic>?)?['imageUrl'] as String? ?? (_result?['previousScan'] as Map<String, dynamic>?)?['image'] as String?,
+                                previousSeverity: (_result?['previousScan'] as Map<String, dynamic>?)?['severity'] as String? ?? 'N/A',
+                                currentSeverity: _severity,
+                              )
+                            : SliderComparisonCard(
+                                currentImageFile: _result?['currentImageFile'] as File?,
+                                previousImageUrl: (_result?['previousScan'] as Map<String, dynamic>?)?['imageUrl'] as String? ?? (_result?['previousScan'] as Map<String, dynamic>?)?['image'] as String?,
+                                previousSeverity: (_result?['previousScan'] as Map<String, dynamic>?)?['severity'] as String? ?? 'N/A',
+                                currentSeverity: _severity,
+                              ),
                         const SizedBox(height: 16),
 
                         // Progress Statistics
@@ -242,7 +254,7 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
         children: [
           Text(
             'Analysis for:',
-            style: TextStyle(fontSize: 13, color: AppColors.Gray),
+            style: TextStyle(fontSize: 13, color: context.dynamicTextColorSecondary),
           ),
           const SizedBox(height: 12),
           Container(
@@ -267,8 +279,8 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
                     child: Text(
                       // initials من اسم المريض الحقيقي
                       _getInitials(_result?['patientName'] ?? ''),
-                      style: TextStyle(
-                        color: Theme.of(context).cardColor,
+                      style: const TextStyle(
+                        color: Colors.white,
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
@@ -297,7 +309,7 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
                     Text(
                       'Confidence: $_confidence',
                       style: TextStyle(
-                          fontSize: 12, color: AppColors.Gray),
+                          fontSize: 12, color: context.dynamicTextColorSecondary),
                     ),
                   ],
                 ),
@@ -349,7 +361,7 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: selected ? Colors.white : AppColors.Gray,
+                color: selected ? Colors.white : context.dynamicTextColorSecondary,
               ),
             ),
           ),
@@ -381,11 +393,11 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
               ),
             ),
             icon: _isSaving
-                ? SizedBox(
+                ? const SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
-                        color: Theme.of(context).cardColor, strokeWidth: 2),
+                        color: Colors.white, strokeWidth: 2),
                   )
                 : const Icon(Icons.save_outlined, color: Colors.white, size: 20),
             label: Text(

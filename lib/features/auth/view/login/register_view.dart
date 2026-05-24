@@ -5,6 +5,7 @@ import 'package:dermalyze/features/auth/view/login/Patient_SignUp.dart';
 import 'package:dermalyze/features/auth/view/login/doctor_SignUp.dart';
 import 'package:dermalyze/features/auth/view/login/login_view.dart';
 import 'package:flutter/material.dart';
+import 'package:dermalyze/core/theme/theme_extensions.dart';
 import 'package:flutter_svg/flutter_svg.dart' show SvgPicture;
 
 class RegisterView extends StatefulWidget {
@@ -18,12 +19,12 @@ class _RegisterViewState extends State<RegisterView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primaryColor,
+      backgroundColor: context.dynamicBgColor,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Center(
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -45,7 +46,7 @@ class _RegisterViewState extends State<RegisterView> {
                     ),
                   ),
 
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
                   Text(
                     "DERMALYZE",
@@ -56,7 +57,7 @@ class _RegisterViewState extends State<RegisterView> {
                       foreground: Paint()
                         ..shader =
                             LinearGradient(
-                              colors: [
+                              colors: const [
                                 Color(0xFF4A90E2),
                                 Color(0xFF4DC1CA),
                               ],
@@ -66,36 +67,36 @@ class _RegisterViewState extends State<RegisterView> {
                     ),
                   ),
 
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
 
                   Text(
                     "AI-Powered Skin Monitoring",
                     style: TextStyle(
                       fontWeight: FontWeight.w400,
                       fontSize: 14,
-                      color: AppColors.Gray3,
+                      color: context.dynamicTextColorSecondary,
                     ),
                   ),
 
-                  SizedBox(height: 48),
+                  const SizedBox(height: 48),
 
                   Text(
                     "Register As",
                     style: TextStyle(
                       fontWeight: FontWeight.w400,
                       fontSize: 30,
-                      color: AppColors.Black2,
+                      color: context.dynamicTextColorPrimary,
                     ),
                   ),
 
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
 
                   Text(
                     "Choose your account type to continue",
                     style: TextStyle(
                       fontWeight: FontWeight.w400,
                       fontSize: 16,
-                      color: AppColors.Gray3,
+                      color: context.dynamicTextColorSecondary,
                     ),
                   ),
 
@@ -159,7 +160,7 @@ class _RegisterViewState extends State<RegisterView> {
                       Text(
                         "Already have an account? ",
                         style: TextStyle(
-                          color: AppColors.Gray3,
+                          color: context.dynamicTextColorSecondary,
                           fontWeight: FontWeight.w400,
                         ),
                       ),

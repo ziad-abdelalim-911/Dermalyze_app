@@ -5,6 +5,7 @@ import 'package:dermalyze/features/auth/view/login/register_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
+import 'package:dermalyze/core/theme/theme_extensions.dart';
 
 class OnboardingContent {
   final String icon;
@@ -93,7 +94,7 @@ class _OnBoardingViewState extends State<OnBoardingView>
         width: double.infinity,
         height: double.infinity,
         decoration: BoxDecoration(
-          gradient: AppColors.primaryGradient1,
+          gradient: context.dynamicBgGradient,
         ),
         child: SafeArea(
           child: Column(
@@ -109,7 +110,7 @@ class _OnBoardingViewState extends State<OnBoardingView>
                         context,
                         PageRouteBuilder(
                           pageBuilder: (context, animation, secondaryAnimation) =>
-                              RegisterView(),
+                              const RegisterView(),
                           transitionsBuilder:
                               (context, animation, secondaryAnimation, child) {
                             return FadeTransition(opacity: animation, child: child);
@@ -126,7 +127,7 @@ class _OnBoardingViewState extends State<OnBoardingView>
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.Gray.withOpacity(0.8),
+                          color: context.dynamicTextColorSecondary,
                         ),
                       ),
                     ),
@@ -259,7 +260,7 @@ class _OnBoardingViewState extends State<OnBoardingView>
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.Gray.withOpacity(0.6),
+                    color: context.dynamicTextColorSecondary,
                     letterSpacing: 0.2,
                   ),
                 ),
@@ -378,10 +379,10 @@ class _OnBoardingViewState extends State<OnBoardingView>
           // Subtitle
           Text(
             content.subtitle,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF1E2D3D), // Dark premium color
+              color: context.dynamicTextColorPrimary,
               letterSpacing: 0.2,
             ),
           ),
@@ -397,7 +398,7 @@ class _OnBoardingViewState extends State<OnBoardingView>
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w400,
-                color: const Color(0xFF64748B), // Slate gray
+                color: context.dynamicTextColorSecondary,
                 height: 1.5,
                 letterSpacing: 0.1,
               ),

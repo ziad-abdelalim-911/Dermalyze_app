@@ -1,6 +1,7 @@
 import 'package:dermalyze/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:dermalyze/core/theme/theme_extensions.dart';
 
 class AccountTypeCard extends StatelessWidget {
   final String title;
@@ -23,15 +24,15 @@ class AccountTypeCard extends StatelessWidget {
     return Container(
       height: 260,
       width: double.infinity,
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.Gray2, width: 1),
+        border: Border.all(color: context.dynamicBorderColor, width: 1),
         boxShadow: [
           BoxShadow(
             blurRadius: 10,
-            color: Colors.black.withOpacity(0.20),
+            color: Colors.black.withValues(alpha: context.isDarkMode ? 0.30 : 0.15),
             offset: const Offset(0, 4),
           ),
         ],
@@ -47,7 +48,7 @@ class AccountTypeCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.20),
+                    color: Colors.black.withValues(alpha: 0.20),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -62,8 +63,19 @@ class AccountTypeCard extends StatelessWidget {
                 ),
               ),
             ),
-            title: Text(title),
-            subtitle: Text(subtitle),
+            title: Text(
+              title,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: context.dynamicTextColorPrimary,
+              ),
+            ),
+            subtitle: Text(
+              subtitle,
+              style: TextStyle(
+                color: context.dynamicTextColorSecondary,
+              ),
+            ),
             trailing: InkWell(
               onTap: () {
                 Navigator.push(
@@ -71,7 +83,11 @@ class AccountTypeCard extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => navigateTo),
                 );
               },
-              child: const Icon(Icons.arrow_forward_ios, size: 16),
+              child: Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: context.dynamicTextColorSecondary,
+              ),
             ),
           ),
 
@@ -91,7 +107,13 @@ class AccountTypeCard extends StatelessWidget {
                         color: Colors.blue,
                       ),
                       const SizedBox(width: 4),
-                      Text(e, style: const TextStyle(fontSize: 12)),
+                      Text(
+                        e,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: context.dynamicTextColorPrimary,
+                        ),
+                      ),
                     ],
                   ),
                 )

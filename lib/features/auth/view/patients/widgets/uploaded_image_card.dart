@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dermalyze/core/constants/app_colors.dart';
+import 'package:dermalyze/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
 class UploadedImageCard extends StatelessWidget {
@@ -42,7 +43,7 @@ class UploadedImageCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.Black,
+                  color: context.dynamicTextColorPrimary,
                 ),
               ),
             ],
@@ -72,7 +73,7 @@ class UploadedImageCard extends StatelessWidget {
                     child: Icon(
                       Icons.image_outlined,
                       size: 48,
-                      color: AppColors.Gray2,
+                      color: context.dynamicTextColorSecondary,
                     ),
                   ),
           ),
@@ -84,7 +85,12 @@ class UploadedImageCard extends StatelessWidget {
             child: OutlinedButton(
               onPressed: onReupload,
               style: OutlinedButton.styleFrom(
-                side: BorderSide(color: AppColors.Gray2, width: 1.5),
+                side: BorderSide(
+                  color: context.isDarkMode
+                      ? Colors.white24
+                      : AppColors.Gray2,
+                  width: 1.5,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -94,7 +100,7 @@ class UploadedImageCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.Black,
+                  color: context.dynamicTextColorPrimary,
                 ),
               ),
             ),

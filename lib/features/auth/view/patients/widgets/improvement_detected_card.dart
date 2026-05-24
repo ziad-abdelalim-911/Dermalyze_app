@@ -22,12 +22,12 @@ class ImprovementDetectedCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Row(
+          const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.check_circle_outline, color: Theme.of(context).cardColor, size: 22),
-              const SizedBox(width: 8),
-              const Text(
+              Icon(Icons.check_circle_outline, color: Colors.white, size: 22),
+              SizedBox(width: 8),
+              Text(
                 'Improvement Detected',
                 style: TextStyle(
                   color: Colors.white,

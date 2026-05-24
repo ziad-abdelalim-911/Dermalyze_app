@@ -217,6 +217,18 @@ class _ProgressReportViewState extends State<ProgressReportView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          final user = await _tokenStorage.getUser();
+          final patientId = user?['_id'] ?? user?['id'] ?? '';
+          if (context.mounted) {
+            Navigator.pushNamed(context, '/uploadAnalyze', arguments: {'patientId': patientId});
+          }
+        },
+        backgroundColor: const Color(0xFF2563EB),
+        icon: const Icon(Icons.add_a_photo, color: Colors.white),
+        label: const Text('New Scan', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      ),
       body: Column(
         children: [
           /// HEADER

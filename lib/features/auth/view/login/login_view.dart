@@ -8,6 +8,7 @@ import 'package:dermalyze/features/Login2/presentation/bloc/login_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:dermalyze/core/theme/theme_extensions.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -82,7 +83,7 @@ class _LoginViewState extends State<LoginView> {
             body: Container(
               width: double.infinity,
               height: double.infinity,
-              decoration: BoxDecoration(gradient: AppColors.primaryGradient1),
+              decoration: BoxDecoration(gradient: context.dynamicBgGradient),
               child: SafeArea(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -114,12 +115,12 @@ class _LoginViewState extends State<LoginView> {
                         ShaderMask(
                           shaderCallback: (bounds) =>
                               AppColors.primaryGradient2.createShader(bounds),
-                          child: Text(
+                          child: const Text(
                             'DERMALYZE',
                             style: TextStyle(
                               fontSize: 30,
                               fontWeight: FontWeight.w700,
-                              color: Theme.of(context).cardColor,
+                              color: Colors.white,
                               letterSpacing: 1.5,
                             ),
                           ),
@@ -129,7 +130,7 @@ class _LoginViewState extends State<LoginView> {
                           'AI-Powered Skin Monitoring',
                           style: TextStyle(
                             fontSize: 14,
-                            color: AppColors.Gray,
+                            color: context.dynamicTextColorSecondary,
                           ),
                         ),
                         const SizedBox(height: 32),
@@ -143,7 +144,7 @@ class _LoginViewState extends State<LoginView> {
                             borderRadius: BorderRadius.circular(24),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.blueGrey.withValues(alpha: 0.08),
+                                color: Colors.black.withValues(alpha: context.isDarkMode ? 0.25 : 0.08),
                                 blurRadius: 20,
                                 offset: const Offset(0, 4),
                               ),
@@ -159,7 +160,7 @@ class _LoginViewState extends State<LoginView> {
                                   style: TextStyle(
                                     fontSize: 22,
                                     fontWeight: FontWeight.w700,
-                                    color: AppColors.Black,
+                                    color: context.dynamicTextColorPrimary,
                                   ),
                                 ),
                               ),
@@ -171,7 +172,7 @@ class _LoginViewState extends State<LoginView> {
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w500,
-                                  color: AppColors.Black,
+                                  color: context.dynamicTextColorPrimary,
                                 ),
                               ),
                               const SizedBox(height: 8),
@@ -179,27 +180,28 @@ class _LoginViewState extends State<LoginView> {
                                 controller: _emailController,
                                 keyboardType: TextInputType.emailAddress,
                                 validator: _validateEmail,
+                                cursorColor: context.dynamicTextColorPrimary,
                                 style: TextStyle(
-                                    fontSize: 14, color: AppColors.Black),
+                                    fontSize: 14, color: context.dynamicTextColorPrimary),
                                 decoration: InputDecoration(
                                   hintText: 'Enter your E-mail',
                                   hintStyle: TextStyle(
-                                      fontSize: 14, color: AppColors.Gray),
+                                      fontSize: 14, color: context.dynamicTextColorSecondary),
                                   prefixIcon: Icon(Icons.person_outline,
                                       color: AppColors.SkyBlue, size: 20),
                                   filled: true,
-                                  fillColor: Colors.white,
+                                  fillColor: context.dynamicInputColor,
                                   contentPadding: const EdgeInsets.symmetric(
                                       vertical: 14),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(14),
                                     borderSide: BorderSide(
-                                        color: AppColors.Gray2, width: 1.5),
+                                        color: context.dynamicBorderColor, width: 1.5),
                                   ),
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(14),
                                     borderSide: BorderSide(
-                                        color: AppColors.Gray2, width: 1.5),
+                                        color: context.dynamicBorderColor, width: 1.5),
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(14),
@@ -226,7 +228,7 @@ class _LoginViewState extends State<LoginView> {
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w500,
-                                  color: AppColors.Black,
+                                  color: context.dynamicTextColorPrimary,
                                 ),
                               ),
                               const SizedBox(height: 8),
@@ -234,12 +236,13 @@ class _LoginViewState extends State<LoginView> {
                                 controller: _passwordController,
                                 obscureText: _isPasswordHidden,
                                 validator: _validatePassword,
+                                cursorColor: context.dynamicTextColorPrimary,
                                 style: TextStyle(
-                                    fontSize: 14, color: AppColors.Black),
+                                    fontSize: 14, color: context.dynamicTextColorPrimary),
                                 decoration: InputDecoration(
                                   hintText: 'Enter your password',
                                   hintStyle: TextStyle(
-                                      fontSize: 14, color: AppColors.Gray),
+                                      fontSize: 14, color: context.dynamicTextColorSecondary),
                                   prefixIcon: Icon(Icons.lock_outline,
                                       color: AppColors.SkyBlue, size: 20),
                                   suffixIcon: IconButton(
@@ -247,25 +250,25 @@ class _LoginViewState extends State<LoginView> {
                                       _isPasswordHidden
                                           ? Icons.visibility_off_outlined
                                           : Icons.visibility_outlined,
-                                      color: AppColors.Gray,
+                                      color: context.dynamicTextColorSecondary,
                                       size: 20,
                                     ),
                                     onPressed: () => setState(() =>
                                         _isPasswordHidden = !_isPasswordHidden),
                                   ),
                                   filled: true,
-                                  fillColor: Colors.white,
+                                  fillColor: context.dynamicInputColor,
                                   contentPadding: const EdgeInsets.symmetric(
                                       vertical: 14),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(14),
                                     borderSide: BorderSide(
-                                        color: AppColors.Gray2, width: 1.5),
+                                        color: context.dynamicBorderColor, width: 1.5),
                                   ),
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(14),
                                     borderSide: BorderSide(
-                                        color: AppColors.Gray2, width: 1.5),
+                                        color: context.dynamicBorderColor, width: 1.5),
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(14),
@@ -358,7 +361,7 @@ class _LoginViewState extends State<LoginView> {
                               ),
                               const SizedBox(height: 16),
 
-                              Divider(color: AppColors.Gray2),
+                              Divider(color: context.dynamicBorderColor),
                               const SizedBox(height: 16),
 
                               // ── Sign Up ──
@@ -371,7 +374,7 @@ class _LoginViewState extends State<LoginView> {
                                       text: "Don't have an account? ",
                                       style: TextStyle(
                                         fontSize: 14,
-                                        color: AppColors.Gray,
+                                        color: context.dynamicTextColorSecondary,
                                       ),
                                       children: [
                                         TextSpan(
@@ -397,12 +400,12 @@ class _LoginViewState extends State<LoginView> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(Icons.security_outlined,
-                                size: 14, color: AppColors.Gray),
+                                size: 14, color: context.dynamicTextColorSecondary),
                             const SizedBox(width: 6),
                             Text(
                               'Secure medical platform • HIPAA Compliant',
                               style: TextStyle(
-                                  fontSize: 12, color: AppColors.Gray),
+                                  fontSize: 12, color: context.dynamicTextColorSecondary),
                             ),
                           ],
                         ),

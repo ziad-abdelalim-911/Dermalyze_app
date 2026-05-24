@@ -1,4 +1,5 @@
 import 'package:dermalyze/core/constants/app_colors.dart';
+import 'package:dermalyze/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
 class AiAnalysisProgressCard extends StatelessWidget {
@@ -43,7 +44,7 @@ class AiAnalysisProgressCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: AppColors.Black,
+              color: context.dynamicTextColorPrimary,
             ),
           ),
           const SizedBox(height: 6),
@@ -51,7 +52,7 @@ class AiAnalysisProgressCard extends StatelessWidget {
             'Comparing with previous scans...',
             style: TextStyle(
               fontSize: 13,
-              color: AppColors.Gray,
+              color: context.dynamicTextColorSecondary,
             ),
           ),
         ],

@@ -1,4 +1,5 @@
 import 'package:dermalyze/core/constants/app_colors.dart';
+import 'package:dermalyze/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
 class ProgressStatisticsCard extends StatelessWidget {
@@ -47,7 +48,7 @@ class ProgressStatisticsCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.Black,
+                  color: context.dynamicTextColorPrimary,
                 ),
               ),
             ],
@@ -64,7 +65,10 @@ class ProgressStatisticsCard extends StatelessWidget {
                     color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                        color: const Color(0xFFFFCDD2), width: 1),
+                        color: context.isDarkMode
+                            ? Colors.red.withOpacity(0.4)
+                            : const Color(0xFFFFCDD2),
+                        width: 1),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,7 +76,7 @@ class ProgressStatisticsCard extends StatelessWidget {
                       Text(
                         'Previous Severity',
                         style: TextStyle(
-                            fontSize: 11, color: AppColors.Gray),
+                            fontSize: 11, color: context.dynamicTextColorSecondary),
                       ),
                       const SizedBox(height: 6),
                       Text(
@@ -86,7 +90,7 @@ class ProgressStatisticsCard extends StatelessWidget {
                       Text(
                         previousDate,
                         style: TextStyle(
-                            fontSize: 11, color: AppColors.Gray),
+                            fontSize: 11, color: context.dynamicTextColorSecondary),
                       ),
                     ],
                   ),
@@ -109,7 +113,7 @@ class ProgressStatisticsCard extends StatelessWidget {
                       Text(
                         'Current Severity',
                         style: TextStyle(
-                            fontSize: 11, color: AppColors.Gray),
+                            fontSize: 11, color: context.dynamicTextColorSecondary),
                       ),
                       const SizedBox(height: 6),
                       Text(
@@ -123,7 +127,7 @@ class ProgressStatisticsCard extends StatelessWidget {
                       Text(
                         'Today',
                         style: TextStyle(
-                            fontSize: 11, color: AppColors.Gray),
+                            fontSize: 11, color: context.dynamicTextColorSecondary),
                       ),
                     ],
                   ),
@@ -134,18 +138,27 @@ class ProgressStatisticsCard extends StatelessWidget {
           const SizedBox(height: 14),
           // Affected Area
           _buildStatRow(
+            context: context,
             label: 'Affected Area',
             oldValue: affectedAreaPrevious,
             newValue: affectedAreaCurrent,
           ),
-          Divider(height: 24, color: AppColors.Gray2.withOpacity(0.5)),
+          Divider(
+            height: 24,
+            color: context.isDarkMode
+                ? Colors.white10
+                : AppColors.Gray2.withOpacity(0.5),
+          ),
           // Improvement Rate
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 'Improvement Rate',
-                style: TextStyle(fontSize: 13, color: AppColors.Black),
+                style: TextStyle(
+                  fontSize: 13,
+                  color: context.dynamicTextColorPrimary,
+                ),
               ),
               Row(
                 children: [
@@ -170,6 +183,7 @@ class ProgressStatisticsCard extends StatelessWidget {
   }
 
   Widget _buildStatRow({
+    required BuildContext context,
     required String label,
     required String oldValue,
     required String newValue,
@@ -177,8 +191,10 @@ class ProgressStatisticsCard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label,
-            style: TextStyle(fontSize: 13, color: AppColors.Black)),
+        Text(
+          label,
+          style: TextStyle(fontSize: 13, color: context.dynamicTextColorPrimary),
+        ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
@@ -186,7 +202,7 @@ class ProgressStatisticsCard extends StatelessWidget {
               oldValue,
               style: TextStyle(
                 fontSize: 12,
-                color: AppColors.Gray,
+                color: context.dynamicTextColorSecondary,
                 decoration: TextDecoration.lineThrough,
               ),
             ),

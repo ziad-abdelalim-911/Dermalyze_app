@@ -30,7 +30,7 @@ class CustomText extends StatelessWidget {
       overflow: overflow,
       style: TextStyle(
         fontSize: size ?? 14,
-        color: color ?? AppColors.Black2,
+        color: color ?? (Theme.of(context).brightness == Brightness.dark ? Colors.white : AppColors.Black2),
         fontWeight: weight ?? FontWeight.w400,
       ),
     );

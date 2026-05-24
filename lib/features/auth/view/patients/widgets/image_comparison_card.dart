@@ -1,8 +1,21 @@
+import 'dart:io';
 import 'package:dermalyze/core/constants/app_colors.dart';
+import 'package:dermalyze/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
 class ImageComparisonCard extends StatelessWidget {
-  const ImageComparisonCard({super.key});
+  final File? currentImageFile;
+  final String? previousImageUrl;
+  final String previousSeverity;
+  final String currentSeverity;
+
+  const ImageComparisonCard({
+    super.key,
+    this.currentImageFile,
+    this.previousImageUrl,
+    required this.previousSeverity,
+    required this.currentSeverity,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +41,7 @@ class ImageComparisonCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: AppColors.Black,
+              color: context.dynamicTextColorPrimary,
             ),
           ),
           const SizedBox(height: 14),
@@ -41,52 +54,38 @@ class ImageComparisonCard extends StatelessWidget {
                     Row(
                       children: [
                         Icon(Icons.camera_alt_outlined,
-                            size: 14, color: AppColors.Gray),
+                            size: 14, color: context.dynamicTextColorSecondary),
                         const SizedBox(width: 4),
                         Text(
                           'Previous Scan',
                           style: TextStyle(
-                              fontSize: 12, color: AppColors.Gray),
+                              fontSize: 12, color: context.dynamicTextColorSecondary),
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
-                    Container(
-                      height: 130,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).cardColor,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Center(
-                        child: Container(
-                          width: 70,
-                          height: 70,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFFFCDD2),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: _buildPreviousImage(context),
                     ),
                     const SizedBox(height: 6),
                     Container(
-                      padding: EdgeInsets.symmetric(
+                      padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: AppColors.Black,
+                        color: context.isDarkMode ? Colors.white24 : AppColors.Black,
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        'Severity: 65%',
-                        style:
-                            TextStyle(color: Theme.of(context).cardColor, fontSize: 11),
+                        'Severity: $previousSeverity',
+                        style: const TextStyle(color: Colors.white, fontSize: 11),
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Jan 15, 2025',
+                      'Previous Date',
                       style:
-                          TextStyle(fontSize: 11, color: AppColors.Gray),
+                          TextStyle(fontSize: 11, color: context.dynamicTextColorSecondary),
                     ),
                   ],
                 ),
@@ -99,54 +98,45 @@ class ImageComparisonCard extends StatelessWidget {
                     Row(
                       children: [
                         Icon(Icons.camera_alt_outlined,
-                            size: 14, color: AppColors.Gray),
+                            size: 14, color: context.dynamicTextColorSecondary),
                         const SizedBox(width: 4),
                         Text(
                           'Current Scan',
                           style: TextStyle(
-                              fontSize: 12, color: AppColors.Gray),
+                              fontSize: 12, color: context.dynamicTextColorSecondary),
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
                     Container(
-                      height: 130,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                             color: AppColors.Turqouoise, width: 2),
                       ),
-                      child: Center(
-                        child: Container(
-                          width: 70,
-                          height: 70,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFC8F5C8),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: _buildCurrentImage(context),
                       ),
                     ),
                     const SizedBox(height: 6),
                     Container(
-                      padding: EdgeInsets.symmetric(
+                      padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: AppColors.Black,
+                        color: context.isDarkMode ? Colors.white24 : AppColors.Black,
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        'Severity: 50%',
-                        style:
-                            TextStyle(color: Theme.of(context).cardColor, fontSize: 11),
+                        'Severity: $currentSeverity',
+                        style: const TextStyle(color: Colors.white, fontSize: 11),
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Today',
                       style:
-                          TextStyle(fontSize: 11, color: AppColors.Gray),
+                          TextStyle(fontSize: 11, color: context.dynamicTextColorSecondary),
                     ),
                   ],
                 ),
@@ -154,6 +144,83 @@ class ImageComparisonCard extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPreviousImage(BuildContext context) {
+    if (previousImageUrl != null && previousImageUrl!.isNotEmpty) {
+      final fullUrl = previousImageUrl!.startsWith('http')
+          ? previousImageUrl!
+          : 'https://dermalyze-backend-final-main-production.up.railway.app/$previousImageUrl';
+      return Image.network(
+        fullUrl,
+        height: 130,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (c, e, s) => _buildPreviousFallback(context),
+      );
+    }
+    return _buildPreviousFallback(context);
+  }
+
+  Widget _buildPreviousFallback(BuildContext context) {
+    return Container(
+      height: 130,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: context.isDarkMode ? const Color(0xFF1E293B) : const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Center(
+        child: Container(
+          width: 70,
+          height: 70,
+          decoration: BoxDecoration(
+            color: Colors.red.withOpacity(context.isDarkMode ? 0.35 : 0.75),
+            shape: BoxShape.circle,
+          ),
+          child: const Center(
+            child: Icon(Icons.warning_amber_rounded, color: Colors.white, size: 24),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCurrentImage(BuildContext context) {
+    if (currentImageFile != null) {
+      return Image.file(
+        currentImageFile!,
+        height: 126, // accounts for the border thickness
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (c, e, s) => _buildCurrentFallback(context),
+      );
+    }
+    return _buildCurrentFallback(context);
+  }
+
+  Widget _buildCurrentFallback(BuildContext context) {
+    return Container(
+      height: 126,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: context.isDarkMode ? const Color(0xFF0F172A) : const Color(0xFFF0FFF0),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Center(
+        child: Container(
+          width: 70,
+          height: 70,
+          decoration: BoxDecoration(
+            color: Colors.green.withOpacity(context.isDarkMode ? 0.35 : 0.75),
+            shape: BoxShape.circle,
+          ),
+          child: const Center(
+            child: Icon(Icons.check_circle_outline, color: Colors.white, size: 24),
+          ),
+        ),
       ),
     );
   }

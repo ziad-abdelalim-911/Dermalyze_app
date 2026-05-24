@@ -147,7 +147,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                 // ── Body ────────────────────────────────────────
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
+                    padding: const EdgeInsets.fromLTRB(16, 20, 16, 120),
                     child: Column(
                       children: [
                         // Personal Information Card

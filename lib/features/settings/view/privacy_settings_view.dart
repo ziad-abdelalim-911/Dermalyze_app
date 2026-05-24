@@ -1,6 +1,9 @@
 import 'package:dermalyze/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 
+import 'package:dermalyze/core/theme/theme_extensions.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:dermalyze/core/theme/cubit/theme_cubit.dart';
 import '../widgets/privacy_info_box.dart';
 import '../widgets/settings_nav_tile.dart';
 import '../widgets/settings_section_card.dart';
@@ -34,10 +37,11 @@ class _PrivacySettingsViewState extends State<PrivacySettingsView> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        iconTheme: IconThemeData(color: context.dynamicTextColorPrimary),
         leading: const BackButton(),
-        title: const Text(
+        title: Text(
           "Privacy & Settings",
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(color: context.dynamicTextColorPrimary),
         ),
       ),
       body: SingleChildScrollView(
@@ -159,15 +163,19 @@ class _PrivacySettingsViewState extends State<PrivacySettingsView> {
               title: "App Settings",
               icon: Icons.settings_outlined,
               headerColor: const Color(0xFF1F2937),
-              child: SettingsSwitchTile(
-                icon: Icons.dark_mode_outlined,
-                title: "Dark Mode",
-                subtitle: "Switch to dark theme",
-                value: darkMode,
-                onChanged: (v) => setState(() => darkMode = v),
-                iconColor: Colors.black87,
-                iconBgColor: Colors.black12,
-                switchColor: Colors.black87,
+              child: BlocBuilder<ThemeCubit, ThemeMode>(
+                builder: (context, themeMode) {
+                  return SettingsSwitchTile(
+                    icon: Icons.dark_mode_outlined,
+                    title: "Dark Mode",
+                    subtitle: "Switch to dark theme",
+                    value: themeMode == ThemeMode.dark,
+                    onChanged: (v) => context.read<ThemeCubit>().toggleTheme(),
+                    iconColor: Colors.white,
+                    iconBgColor: Colors.black12,
+                    switchColor: Colors.black87,
+                  );
+                },
               ),
             ),
 
@@ -236,6 +244,7 @@ class _PrivacySettingsViewState extends State<PrivacySettingsView> {
   }
 
   static void _showDoc(BuildContext context, {required String title, required String body}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -249,9 +258,9 @@ class _PrivacySettingsViewState extends State<PrivacySettingsView> {
         minChildSize: 0.4,
         builder: (_, ctrl) => Container(
           padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E293B) : Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -260,18 +269,18 @@ class _PrivacySettingsViewState extends State<PrivacySettingsView> {
                 child: Container(
                   width: 40, height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
+                    color: isDark ? Colors.white24 : Colors.grey.shade300,
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
-              Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87)),
               const SizedBox(height: 16),
               Expanded(
                 child: SingleChildScrollView(
                   controller: ctrl,
-                  child: Text(body, style: const TextStyle(fontSize: 14, height: 1.6, color: Colors.black87)),
+                  child: Text(body, style: TextStyle(fontSize: 14, height: 1.6, color: isDark ? Colors.grey.shade300 : Colors.black87)),
                 ),
               ),
               const SizedBox(height: 16),
@@ -280,10 +289,10 @@ class _PrivacySettingsViewState extends State<PrivacySettingsView> {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF2563EB),
+                    backgroundColor: const Color(0xFF2563EB),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: Text('Close', style: TextStyle(color: Theme.of(context).cardColor)),
+                  child: const Text('Close', style: TextStyle(color: Colors.white)),
                 ),
               ),
             ],

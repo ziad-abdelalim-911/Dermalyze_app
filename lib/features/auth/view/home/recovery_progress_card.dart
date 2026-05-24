@@ -1,3 +1,4 @@
+import 'package:dermalyze/core/constants/app_colors.dart';
 import 'package:dermalyze/features/auth/view/ProgressReport_view/progress_report_view.dart';
 import 'package:flutter/material.dart';
 
@@ -17,6 +18,7 @@ class _RecoveryProgressCardState extends State<RecoveryProgressCard> {
   @override
   Widget build(BuildContext context) {
     final percent = '${(widget.recoveryRate * 100).toInt()}%';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Material(
       color: Colors.transparent,
@@ -29,64 +31,97 @@ class _RecoveryProgressCardState extends State<RecoveryProgressCard> {
         },
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 16),
-          padding: const EdgeInsets.all(18),
+          padding: const EdgeInsets.all(22),
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
-                  color: Colors.black.withOpacity(0.05), blurRadius: 10),
+                  color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+                  blurRadius: 10),
             ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               /// ===== Header
-              const Row(
+              Row(
                 children: [
-                  Icon(Icons.trending_up, color: Color(0xFF3B82F6)),
-                  SizedBox(width: 8),
+                  Icon(Icons.trending_up, color: AppColors.SkyBlue),
+                  const SizedBox(width: 8),
                   Text(
                     "Recovery Progress",
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 18),
 
               /// ===== Recovery Rate
               Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       "Recovery Rate",
-                      style: TextStyle(fontSize: 14),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: isDark ? Colors.white70 : Colors.black87,
+                      ),
                     ),
                   ),
                   Text(
                     percent,
-                    style: const TextStyle(
-                      color: Color(0xFF3B82F6),
+                    style: TextStyle(
+                      color: AppColors.Turqouoise,
                       fontWeight: FontWeight.w500,
+                      fontSize: 15,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+
+              /// ===== Linear Progress
+              Stack(
+                children: [
+                  Container(
+                    height: 10,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white12 : Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  FractionallySizedBox(
+                    widthFactor: widget.recoveryRate,
+                    child: Container(
+                      height: 10,
+                      decoration: BoxDecoration(
+                        gradient: AppColors.primaryGradient2,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
 
-              /// ===== Linear Progress
-              ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: LinearProgressIndicator(
-                  value: widget.recoveryRate,
-                  minHeight: 8,
-                  backgroundColor: Colors.grey.shade300,
-                  valueColor:
-                      const AlwaysStoppedAnimation(Color(0xFF3B82F6)),
-                ),
+              /// ===== Trending Text
+              Row(
+                children: [
+                  Icon(Icons.trending_up, size: 16, color: AppColors.Turqouoise),
+                  const SizedBox(width: 4),
+                  Text(
+                    "+12% from last month",
+                    style: TextStyle(fontSize: 12, color: AppColors.Turqouoise),
+                  ),
+                ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 32),
 
               /// ===== Circle Progress
               Center(
@@ -100,11 +135,22 @@ class _RecoveryProgressCardState extends State<RecoveryProgressCard> {
                         width: 140,
                         height: 140,
                         child: CircularProgressIndicator(
-                          value: widget.recoveryRate,
-                          strokeWidth: 12,
-                          backgroundColor: Colors.grey.shade300,
-                          valueColor: const AlwaysStoppedAnimation(
-                            Color(0xFF3B82F6),
+                          value: 1.0,
+                          strokeWidth: 14,
+                          color: isDark ? Colors.white12 : Colors.grey.shade200,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 140,
+                        height: 140,
+                        child: ShaderMask(
+                          shaderCallback: (bounds) => AppColors.primaryGradient2
+                              .createShader(bounds),
+                          child: CircularProgressIndicator(
+                            value: widget.recoveryRate,
+                            strokeWidth: 14,
+                            backgroundColor: Colors.transparent,
+                            color: Colors.white,
                           ),
                         ),
                       ),
@@ -113,21 +159,27 @@ class _RecoveryProgressCardState extends State<RecoveryProgressCard> {
                         children: [
                           Text(
                             percent,
-                            style: const TextStyle(
-                              fontSize: 22,
+                            style: TextStyle(
+                              fontSize: 28,
                               fontWeight: FontWeight.w500,
-                              color: Color(0xFF3B82F6),
+                              color: AppColors.SkyBlue,
                             ),
                           ),
-                          const Text("Recovery",
-                              style: TextStyle(fontSize: 12)),
+                          const SizedBox(height: 2),
+                          Text(
+                            "Recovery",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                            ),
+                          ),
                         ],
                       ),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 24),
 
               const Center(
                 child: Text(

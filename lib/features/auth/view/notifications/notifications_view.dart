@@ -1,7 +1,6 @@
 import 'package:dermalyze/core/constants/app_assets.dart';
 import 'package:dermalyze/features/auth/view/notifications/notification_model.dart';
 import 'package:dermalyze/features/auth/view/notifications/notifications_cubit.dart';
-import 'package:dermalyze/features/auth/view/notifications/notifications_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

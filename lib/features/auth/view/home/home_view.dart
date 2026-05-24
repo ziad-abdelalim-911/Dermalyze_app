@@ -124,7 +124,7 @@ class _HomeViewState extends State<HomeView> {
                   MedicationListCard(
                     medications: _medications,
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 120),
                 ],
               ),
       ),

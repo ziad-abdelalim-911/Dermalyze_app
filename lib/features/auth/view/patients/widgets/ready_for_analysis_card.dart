@@ -1,4 +1,5 @@
 import 'package:dermalyze/core/constants/app_colors.dart';
+import 'package:dermalyze/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
 class ReadyForAnalysisCard extends StatelessWidget {
@@ -43,7 +44,7 @@ class ReadyForAnalysisCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: AppColors.Black,
+              color: context.dynamicTextColorPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -51,7 +52,7 @@ class ReadyForAnalysisCard extends StatelessWidget {
             "The AI will compare this image with the patient's previous scans to detect improvements.",
             style: TextStyle(
               fontSize: 13,
-              color: AppColors.Gray,
+              color: context.dynamicTextColorSecondary,
               height: 1.4,
             ),
           ),
@@ -76,8 +77,8 @@ class ReadyForAnalysisCard extends StatelessWidget {
                   child: Center(
                     child: Text(
                       initials,
-                      style: TextStyle(
-                        color: Theme.of(context).cardColor,
+                      style: const TextStyle(
+                        color: Colors.white,
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
@@ -93,14 +94,14 @@ class ReadyForAnalysisCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.Black,
+                        color: context.dynamicTextColorPrimary,
                       ),
                     ),
                     Text(
                       diagnosis,
                       style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.Gray,
+                        color: context.dynamicTextColorSecondary,
                       ),
                     ),
                   ],
