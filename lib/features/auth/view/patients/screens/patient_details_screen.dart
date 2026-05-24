@@ -370,8 +370,8 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
             child: SizedBox(
               height: 48,
               child: ElevatedButton(
-                onPressed: () {
-                  showModalBottomSheet(
+                onPressed: () async {
+                  final newStatus = await showModalBottomSheet<PatientStatus>(
                     context: context,
                     isScrollControlled: true,
                     shape: const RoundedRectangleBorder(
@@ -383,6 +383,16 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
                       patientName: name,
                     ),
                   );
+
+                  if (newStatus != null && _patient != null) {
+                    // Update the status locally to avoid needing another API call to fetch
+                    String statusString = newStatus.name;
+                    // Capitalize first letter
+                    statusString = statusString[0].toUpperCase() + statusString.substring(1);
+                    setState(() {
+                      _patient = _patient!.copyWith(statusBadge: statusString);
+                    });
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.SkyBlue,

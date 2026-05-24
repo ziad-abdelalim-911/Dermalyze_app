@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:dermalyze/core/routes/app_routes.dart';
+import 'package:dermalyze/core/network/api_service.dart' as dermalyze_api;
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -114,8 +115,27 @@ class PushNotificationService {
     try {
       String? token = await _fcm.getToken();
       print("FCM Token: $token");
+      if (token != null) {
+        await registerFcmToken(token);
+      }
     } catch (e) {
       print("Failed to get FCM token: $e");
+    }
+  }
+
+  static Future<void> registerFcmToken([String? token]) async {
+    try {
+      final fcmToken = token ?? await _fcm.getToken();
+      if (fcmToken == null) return;
+
+      final _apiService = dermalyze_api.ApiService(); // need to import
+      await _apiService.put(
+        'user/fcm-token',
+        {'fcmToken': fcmToken},
+      );
+      print("✅ FCM Token registered with backend");
+    } catch (e) {
+      print("❌ Failed to register FCM token with backend: $e");
     }
   }
 

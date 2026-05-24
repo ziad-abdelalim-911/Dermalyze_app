@@ -26,4 +26,34 @@ class PatientEntity {
     this.currentSymptoms = '',
     this.nextAppointment = '',
   });
+
+  PatientEntity copyWith({
+    String? id,
+    String? name,
+    String? diagnosis,
+    String? qualityBadge,
+    String? statusBadge,
+    double? recoveryRate,
+    String? lastVisit,
+    int? age,
+    bool? isCritical,
+    String? phone,
+    String? currentSymptoms,
+    String? nextAppointment,
+  }) {
+    return PatientEntity(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      diagnosis: diagnosis ?? this.diagnosis,
+      qualityBadge: qualityBadge ?? this.qualityBadge,
+      statusBadge: statusBadge ?? this.statusBadge,
+      recoveryRate: recoveryRate ?? this.recoveryRate,
+      lastVisit: lastVisit ?? this.lastVisit,
+      age: age ?? this.age,
+      isCritical: isCritical ?? this.isCritical,
+      phone: phone ?? this.phone,
+      currentSymptoms: currentSymptoms ?? this.currentSymptoms,
+      nextAppointment: nextAppointment ?? this.nextAppointment,
+    );
+  }
 }

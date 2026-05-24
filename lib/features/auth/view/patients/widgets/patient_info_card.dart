@@ -96,15 +96,17 @@ class PatientInfoCard extends StatelessWidget {
             children: [
               Expanded(
                 child: _buildStat(
+                  context: context,
                   icon: Icons.calendar_today_outlined,
                   label: 'Last Visit',
                   value: lastVisit,
                   valueColor: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
-              Container(width: 1, height: 40, color: Theme.of(context).dividerColor),
+              const SizedBox(width: 12),
               Expanded(
                 child: _buildStat(
+                  context: context,
                   icon: Icons.show_chart,
                   label: 'Recovery Rate',
                   value: recoveryRate,
@@ -119,25 +121,27 @@ class PatientInfoCard extends StatelessWidget {
   }
 
   Widget _buildStat({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required String value,
     required Color valueColor,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white10 : const Color(0xFFF8F9FA),
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(icon, size: 16, color: AppColors.Gray),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(fontSize: 12, color: AppColors.Gray),
-              ),
-            ],
+          Icon(icon, size: 20, color: AppColors.Gray),
+          const SizedBox(height: 10),
+          Text(
+            label,
+            style: TextStyle(fontSize: 11, color: AppColors.Gray, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 4),
           Text(

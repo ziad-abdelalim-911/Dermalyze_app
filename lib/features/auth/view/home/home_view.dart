@@ -5,6 +5,8 @@ import 'package:dermalyze/features/auth/view/home/home_header.dart';
 import 'package:dermalyze/features/auth/view/home/medication_list_card.dart';
 import 'package:dermalyze/features/auth/view/home/patient_home_repository.dart';
 import 'package:dermalyze/features/auth/view/home/recovery_progress_card.dart';
+import 'dart:async';
+import 'package:dermalyze/core/services/socket_service.dart' as dermalyze_socket;
 import 'package:flutter/material.dart';
 
 class HomeView extends StatefulWidget {
@@ -38,10 +40,50 @@ class _HomeViewState extends State<HomeView> {
 
   bool _isLoading = true;
 
+  StreamSubscription? _socketSubscription;
+
   @override
   void initState() {
     super.initState();
     _loadAll();
+    _listenToRealTimeUpdates();
+  }
+
+  void _listenToRealTimeUpdates() {
+    _socketSubscription = dermalyze_socket.SocketService().profileStream.listen((data) {
+      if (!mounted) return;
+      setState(() {
+        if (data.containsKey('nextAppointment') || data.containsKey('nextVisit')) {
+          _nextVisit = data['nextAppointment'] ?? data['nextVisit'] ?? _nextVisit;
+        }
+        if (data.containsKey('lastVisit') || data.containsKey('lastCheckup')) {
+          _lastCheckup = data['lastVisit'] ?? data['lastCheckup'] ?? _lastCheckup;
+        }
+        if (data.containsKey('diagnosis') || data.containsKey('currentDiagnosis')) {
+          _diagnosis = data['diagnosis'] ?? data['currentDiagnosis'] ?? _diagnosis;
+        }
+        if (data.containsKey('status')) {
+          // If status changes, you might update it here if displayed
+        }
+      });
+
+      if (data.containsKey('message')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(data['message']),
+            backgroundColor: AppColors.SkyBlue,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _socketSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadAll() async {

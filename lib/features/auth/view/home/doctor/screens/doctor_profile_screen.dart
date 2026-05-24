@@ -64,89 +64,89 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
       backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF4F6FA),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                // ── Gradient Header ─────────────────────────────
-                Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    gradient: AppColors.primaryGradient2,
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(32),
-                      bottomRight: Radius.circular(32),
+          : SingleChildScrollView(
+              child: Column(
+                children: [
+                  // ── Gradient Header ─────────────────────────────
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      gradient: AppColors.primaryGradient2,
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(32),
+                        bottomRight: Radius.circular(32),
+                      ),
                     ),
-                  ),
-                  child: SafeArea(
-                    bottom: false,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 36),
-                      child: Column(
-                        children: [
-                          // Back row
-                          if (Navigator.canPop(context))
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: GestureDetector(
-                                onTap: () {
-                                  Navigator.pop(context);
-                                },
-                                child: const Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.arrow_back_ios_new,
-                                        color: Colors.white, size: 16),
-                                    SizedBox(width: 6),
-                                    Text(
-                                      'Profile',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
+                    child: SafeArea(
+                      bottom: false,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 36),
+                        child: Column(
+                          children: [
+                            // Back row
+                            if (Navigator.canPop(context))
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.arrow_back_ios_new,
+                                          color: Colors.white, size: 16),
+                                      SizedBox(width: 6),
+                                      Text(
+                                        'Profile',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
+                            const SizedBox(height: 24),
+                            // Avatar circle
+                            Container(
+                              width: 88,
+                              height: 88,
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(Icons.person_2_outlined,
+                                  size: 46, color: AppColors.SkyBlue),
                             ),
-                          const SizedBox(height: 24),
-                          // Avatar circle
-                          Container(
-                            width: 88,
-                            height: 88,
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
+                            const SizedBox(height: 14),
+                            Text(
+                              'Dr. $_name',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                            child: Icon(Icons.person_2_outlined,
-                                size: 46, color: AppColors.SkyBlue),
-                          ),
-                          const SizedBox(height: 14),
-                          Text(
-                            'Dr. $_name',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                            const SizedBox(height: 4),
+                            const Text(
+                              'Doctor Account',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 13,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'Doctor Account',
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 13,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                        ],
+                            const SizedBox(height: 8),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
 
-                // ── Body ────────────────────────────────────────
-                Expanded(
-                  child: SingleChildScrollView(
+                  // ── Body ────────────────────────────────────────
+                  Padding(
                     padding: const EdgeInsets.fromLTRB(16, 20, 16, 120),
                     child: Column(
                       children: [
@@ -299,8 +299,8 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                       ],
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
     );
   }

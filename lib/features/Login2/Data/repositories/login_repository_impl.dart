@@ -2,6 +2,8 @@ import 'package:dermalyze/core/network/api_service.dart';
 import 'package:dermalyze/core/storage/token_storage.dart';
 import 'package:dermalyze/features/Login2/Data/models/login_response_model.dart';
 import 'package:dermalyze/features/Login2/domain/repositories/login_repository.dart';
+import 'package:dermalyze/core/services/push_notification_service.dart' as dermalyze_push;
+import 'package:dermalyze/core/services/socket_service.dart' as dermalyze_socket;
 
 class LoginRepositoryImpl implements LoginRepository {
   final ApiService _apiService = ApiService();
@@ -23,6 +25,10 @@ class LoginRepositoryImpl implements LoginRepository {
     await _tokenStorage.saveToken(model.token);
     final userMap = model.user.toJson();
     await _tokenStorage.saveUser(userMap);
+
+    // Register FCM Token & Connect to Socket.IO after successful login
+    await dermalyze_push.PushNotificationService.registerFcmToken();
+    await dermalyze_socket.SocketService().connect();
 
     return model;
   }

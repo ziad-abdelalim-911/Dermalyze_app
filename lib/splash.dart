@@ -1,6 +1,8 @@
 import 'package:dermalyze/core/constants/app_assets.dart';
 import 'package:dermalyze/core/constants/app_colors.dart';
 import 'package:dermalyze/core/storage/token_storage.dart';
+import 'package:dermalyze/core/services/push_notification_service.dart' as dermalyze_push;
+import 'package:dermalyze/core/services/socket_service.dart' as dermalyze_socket;
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -40,6 +42,10 @@ class _SplashViewState extends State<SplashView>
         // المستخدم logged in — اعرف دوره
         final user = await tokenStorage.getUser();
         final role = user?['role'] ?? 'patient';
+
+        // Connect real-time services on auto-login
+        dermalyze_push.PushNotificationService.registerFcmToken();
+        dermalyze_socket.SocketService().connect();
 
         if (!mounted) return;
         Navigator.pushReplacementNamed(
