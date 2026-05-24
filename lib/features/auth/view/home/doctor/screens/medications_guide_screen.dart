@@ -12,47 +12,90 @@ class MedicationsGuideScreen extends StatefulWidget {
 
 class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   final ClinicalResourcesRepository _repo = ClinicalResourcesRepository();
 
   List<Map<String, dynamic>> _filteredMedications = [];
   bool _isLoading = true;
+  bool _isFetchingMore = false;
+  bool _hasMore = true;
+  int _currentPage = 1;
+  static const int _limit = 20;
   Timer? _debounce;
+  String _currentQuery = '';
 
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _loadData(isRefresh: true);
     _searchController.addListener(_onSearch);
+    _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     _debounce?.cancel();
     super.dispose();
   }
 
-  Future<void> _loadData([String? query]) async {
-    print('MedicationsGuide: Starting _loadData with query: $query');
-    setState(() {
-      _isLoading = true;
-    });
-    final data = await _repo.getMedicationsGuide(query: query);
-    print('MedicationsGuide: _loadData completed, data length: ${data.length}');
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      if (!_isFetchingMore && _hasMore && !_isLoading) {
+        _loadData(isRefresh: false);
+      }
+    }
+  }
+
+  Future<void> _loadData({required bool isRefresh}) async {
+    if (isRefresh) {
+      setState(() {
+        _isLoading = true;
+        _currentPage = 1;
+        _hasMore = true;
+      });
+    } else {
+      setState(() {
+        _isFetchingMore = true;
+      });
+    }
+
+    final data = await _repo.getMedicationsGuide(
+      query: _currentQuery,
+      page: _currentPage,
+      limit: _limit,
+    );
+
     if (mounted) {
       setState(() {
-        _filteredMedications = data;
+        if (isRefresh) {
+          _filteredMedications = data;
+        } else {
+          _filteredMedications.addAll(data);
+        }
+        
+        // If we got less than the limit, we've reached the end
+        if (data.length < _limit) {
+          _hasMore = false;
+        } else {
+          _currentPage++;
+        }
+
         _isLoading = false;
+        _isFetchingMore = false;
       });
-      print('MedicationsGuide: UI Updated, _isLoading set to false');
     }
   }
 
   void _onSearch() {
+    if (_currentQuery == _searchController.text) return;
+    
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
       if (mounted) {
-        _loadData(_searchController.text);
+        _currentQuery = _searchController.text;
+        _loadData(isRefresh: true);
       }
     });
   }
@@ -77,6 +120,7 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: CustomScrollView(
+        controller: _scrollController,
         slivers: [
           _buildHeaderSliver(),
           SliverToBoxAdapter(
@@ -111,7 +155,7 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
               ),
             ),
           ),
-          if (_isLoading)
+          if (_isLoading && _filteredMedications.isEmpty)
             SliverToBoxAdapter(
                child: Center(child: Padding(padding: const EdgeInsets.all(40), child: CircularProgressIndicator(color: AppColors.Turqouoise))),
             )
@@ -121,7 +165,7 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
             )
           else
             SliverPadding(
-              padding: const EdgeInsets.only(left: 20, right: 20, bottom: 40),
+              padding: const EdgeInsets.only(left: 20, right: 20, bottom: 10),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
@@ -132,6 +176,22 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
                 ),
               ),
             ),
+            
+          if (_isFetchingMore)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.only(bottom: 40, top: 10),
+                child: Center(
+                  child: SizedBox(
+                    width: 30, 
+                    height: 30, 
+                    child: CircularProgressIndicator(strokeWidth: 3, color: AppColors.Turqouoise)
+                  )
+                ),
+              ),
+            )
+          else
+            const SliverToBoxAdapter(child: SizedBox(height: 40)),
         ],
       ),
     );

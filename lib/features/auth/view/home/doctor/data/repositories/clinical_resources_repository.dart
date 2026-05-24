@@ -13,17 +13,37 @@ class ClinicalResourcesRepository {
     }
   }
 
-  /// جلب دليل الأدوية الكامل مع إمكانية البحث
-  Future<List<Map<String, dynamic>>> getMedicationsGuide({String? query}) async {
+  /// جلب دليل الأدوية الكامل مع إمكانية البحث (مع Pagination)
+  Future<List<Map<String, dynamic>>> getMedicationsGuide({
+    String? query,
+    int page = 1,
+    int limit = 20,
+  }) async {
     try {
-      print('Fetching medications with query: $query');
-      final queryParams = query != null && query.isNotEmpty ? {'search': query} : null;
-      final response = await _api.get('resources/medications', queryParameters: queryParams);
-      print('Response received: $response');
-      if (response is Map && response.containsKey('data')) {
-          return (response['data'] as List).cast<Map<String, dynamic>>();
+      String endpoint;
+      Map<String, dynamic> queryParams = {};
+
+      if (query != null && query.trim().isNotEmpty) {
+        endpoint = 'medicines/search';
+        queryParams['q'] = query.trim();
+      } else {
+        endpoint = 'medicines/all';
+        queryParams['page'] = page;
+        queryParams['limit'] = limit;
       }
-      return (response is List) ? response.cast<Map<String, dynamic>>() : [];
+
+      print('Fetching medications from $endpoint with params: $queryParams');
+      final response = await _api.get(endpoint, queryParameters: queryParams);
+      
+      // Parse the response based on the expected backend structure
+      if (response is Map) {
+        if (response.containsKey('results') && response['results'] is List) {
+          return List<Map<String, dynamic>>.from(response['results']);
+        } else if (response.containsKey('data') && response['data'] is List) {
+          return List<Map<String, dynamic>>.from(response['data']);
+        }
+      }
+      return (response is List) ? List<Map<String, dynamic>>.from(response) : [];
     } catch (e) {
       print('Error in getMedicationsGuide: $e');
       return [];

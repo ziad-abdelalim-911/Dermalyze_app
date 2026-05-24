@@ -39,6 +39,12 @@ class ApiEndpoints {
   /// GET   /resources/medications?search=...
   static const String medications = 'resources/medications';
 
+  /// GET   /medicines/all?page=1&limit=20
+  static const String medicinesAll = 'medicines/all';
+
+  /// GET   /medicines/search?q=...
+  static const String medicinesSearch = 'medicines/search';
+
   /// GET   /resources/diseases?search=...
   static const String diseases = 'resources/diseases';
 
