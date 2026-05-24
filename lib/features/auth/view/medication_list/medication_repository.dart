@@ -3,13 +3,13 @@ import 'package:dermalyze/core/network/api_service.dart';
 class MedicationRepository {
   final ApiService _api = ApiService();
 
-  /// GET /api/patient/{patientId}/medications
+  /// GET /api/patients/{patientId}/medications
   Future<List<dynamic>> getMedications(String patientId) async {
-    final response = await _api.get('patient/$patientId/medications');
+    final response = await _api.get('patients/$patientId/medications');
     return response is List ? response : (response['medications'] ?? []);
   }
 
-  /// POST /api/patient/{patientId}/medications
+  /// POST /api/patients/{patientId}/medications
   Future<Map<String, dynamic>> addMedication({
     required String patientId,
     required String name,
@@ -23,7 +23,7 @@ class MedicationRepository {
       'frequency': frequency,
       if (notes != null && notes.isNotEmpty) 'notes': notes,
     };
-    final response = await _api.post('patient/$patientId/medications', body);
+    final response = await _api.post('patients/$patientId/medications', body);
     return response is Map<String, dynamic> ? response : {};
   }
 

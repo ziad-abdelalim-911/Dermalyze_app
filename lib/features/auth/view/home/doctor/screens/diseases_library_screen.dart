@@ -206,9 +206,9 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
                 SizedBox(
                   height: 160,
                   width: double.infinity,
-                  child: disease['image'] != null
+                  child: disease['imageUrl'] != null && disease['imageUrl'].toString().isNotEmpty
                     ? Image.network(
-                        disease['image'] as String,
+                        disease['imageUrl'] as String,
                         fit: BoxFit.cover,
                         errorBuilder: (ctx, err, stack) => Container(
                           color: Colors.grey.shade300,
@@ -321,9 +321,9 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
                         SizedBox(
                           height: 200,
                           width: double.infinity,
-                          child: disease['image'] != null
+                          child: disease['imageUrl'] != null && disease['imageUrl'].toString().isNotEmpty
                             ? Image.network(
-                                disease['image'] as String,
+                                disease['imageUrl'] as String,
                                 fit: BoxFit.cover,
                                 errorBuilder: (ctx, err, stack) => Container(
                                   color: Colors.grey.shade300,

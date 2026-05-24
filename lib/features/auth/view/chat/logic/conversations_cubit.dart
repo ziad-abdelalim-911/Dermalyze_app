@@ -110,6 +110,21 @@ class ConversationsCubit extends Cubit<ConversationsState> {
     }
   }
 
+  Future<void> deleteConversation(String receiverId) async {
+    // Optimistic delete
+    final previousState = List<ConversationModel>.from(_localConversations);
+    _localConversations.removeWhere((conv) => conv.receiverId == receiverId);
+    emit(ConversationsLoaded(List.from(_localConversations)));
+
+    try {
+      await _chatRepository.deleteConversation(receiverId);
+    } catch (e) {
+      // Revert on failure
+      _localConversations = previousState;
+      emit(ConversationsLoaded(List.from(_localConversations)));
+    }
+  }
+
   void _startPolling() {
     _pollingTimer = Timer.periodic(const Duration(seconds: 5), (_) {
       loadConversations();

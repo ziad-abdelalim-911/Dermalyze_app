@@ -102,107 +102,113 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
-          // ── Header ──
-          Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              gradient: AppColors.primaryGradient2,
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(32),
-                bottomRight: Radius.circular(32),
-              ),
-            ),
-            child: SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(20, 12, 20, 40),
-                child: Column(
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Icon(Icons.arrow_back,
-                            color: Theme.of(context).cardColor, size: 22),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Container(
-                      width: 72,
-                      height: 72,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).cardColor.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Icon(Icons.auto_awesome,
-                          color: Colors.white, size: 34),
-                    ),
-                    const SizedBox(height: 14),
-                    const Text(
-                      'AI Analysis Result',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Automated Skin Condition Comparison',
-                      style:
-                          TextStyle(color: Colors.white70, fontSize: 13),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          // ── Content ──
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(16, 24, 16, 100),
               child: Column(
                 children: [
-                  // Patient Info
-                  _buildPatientInfoCard(),
-                  const SizedBox(height: 16),
-
-                  // Improvement
-                  ImprovementDetectedCard(
-                    percentage: _confidence,
-                    message: _recommendation,
+                  // ── Header ──
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      gradient: AppColors.primaryGradient2,
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(32),
+                        bottomRight: Radius.circular(32),
+                      ),
+                    ),
+                    child: SafeArea(
+                      bottom: false,
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(20, 12, 20, 40),
+                        child: Column(
+                          children: [
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: GestureDetector(
+                                onTap: () => Navigator.pop(context),
+                                child: Icon(Icons.arrow_back,
+                                    color: Theme.of(context).cardColor, size: 22),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            Container(
+                              width: 72,
+                              height: 72,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).cardColor.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: const Icon(Icons.auto_awesome,
+                                  color: Colors.white, size: 34),
+                            ),
+                            const SizedBox(height: 14),
+                            const Text(
+                              'AI Analysis Result',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            const Text(
+                              'Automated Skin Condition Comparison',
+                              style:
+                                  TextStyle(color: Colors.white70, fontSize: 13),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 16),
 
-                  // Toggle Tabs
-                  _buildToggleTabs(),
-                  const SizedBox(height: 16),
+                  // ── Content ──
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 30),
+                    child: Column(
+                      children: [
+                        // Patient Info
+                        _buildPatientInfoCard(),
+                        const SizedBox(height: 16),
 
-                  // Comparison View
-                  _isSideBySide
-                      ? const ImageComparisonCard()
-                      : const SliderComparisonCard(),
-                  const SizedBox(height: 16),
+                        // Improvement
+                        ImprovementDetectedCard(
+                          percentage: _confidence,
+                          message: _recommendation,
+                        ),
+                        const SizedBox(height: 16),
 
-                  // Progress Statistics
-                  ProgressStatisticsCard(
-                    previousSeverity: _severity,
-                    previousDate: _result?['date'] ?? 'Previous scan',
-                    currentSeverity: _severity,
-                    affectedAreaPrevious: _result?['affectedArea'] ?? 'N/A',
-                    affectedAreaCurrent: _result?['currentArea'] ?? 'N/A',
-                    improvementRate: _confidence,
-                  ),
-                  const SizedBox(height: 16),
+                        // Toggle Tabs
+                        _buildToggleTabs(),
+                        const SizedBox(height: 16),
 
-                  // Detailed Analysis
-                  DetailedAnalysisCard(items: _analysisItems),
-                  const SizedBox(height: 16),
+                        // Comparison View
+                        _isSideBySide
+                            ? const ImageComparisonCard()
+                            : const SliderComparisonCard(),
+                        const SizedBox(height: 16),
 
-                  // AI Recommendation
-                  AiRecommendationCard(
-                    recommendation: _recommendation,
+                        // Progress Statistics
+                        ProgressStatisticsCard(
+                          previousSeverity: _severity,
+                          previousDate: _result?['date'] ?? 'Previous scan',
+                          currentSeverity: _severity,
+                          affectedAreaPrevious: _result?['affectedArea'] ?? 'N/A',
+                          affectedAreaCurrent: _result?['currentArea'] ?? 'N/A',
+                          improvementRate: _confidence,
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Detailed Analysis
+                        DetailedAnalysisCard(items: _analysisItems),
+                        const SizedBox(height: 16),
+
+                        // AI Recommendation
+                        AiRecommendationCard(
+                          recommendation: _recommendation,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),

@@ -5,7 +5,7 @@ class AppAssets {
   static const String Call = "assets/icons/Icon_call.svg";
   static const String Google = "assets/icons/Social Icons_google.svg";
   static const String Apple = "assets/icons/Social Icons_apple.svg";
-  static const String Logo = "assets/img/logo_dermalyze.svg";
+  static const String Logo = "assets/img/logo_dermalyze_new.svg";
   static const String ArrowLeft = "assets/icons/ArrowLeft_icon.svg";
   static const String ArrowRight = "assets/icons/ArrowRight_icon.svg";
   static const String Icon_intro_1 = "assets/icons/icon_intro_1.svg";

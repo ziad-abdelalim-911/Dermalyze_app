@@ -50,6 +50,7 @@ class ChatCubit extends Cubit<ChatState> {
   // Load messages from backend
   // ─────────────────────────────────────────────────────────────────
   Future<void> loadMessages() async {
+    if (isClosed) return;
     if (state is ChatInitial) emit(ChatLoading());
 
     try {
@@ -62,7 +63,7 @@ class ChatCubit extends Cubit<ChatState> {
     } catch (e) {
       // Keep showing local messages on error, don't flash error screen
       if (_localMessages.isEmpty) {
-        emit(ChatError('Failed to load messages. Please try again.'));
+        if (!isClosed) emit(ChatError('Failed to load messages. Please try again.'));
       } else {
         _emitLoaded();
       }
@@ -80,7 +81,9 @@ class ChatCubit extends Cubit<ChatState> {
         .where((m) =>
             m.isMe &&
             (m.status == MessageStatus.pending ||
-                m.status == MessageStatus.failed))
+                m.status == MessageStatus.failed ||
+                m.status == MessageStatus.sent ||
+                m.status == MessageStatus.delivered))
         .toList();
 
     _localMessages
@@ -97,6 +100,7 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   void _emitLoaded({bool isRecording = false}) {
+    if (isClosed) return;
     emit(ChatLoaded(List.from(_localMessages), isRecording: isRecording));
   }
 
@@ -190,6 +194,29 @@ class ChatCubit extends Cubit<ChatState> {
         _localMessages[idx] = optimistic.copyWith(status: MessageStatus.failed);
         _emitLoaded();
       }
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────
+  // Delete message
+  // ─────────────────────────────────────────────────────────────────
+  Future<void> deleteMessage(String messageId) async {
+    // Optimistic UI update
+    final index = _localMessages.indexWhere((m) => m.id == messageId);
+    if (index == -1) return;
+
+    final deletedMessage = _localMessages[index];
+    _localMessages.removeAt(index);
+    _emitLoaded();
+
+    try {
+      await _chatRepository.deleteMessage(messageId);
+    } catch (e) {
+      if (isClosed) return;
+      // Revert if failed
+      _localMessages.insert(index, deletedMessage);
+      _emitLoaded();
+      emit(ChatError('Failed to delete message.'));
     }
   }
 

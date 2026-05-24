@@ -23,6 +23,9 @@ public class WinAPI {
     public static extern bool SetForegroundWindow(IntPtr hWnd);
 
     [DllImport("user32.dll")]
+    public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+    [DllImport("user32.dll")]
     public static extern bool IsWindowVisible(IntPtr hWnd);
 
     [DllImport("user32.dll")]
@@ -116,6 +119,7 @@ Write-Host "[+] Original : ${winW} x ${winH}" -ForegroundColor Green
 Write-Host "[+] Resized  : ${targetW} x ${targetH}" -ForegroundColor Cyan
 Write-Host "[+] Position : ($newX, $newY)" -ForegroundColor Cyan
 
+[WinAPI]::ShowWindow($emulatorHwnd, 9) | Out-Null
 [WinAPI]::MoveWindow($emulatorHwnd, $newX, $newY, $targetW, $targetH, $true) | Out-Null
 [WinAPI]::SetForegroundWindow($emulatorHwnd) | Out-Null
 

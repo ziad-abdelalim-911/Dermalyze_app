@@ -71,11 +71,15 @@ class ChatRepository {
   Future<List<ConversationModel>> getDoctorPatients() async {
     try {
       final response = await _apiService.get(ApiEndpoints.doctorPatients);
+      debugLog('!!! DOCTOR PATIENTS RESPONSE: $response');
       final rawList = _extractList(response, ['patients', 'data']);
 
       return rawList
           .whereType<Map<String, dynamic>>()
-          .map((json) => ConversationModel.fromPatient(json))
+          .map((json) {
+            debugLog('!!! PATIENT JSON: $json');
+            return ConversationModel.fromPatient(json);
+          })
           .toList();
     } catch (e) {
       debugLog('[ChatRepo] getDoctorPatients error: $e');
@@ -144,7 +148,31 @@ class ChatRepository {
       return message;
     } catch (e) {
       debugLog('[ChatRepo] sendMessage error: $e');
-      return message;
+      throw Exception('Failed to send message');
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────
+  // DELETE chat/messages/{messageId}
+  // ─────────────────────────────────────────────────────────────────
+  Future<void> deleteMessage(String messageId) async {
+    try {
+      await _apiService.delete(ApiEndpoints.deleteMessage(messageId));
+    } catch (e) {
+      debugLog('[ChatRepo] deleteMessage error: $e');
+      throw Exception('Failed to delete message');
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────
+  // DELETE chat/conversations/{receiverId}
+  // ─────────────────────────────────────────────────────────────────
+  Future<void> deleteConversation(String receiverId) async {
+    try {
+      await _apiService.delete(ApiEndpoints.deleteConversation(receiverId));
+    } catch (e) {
+      debugLog('[ChatRepo] deleteConversation error: $e');
+      throw Exception('Failed to delete conversation');
     }
   }
 

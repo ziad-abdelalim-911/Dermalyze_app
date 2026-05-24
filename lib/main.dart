@@ -13,6 +13,8 @@ import 'package:dermalyze/features/auth/view/chat/data/repositories/chat_reposit
 import 'package:dermalyze/core/network/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
@@ -40,6 +42,7 @@ class MyApp extends StatelessWidget {
       child: BlocBuilder<ThemeCubit, ThemeMode>(
         builder: (context, themeMode) {
           return MaterialApp(
+            navigatorKey: navigatorKey,
             debugShowCheckedModeBanner: false,
             title: 'Dermalyze',
             theme: AppTheme.lightTheme,

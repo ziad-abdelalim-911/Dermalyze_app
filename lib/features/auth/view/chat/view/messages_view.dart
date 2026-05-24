@@ -111,6 +111,34 @@ class _MessagesViewState extends State<MessagesView> {
                               ),
                             );
                           },
+                          onLongPress: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext ctx) {
+                                return AlertDialog(
+                                  title: const Text('Delete Conversation'),
+                                  content: const Text(
+                                      'Are you sure you want to delete this entire conversation? This action cannot be undone.'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(ctx),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        context
+                                            .read<ConversationsCubit>()
+                                            .deleteConversation(conv.receiverId);
+                                        Navigator.pop(ctx);
+                                      },
+                                      child: const Text('Delete',
+                                          style: TextStyle(color: Colors.red)),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
                         );
                       },
                     ),
@@ -218,8 +246,13 @@ class _ErrorState extends StatelessWidget {
 class _ChatItemTile extends StatelessWidget {
   final dynamic conversation;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
 
-  const _ChatItemTile({required this.conversation, required this.onTap});
+  const _ChatItemTile({
+    required this.conversation,
+    required this.onTap,
+    this.onLongPress,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -230,6 +263,7 @@ class _ChatItemTile extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
+      onLongPress: onLongPress,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Row(

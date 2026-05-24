@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/services.dart';
 import 'package:dermalyze/features/auth/view/chat/model/message_type.dart';
 import 'package:dermalyze/features/auth/view/chat/widgets/voice_message_player.dart';
 import 'package:dermalyze/features/auth/view/chat/widgets/voice_recorder_button.dart';
@@ -101,6 +102,7 @@ class _ChatViewState extends State<ChatView> {
               ChatAppBar(
                 name: widget.receiverName,
                 role: widget.receiverRole,
+                receiverId: widget.receiverId,
               ),
 
               // ── Messages ──────────────────────────────────────────
@@ -305,8 +307,14 @@ class _DateSeparator extends StatelessWidget {
 class ChatAppBar extends StatelessWidget {
   final String name;
   final String role;
+  final String receiverId;
 
-  const ChatAppBar({super.key, required this.name, required this.role});
+  const ChatAppBar({
+    super.key,
+    required this.name,
+    required this.role,
+    required this.receiverId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -343,15 +351,52 @@ class ChatAppBar extends StatelessWidget {
               ],
             ),
           ),
-          IconButton(
-              icon: const Icon(Icons.videocam, color: Colors.white),
-              onPressed: () {}),
-          IconButton(
-              icon: const Icon(Icons.call, color: Colors.white),
-              onPressed: () {}),
-          IconButton(
-              icon: const Icon(Icons.more_vert, color: Colors.white),
-              onPressed: () {}),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, color: Colors.white),
+            onSelected: (value) {
+              if (value == 'delete') {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext ctx) {
+                    return AlertDialog(
+                      title: const Text('Delete Conversation'),
+                      content: const Text(
+                          'Are you sure you want to delete this entire conversation? This action cannot be undone.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            context
+                                .read<ConversationsCubit>()
+                                .deleteConversation(receiverId);
+                            Navigator.pop(ctx); // Close dialog
+                            Navigator.pop(context); // Exit chat screen
+                          },
+                          child: const Text('Delete',
+                              style: TextStyle(color: Colors.red)),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete_outline, color: Colors.red),
+                    SizedBox(width: 8),
+                    Text('Delete Chat', style: TextStyle(color: Colors.red)),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -374,9 +419,11 @@ class MessageBubble extends StatelessWidget {
 
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 4),
-        child: Stack(
+      child: GestureDetector(
+        onLongPress: () => _showMessageOptions(context, message),
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 6),
+          child: Stack(
           children: [
             CustomPaint(
               size: const Size(15, 15),
@@ -393,13 +440,20 @@ class MessageBubble extends StatelessWidget {
               ),
               decoration: BoxDecoration(
                 color: color,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
                 borderRadius: BorderRadius.only(
                   topLeft:
-                      isMe ? const Radius.circular(12) : Radius.zero,
+                      isMe ? const Radius.circular(16) : Radius.zero,
                   topRight:
-                      isMe ? Radius.zero : const Radius.circular(12),
-                  bottomLeft: const Radius.circular(12),
-                  bottomRight: const Radius.circular(12),
+                      isMe ? Radius.zero : const Radius.circular(16),
+                  bottomLeft: const Radius.circular(16),
+                  bottomRight: const Radius.circular(16),
                 ),
               ),
               child: Column(
@@ -429,6 +483,54 @@ class MessageBubble extends StatelessWidget {
                 ],
               ),
             ),
+          ],
+        ),
+      ),
+      ),
+    );
+  }
+
+  void _showMessageOptions(BuildContext context, MessageModel message) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) => Container(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Theme.of(sheetCtx).cardColor,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (message.type == MessageType.text)
+              ListTile(
+                leading: const Icon(Icons.copy),
+                title: const Text('Copy Text'),
+                onTap: () {
+                  Navigator.pop(sheetCtx);
+                  Clipboard.setData(ClipboardData(text: message.content));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Text copied to clipboard')),
+                  );
+                },
+              ),
+            if (message.isMe && message.id != null)
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text('Delete Message', style: TextStyle(color: Colors.red)),
+                onTap: () {
+                  Navigator.pop(sheetCtx);
+                  context.read<ChatCubit>().deleteMessage(message.id!);
+                },
+              ),
+            if (!message.isMe || message.type != MessageType.text)
+              if (!(message.isMe && message.id != null))
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text('No actions available for this message', style: TextStyle(color: Colors.grey)),
+                ),
           ],
         ),
       ),

@@ -53,6 +53,14 @@ class ApiEndpoints {
   /// POST  { receiverId, content }
   static const String sendMessage = 'chat/send';
 
+  /// DELETE /chat/messages/{messageId}
+  static String deleteMessage(String messageId) =>
+      'chat/messages/$messageId';
+
+  /// DELETE /chat/conversations/{receiverId}
+  static String deleteConversation(String receiverId) =>
+      'chat/conversations/$receiverId';
+
   // ─── Patients (Doctor actions) ─────────────────────────
   /// POST  — add a new patient (doctor only)
   static const String addPatient = 'patients';

@@ -247,7 +247,7 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Divider(height: 1, color: isDark ? Colors.white24 : const Color(0xFFF3F4F6)),
             ),
-            _buildInfoRow('Description', med['description'] as String? ?? 'N/A'),
+            _buildInfoRow('Active Ingredient', med['activeIngredient'] as String? ?? 'N/A'),
           ],
         ),
       ),
@@ -354,6 +354,15 @@ class _MedicationsGuideScreenState extends State<MedicationsGuideScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      _buildDetailSection(
+                        icon: Icons.science,
+                        iconColor: const Color(0xFF4A90E2),
+                        title: 'Active Ingredient',
+                        content: med['activeIngredient'] as String? ?? 'N/A',
+                        bgColor: const Color(0xFFEFF6FF),
+                        borderColor: const Color(0xFFBFDBFE),
+                      ),
+                      const SizedBox(height: 16),
                       _buildDetailSection(
                         icon: Icons.info_outline,
                         iconColor: const Color(0xFF4A90E2),
