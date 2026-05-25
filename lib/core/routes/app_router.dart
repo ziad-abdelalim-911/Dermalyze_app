@@ -108,6 +108,7 @@ class AppRouter {
 
       case AppRoutes.aiAnalysisResult:
         return MaterialPageRoute(
+            settings: settings,
             builder: (_) => const AiAnalysisResultScreen());
 
       case AppRoutes.doctorHome:

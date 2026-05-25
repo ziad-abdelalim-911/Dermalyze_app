@@ -100,8 +100,8 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
     super.didChangeDependencies();
     // نقرأ الـ arguments من الـ navigation
     final args = ModalRoute.of(context)?.settings.arguments;
-    if (args is Map<String, dynamic>) {
-      setState(() => _result = args);
+    if (args is Map) {
+      setState(() => _result = Map<String, dynamic>.from(args));
     }
   }
 

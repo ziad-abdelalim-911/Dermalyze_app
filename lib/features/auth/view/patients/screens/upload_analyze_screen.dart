@@ -442,8 +442,6 @@ class _UploadAnalyzeScreenState extends State<UploadAnalyzeScreen> {
         onProgress: (sent, total) {}, // progress tracked internally
       );
       
-      final previousScan = _previousAnalyses.isNotEmpty ? _previousAnalyses.first : null;
-      
       if (mounted) {
         Navigator.pushNamed(
           context,
@@ -451,7 +449,6 @@ class _UploadAnalyzeScreenState extends State<UploadAnalyzeScreen> {
           arguments: {
             ...result,
             'currentImageFile': _imageFile,
-            'previousScan': previousScan,
           },
         );
       }

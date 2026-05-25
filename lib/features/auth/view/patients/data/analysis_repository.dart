@@ -39,6 +39,11 @@ class AnalysisRepository {
   Future<List<dynamic>> getPatientAnalyses(String patientId) async {
     final response = await _dio.get('patient/$patientId/analyses');
     final data = response.data;
-    return data is List ? data : (data['analyses'] ?? []);
+    if (data is List) return data;
+    // الباك إند الجديد بيرجع { data: [...] }
+    if (data is Map && data['data'] is List) return data['data'] as List;
+    // fallback للـ format القديم
+    if (data is Map && data['analyses'] is List) return data['analyses'] as List;
+    return [];
   }
 }
