@@ -24,14 +24,21 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
   bool _isSaving = false;
   Map<String, dynamic>? _result; // ✅ النتيجة الحقيقية من الـ API
 
-  // fallback لو مفيش result
-  String get _diagnosis => _result?['diagnosis'] ?? _result?['condition'] ?? 'Analysis Complete';
-  String get _confidence => _result?['confidence'] != null
-      ? '${(_result!['confidence'] * 100).toStringAsFixed(0)}%'
-      : 'N/A';
-  String get _recommendation =>
-      _result?['recommendation'] ?? _result?['treatment'] ?? 'Continue current treatment plan.';
-  String get _severity => _result?['severity'] ?? _result?['stage'] ?? 'Moderate';
+  bool get _isFirstScan =>
+      _result?['isFirstScan'] == true || _result?['previousScan'] == null;
+
+  String get _confidence {
+    final raw = _result?['confidence'];
+    if (raw == null) return 'N/A';
+    final num val = raw is num ? raw : num.tryParse(raw.toString()) ?? 0;
+    return '${(val * 100).toStringAsFixed(0)}%';
+  }
+
+  String get _diagnosis    => _result?['diagnosis'] ?? 'Analysis Complete';
+  String get _severity     => _result?['severity'] ?? 'N/A';
+  String get _recommendation => _result?['recommendation'] ?? 'Continue current treatment plan.';
+  String get _improvement  => _result?['improvement'] ?? 'No change';
+  String get _patientId    => _result?['patientId']?.toString() ?? '';
 
   /// يبني قائمة التحليل التفصيلي من الـ API result ديناميكياً
   List<DetailedAnalysisItem> get _analysisItems {
@@ -169,53 +176,73 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
                     padding: const EdgeInsets.fromLTRB(16, 24, 16, 30),
                     child: Column(
                       children: [
-                        // Patient Info
+                        // 1. Patient Info — دايماً بتتظهر
                         _buildPatientInfoCard(),
                         const SizedBox(height: 16),
 
-                        // Improvement
-                        ImprovementDetectedCard(
-                          percentage: _confidence,
-                          message: _recommendation,
-                        ),
-                        const SizedBox(height: 16),
+                        // 2. Improvement + Comparison — بس لو في صورة قديمة
+                        if (!_isFirstScan) ...[
+                          ImprovementDetectedCard(
+                            percentage: _confidence,
+                            message: _recommendation,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildToggleTabs(),
+                          const SizedBox(height: 16),
+                          _isSideBySide
+                              ? ImageComparisonCard(
+                                  currentImageFile: _result?['currentImageFile'] as File?,
+                                  previousImageUrl: (_result?['previousScan'] as Map?)?['imageUrl'] as String?,
+                                  previousSeverity: (_result?['previousScan'] as Map?)?['severity'] as String? ?? 'N/A',
+                                  currentSeverity: _severity,
+                                )
+                              : SliderComparisonCard(
+                                  currentImageFile: _result?['currentImageFile'] as File?,
+                                  previousImageUrl: (_result?['previousScan'] as Map?)?['imageUrl'] as String?,
+                                  previousSeverity: (_result?['previousScan'] as Map?)?['severity'] as String? ?? 'N/A',
+                                  currentSeverity: _severity,
+                                ),
+                          const SizedBox(height: 16),
+                          ProgressStatisticsCard(
+                            previousSeverity: (_result?['previousScan'] as Map?)?['severity'] as String? ?? 'N/A',
+                            previousDate: 'Previous scan',
+                            currentSeverity: _severity,
+                            affectedAreaPrevious: 'N/A',
+                            affectedAreaCurrent: 'N/A',
+                            improvementRate: _improvement,
+                          ),
+                          const SizedBox(height: 16),
+                        ],
 
-                        // Toggle Tabs
-                        _buildToggleTabs(),
-                        const SizedBox(height: 16),
+                        // 3. Banner لو أول صورة
+                        if (_isFirstScan) ...[
+                          Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: AppColors.Turqouoise.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: AppColors.Turqouoise.withOpacity(0.4)),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.info_outline, color: AppColors.Turqouoise, size: 20),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    'This is the first scan for this patient. '
+                                    'A comparison will be available after the next scan.',
+                                    style: TextStyle(fontSize: 13, color: AppColors.Turqouoise),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
 
-                        // Comparison View
-                        _isSideBySide
-                            ? ImageComparisonCard(
-                                currentImageFile: _result?['currentImageFile'] as File?,
-                                previousImageUrl: (_result?['previousScan'] as Map<String, dynamic>?)?['imageUrl'] as String? ?? (_result?['previousScan'] as Map<String, dynamic>?)?['image'] as String?,
-                                previousSeverity: (_result?['previousScan'] as Map<String, dynamic>?)?['severity'] as String? ?? 'N/A',
-                                currentSeverity: _severity,
-                              )
-                            : SliderComparisonCard(
-                                currentImageFile: _result?['currentImageFile'] as File?,
-                                previousImageUrl: (_result?['previousScan'] as Map<String, dynamic>?)?['imageUrl'] as String? ?? (_result?['previousScan'] as Map<String, dynamic>?)?['image'] as String?,
-                                previousSeverity: (_result?['previousScan'] as Map<String, dynamic>?)?['severity'] as String? ?? 'N/A',
-                                currentSeverity: _severity,
-                              ),
-                        const SizedBox(height: 16),
-
-                        // Progress Statistics
-                        ProgressStatisticsCard(
-                          previousSeverity: _severity,
-                          previousDate: _result?['date'] ?? 'Previous scan',
-                          currentSeverity: _severity,
-                          affectedAreaPrevious: _result?['affectedArea'] ?? 'N/A',
-                          affectedAreaCurrent: _result?['currentArea'] ?? 'N/A',
-                          improvementRate: _confidence,
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Detailed Analysis
+                        // 4. دايماً بيتظهروا
                         DetailedAnalysisCard(items: _analysisItems),
                         const SizedBox(height: 16),
-
-                        // AI Recommendation
                         AiRecommendationCard(
                           recommendation: _recommendation,
                         ),

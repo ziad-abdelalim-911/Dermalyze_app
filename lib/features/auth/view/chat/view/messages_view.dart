@@ -25,7 +25,8 @@ class _MessagesViewState extends State<MessagesView> {
             decoration: BoxDecoration(gradient: AppColors.primaryGradient2),
             child: Row(
               children: [
-                if (Navigator.canPop(context))
+                if (Navigator.canPop(context) && 
+                    ModalRoute.of(context)?.settings.name != '/bottomNavBar')
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: const Padding(

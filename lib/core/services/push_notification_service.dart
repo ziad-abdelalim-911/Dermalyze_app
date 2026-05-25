@@ -125,6 +125,11 @@ class PushNotificationService {
 
   static Future<void> registerFcmToken([String? token]) async {
     try {
+      if (Firebase.apps.isEmpty) {
+        print("ℹ️ Firebase is not initialized. Skipping FCM token registration.");
+        return;
+      }
+      
       final fcmToken = token ?? await _fcm.getToken();
       if (fcmToken == null) return;
 

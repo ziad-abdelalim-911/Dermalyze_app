@@ -32,17 +32,19 @@ class _VoiceRecorderButtonState extends State<VoiceRecorderButton>
 
   bool _isRecording = false;
   bool _isCancelled = false;
+  bool _isLocked = false;
   double _dragDx = 0;
+  double _dragDy = 0;
   int _seconds = 0;
   Timer? _timer;
   String? _filePath;
   int _startMs = 0;
 
-  // Animations
   late AnimationController _pulseController;
   late Animation<double> _pulseAnim;
 
   static const double _cancelThreshold = -80.0;
+  static const double _lockThreshold = -40.0;
 
   @override
   void initState() {
@@ -80,7 +82,9 @@ class _VoiceRecorderButtonState extends State<VoiceRecorderButton>
     setState(() {
       _isRecording = true;
       _isCancelled = false;
+      _isLocked = false;
       _dragDx = 0;
+      _dragDy = 0;
       _seconds = 0;
     });
 
@@ -99,7 +103,9 @@ class _VoiceRecorderButtonState extends State<VoiceRecorderButton>
 
     setState(() {
       _isRecording = false;
+      _isLocked = false;
       _dragDx = 0;
+      _dragDy = 0;
     });
 
     if (!cancelled && path != null && durationMs > 500) {
@@ -126,21 +132,43 @@ class _VoiceRecorderButtonState extends State<VoiceRecorderButton>
       return GestureDetector(
         onLongPressStart: (_) => _startRecording(),
         onLongPressMoveUpdate: (details) {
-          setState(() => _dragDx = details.offsetFromOrigin.dx);
-          if (_dragDx < _cancelThreshold && !_isCancelled) {
+          setState(() {
+            _dragDx = details.offsetFromOrigin.dx;
+            _dragDy = details.offsetFromOrigin.dy;
+          });
+          if (_dragDy < _lockThreshold && !_isLocked) {
+            setState(() => _isLocked = true);
+            HapticFeedback.heavyImpact();
+          } else if (_dragDx < _cancelThreshold && !_isCancelled && !_isLocked) {
             setState(() => _isCancelled = true);
             HapticFeedback.lightImpact();
           }
         },
-        onLongPressEnd: (_) => _stopRecording(cancelled: _isCancelled),
-        onLongPressCancel: () => _stopRecording(cancelled: true),
+        onLongPressEnd: (_) {
+          if (!_isLocked) _stopRecording(cancelled: _isCancelled);
+        },
+        onLongPressCancel: () {
+          if (!_isLocked) _stopRecording(cancelled: true);
+        },
         child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: const BoxDecoration(
-            color: Color(0xFF4A90E2),
+          width: 46,
+          height: 46,
+          decoration: BoxDecoration(
             shape: BoxShape.circle,
+            gradient: const LinearGradient(
+              colors: [Color(0xFF2AABEE), Color(0xFF1A86C8)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF2AABEE).withOpacity(0.45),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-          child: const Icon(Icons.mic_none, color: Colors.white, size: 24),
+          child: const Icon(Icons.mic, color: Colors.white, size: 22),
         ),
       );
     }
@@ -150,14 +178,12 @@ class _VoiceRecorderButtonState extends State<VoiceRecorderButton>
   }
 
   Widget _buildRecordingBar() {
-    final cancelled = _dragDx < _cancelThreshold;
+    final cancelled = _dragDx < _cancelThreshold && !_isLocked;
 
     return Container(
       height: 56,
       decoration: BoxDecoration(
-        color: cancelled
-            ? Colors.red.shade50
-            : const Color(0xFFF0F4FF),
+        color: cancelled ? Colors.red.shade50 : const Color(0xFFF0F4FF),
         borderRadius: BorderRadius.circular(28),
         border: Border.all(
           color: cancelled ? Colors.red.shade200 : const Color(0xFFBFDBFE),
@@ -165,17 +191,28 @@ class _VoiceRecorderButtonState extends State<VoiceRecorderButton>
       ),
       child: Row(
         children: [
-          const SizedBox(width: 12),
-          // Pulsing mic icon
-          ScaleTransition(
-            scale: _pulseAnim,
-            child: Icon(
-              Icons.mic,
-              color: cancelled ? Colors.red : const Color(0xFF4A90E2),
-              size: 22,
+          if (_isLocked) ...[
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(Icons.delete_outline, color: Colors.red, size: 26),
+              onPressed: () => _stopRecording(cancelled: true),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
             ),
-          ),
-          const SizedBox(width: 8),
+            const SizedBox(width: 12),
+          ] else ...[
+            const SizedBox(width: 12),
+            ScaleTransition(
+              scale: _pulseAnim,
+              child: Icon(
+                Icons.mic,
+                color: cancelled ? Colors.red : const Color(0xFF4A90E2),
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 8),
+          ],
+          
           // Timer
           Text(
             _formatTime(_seconds),
@@ -187,64 +224,89 @@ class _VoiceRecorderButtonState extends State<VoiceRecorderButton>
             ),
           ),
           const SizedBox(width: 8),
-          // Waveform animation
+          
+          // Waveform
           Expanded(child: _buildWaveform(cancelled)),
-          // Slide to cancel text
-          AnimatedOpacity(
-            opacity: cancelled ? 0 : 1,
-            duration: const Duration(milliseconds: 200),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.chevron_left,
-                    color: Colors.grey.shade500, size: 18),
-                Text(
-                  'Slide to cancel',
+          
+          if (_isLocked) ...[
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: () => _stopRecording(cancelled: false),
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xFF4A90E2),
+                ),
+                child: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+              ),
+            ),
+            const SizedBox(width: 8),
+          ] else ...[
+            AnimatedOpacity(
+              opacity: cancelled ? 0 : 1,
+              duration: const Duration(milliseconds: 200),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.chevron_left, color: Colors.grey.shade500, size: 18),
+                  Text(
+                    'Cancel',
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                  ),
+                ],
+              ),
+            ),
+            if (cancelled)
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Text(
+                  'Release to cancel',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey.shade500,
+                    color: Colors.red.shade400,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-              ],
-            ),
-          ),
-          if (cancelled)
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: Text(
-                'Release to cancel',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.red.shade400,
-                  fontWeight: FontWeight.w500,
+              ),
+            const SizedBox(width: 8),
+            // The mic button (draggable handle)
+            GestureDetector(
+              onLongPressMoveUpdate: (details) {
+                if (_isLocked) return;
+                setState(() {
+                  _dragDx = details.offsetFromOrigin.dx;
+                  _dragDy = details.offsetFromOrigin.dy;
+                });
+                if (_dragDy < _lockThreshold && !_isLocked) {
+                  setState(() => _isLocked = true);
+                  HapticFeedback.heavyImpact();
+                } else if (_dragDx < _cancelThreshold && !_isCancelled && !_isLocked) {
+                  setState(() => _isCancelled = true);
+                  HapticFeedback.lightImpact();
+                }
+              },
+              onLongPressEnd: (_) {
+                if (!_isLocked) _stopRecording(cancelled: _isCancelled);
+              },
+              onLongPressCancel: () {
+                if (!_isLocked) _stopRecording(cancelled: true);
+              },
+              child: Transform.translate(
+                offset: Offset(_dragDx.clamp(-60.0, 0.0), (_dragDy < 0 ? _dragDy : 0.0).clamp(-20.0, 0.0)),
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: cancelled ? Colors.red : const Color(0xFF4A90E2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.mic, color: Colors.white, size: 22),
                 ),
               ),
             ),
-          const SizedBox(width: 8),
-          // The mic button (draggable handle)
-          GestureDetector(
-            onLongPressMoveUpdate: (details) {
-              setState(() => _dragDx = details.offsetFromOrigin.dx);
-              if (_dragDx < _cancelThreshold && !_isCancelled) {
-                setState(() => _isCancelled = true);
-                HapticFeedback.lightImpact();
-              }
-            },
-            onLongPressEnd: (_) => _stopRecording(cancelled: _isCancelled),
-            onLongPressCancel: () => _stopRecording(cancelled: true),
-            child: Transform.translate(
-              offset: Offset(_dragDx.clamp(-60.0, 0.0), 0),
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: cancelled ? Colors.red : const Color(0xFF4A90E2),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.mic, color: Colors.white, size: 22),
-              ),
-            ),
-          ),
-          const SizedBox(width: 4),
+            const SizedBox(width: 4),
+          ],
         ],
       ),
     );

@@ -23,6 +23,10 @@ class AnalysisRepository {
       'analysis/$patientId',
       data: formData,
       onSendProgress: onProgress,
+      options: Options(
+        sendTimeout: const Duration(seconds: 90),
+        receiveTimeout: const Duration(seconds: 90),
+      ),
     );
 
     return response.data is Map<String, dynamic>

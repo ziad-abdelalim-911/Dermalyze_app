@@ -84,7 +84,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                         child: Column(
                           children: [
                             // Back row
-                            if (Navigator.canPop(context))
+                            if (Navigator.canPop(context) && ModalRoute.of(context)?.settings.name != AppRoutes.bottomNavBar)
                               Align(
                                 alignment: Alignment.centerLeft,
                                 child: GestureDetector(

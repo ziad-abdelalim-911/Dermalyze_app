@@ -302,6 +302,7 @@ class _ChatInputBar extends StatefulWidget {
 
 class _ChatInputBarState extends State<_ChatInputBar> {
   bool _isEmpty = true;
+  bool _isRecording = false;
 
   @override
   void initState() {
@@ -429,16 +430,15 @@ class _ChatInputBarState extends State<_ChatInputBar> {
 
     return SafeArea(
       top: false,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(30),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-          child: Container(
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.centerRight,
+        children: [
+          // ── The Pill ──
+          Container(
             height: 58,
             decoration: BoxDecoration(
-              color: barBg,
               borderRadius: BorderRadius.circular(30),
-              border: Border.all(color: borderColor, width: 1.0),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(isDark ? 0.28 : 0.08),
@@ -453,79 +453,106 @@ class _ChatInputBarState extends State<_ChatInputBar> {
                 ),
               ],
             ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(width: 4),
-
-                // ── Emoji ────────────────────────────────────────
-                _IconBtn(
-                  icon: widget.showEmoji
-                      ? Icons.keyboard_rounded
-                      : Icons.emoji_emotions_outlined,
-                  color: iconColor,
-                  size: 22,
-                  onTap: widget.onEmojiToggle,
-                ),
-
-                const SizedBox(width: 4),
-
-                // ── TextField (no separate background) ───────────
-                Expanded(
-                  child: TextField(
-                    controller: widget.controller,
-                    focusNode: widget.focusNode,
-                    maxLines: 1,
-                    textCapitalization: TextCapitalization.sentences,
-                    style: TextStyle(
-                        color: textColor, fontSize: 15.5, height: 1.3),
-                    decoration: InputDecoration(
-                      hintText: 'Message',
-                      hintStyle:
-                          TextStyle(color: hintColor, fontSize: 15.5),
-                      border: InputBorder.none,
-                      isDense: true,
-                      contentPadding:
-                          const EdgeInsets.symmetric(vertical: 4),
-                    ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(30),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: barBg,
+                    border: Border.all(color: borderColor, width: 1.0),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Row(
+                    children: [
+                      if (!_isRecording) ...[
+                        const SizedBox(width: 4),
+                        _IconBtn(
+                          icon: widget.showEmoji
+                              ? Icons.keyboard_rounded
+                              : Icons.emoji_emotions_outlined,
+                          color: iconColor,
+                          size: 22,
+                          onTap: widget.onEmojiToggle,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: TextField(
+                            controller: widget.controller,
+                            focusNode: widget.focusNode,
+                            maxLines: 1,
+                            textCapitalization: TextCapitalization.sentences,
+                            style: TextStyle(
+                                color: textColor, fontSize: 15.5, height: 1.3),
+                            decoration: InputDecoration(
+                              hintText: 'Message',
+                              hintStyle: TextStyle(color: hintColor, fontSize: 15.5),
+                              border: InputBorder.none,
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(vertical: 4),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        if (_isEmpty)
+                          _IconBtn(
+                            icon: Icons.camera_alt_rounded,
+                            color: iconColor,
+                            size: 21,
+                            onTap: () => _pickImage(ImageSource.camera),
+                          ),
+                        if (_isEmpty)
+                          _IconBtn(
+                            icon: Icons.attach_file_rounded,
+                            color: iconColor,
+                            size: 21,
+                            onTap: _showAttachMenu,
+                          ),
+                        
+                        // Empty space to prevent content from going under the floating button
+                        const SizedBox(width: 48),
+                      ],
+                      
+                      if (_isRecording) const Spacer(),
+                    ],
                   ),
                 ),
-
-                const SizedBox(width: 4),
-
-                // ── Camera ───────────────────────────────────────
-                if (_isEmpty)
-                  _IconBtn(
-                    icon: Icons.camera_alt_rounded,
-                    color: iconColor,
-                    size: 21,
-                    onTap: () => _pickImage(ImageSource.camera),
-                  ),
-
-                // ── Attach ───────────────────────────────────────
-                if (_isEmpty)
-                  _IconBtn(
-                    icon: Icons.attach_file_rounded,
-                    color: iconColor,
-                    size: 21,
-                    onTap: _showAttachMenu,
-                  ),
-
-                const SizedBox(width: 4),
-
-                // ── Send / Mic ────────────────────────────────────
-                _SendButton(
-                  isEmpty: _isEmpty,
-                  controller: widget.controller,
-                  onSend: widget.onSend,
-                  onVoiceSend: widget.onVoiceSend,
-                ),
-
-                const SizedBox(width: 6),
-              ],
+              ),
             ),
           ),
-        ),
+
+          // ── The Voice Recorder / Send button ──
+          if (_isEmpty)
+            Positioned(
+              right: 2,
+              left: _isRecording ? 0 : null,
+              top: _isRecording ? 1 : null,
+              bottom: _isRecording ? 1 : null,
+              child: VoiceRecorderButton(
+                onSend: () {},
+                onCancel: () {
+                  if (mounted) setState(() => _isRecording = false);
+                },
+                onRecordingStart: () {
+                  if (mounted) setState(() => _isRecording = true);
+                },
+                onRecordingComplete: (path, ms) {
+                  if (mounted) setState(() => _isRecording = false);
+                  widget.onVoiceSend(path, ms);
+                },
+              ),
+            ),
+            
+          if (!_isEmpty)
+            Positioned(
+              right: 2,
+              child: _SendButton(
+                isEmpty: _isEmpty,
+                controller: widget.controller,
+                onSend: widget.onSend,
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -565,13 +592,11 @@ class _SendButton extends StatefulWidget {
   final bool isEmpty;
   final TextEditingController controller;
   final void Function(String) onSend;
-  final void Function(String path, int durationMs) onVoiceSend;
 
   const _SendButton({
     required this.isEmpty,
     required this.controller,
     required this.onSend,
-    required this.onVoiceSend,
   });
 
   @override
@@ -580,7 +605,6 @@ class _SendButton extends StatefulWidget {
 
 class _SendButtonState extends State<_SendButton>
     with SingleTickerProviderStateMixin {
-  bool _isRecording = false;
   late final AnimationController _anim;
   late final Animation<double> _scale;
 
@@ -637,23 +661,14 @@ class _SendButtonState extends State<_SendButton>
             ],
           ),
           child: widget.isEmpty
-              ? VoiceRecorderButton(
-                  onSend: () {},
-                  onCancel: () => setState(() => _isRecording = false),
-                  onRecordingStart: () =>
-                      setState(() => _isRecording = true),
-                  onRecordingComplete: (path, ms) {
-                    setState(() => _isRecording = false);
-                    widget.onVoiceSend(path, ms);
-                  },
-                )
-              : const Icon(Icons.send_rounded,
-                  color: Colors.white, size: 20),
+              ? null
+              : const Icon(Icons.send_rounded, color: Colors.white, size: 20),
         ),
       ),
     );
   }
 }
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Date Separator

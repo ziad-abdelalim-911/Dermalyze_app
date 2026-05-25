@@ -1,4 +1,5 @@
 import 'package:dermalyze/core/constants/app_colors.dart';
+import 'package:dermalyze/core/network/api_service.dart';
 import 'package:dermalyze/core/routes/app_routes.dart';
 import 'package:dermalyze/core/storage/token_storage.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +31,7 @@ class _ProfileViewState extends State<ProfileView> {
 
   Future<void> _loadProfile() async {
     try {
+      // خطوة 1: اعرض بيانات Local على طول (سريعة)
       final user = await _tokenStorage.getUser();
       if (mounted && user != null) {
         setState(() {
@@ -44,6 +46,29 @@ class _ProfileViewState extends State<ProfileView> {
         });
       } else {
         if (mounted) setState(() => _isLoading = false);
+      }
+
+      // خطوة 2: جيب بيانات محدّثة من الـ API في الخلفية
+      try {
+        final api = ApiService();
+        final response = await api.get('user/profile');
+        final profile = (response is Map && response.containsKey('profile'))
+            ? response['profile'] as Map<String, dynamic>
+            : response as Map<String, dynamic>? ?? {};
+
+        if (mounted && profile.isNotEmpty) {
+          setState(() {
+            _name       = profile['name']        ?? _name;
+            _email      = profile['email']       ?? _email;
+            _phone      = profile['phone']       ?? _phone;
+            _birthDate  = profile['dateOfBirth'] ?? _birthDate;
+            _nationalId = profile['nationalId']  ?? _nationalId;
+            _diagnosis  = profile['diagnosis']   ?? _diagnosis;
+            _allergies  = profile['allergies']   ?? _allergies;
+          });
+        }
+      } catch (_) {
+        // فشل الـ API؟ اللي في الـ Local Storage كافي
       }
     } catch (_) {
       if (mounted) setState(() => _isLoading = false);
@@ -101,17 +126,11 @@ class _ProfileViewState extends State<ProfileView> {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                GestureDetector(
-                                  onTap: () {
-                                    if (Navigator.canPop(context)) {
+                                if (Navigator.canPop(context) && ModalRoute.of(context)?.settings.name != AppRoutes.bottomNavBar)
+                                  GestureDetector(
+                                    onTap: () {
                                       Navigator.pop(context);
-                                    } else {
-                                      Navigator.of(context, rootNavigator: true)
-                                          .pushNamedAndRemoveUntil(
-                                              AppRoutes.bottomNavBar,
-                                              (route) => false);
-                                    }
-                                  },
+                                    },
                                     child: Container(
                                       width: 40,
                                       height: 40,
@@ -122,7 +141,8 @@ class _ProfileViewState extends State<ProfileView> {
                                       child: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
                                     ),
                                   ),
-                                  SizedBox(width: 12),
+                                if (Navigator.canPop(context) && ModalRoute.of(context)?.settings.name != AppRoutes.bottomNavBar)
+                                  const SizedBox(width: 12),
                                   Text(
                                     'Profile',
                                     style: TextStyle(
