@@ -198,15 +198,20 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
               child: Column(
                 children: [
                   FollowupImageCard(
-                    onTap: () => Navigator.pushNamed(
-                      context,
-                      AppRoutes.uploadAnalyze,
-                      arguments: {
-                        'patientId': _patient?.id ?? '',
-                        'patientName': name,
-                        'diagnosis': diagnosis,
-                      },
-                    ),
+                    onTap: () async {
+                      await Navigator.pushNamed(
+                        context,
+                        AppRoutes.uploadAnalyze,
+                        arguments: {
+                          'patientId': _patient?.id ?? '',
+                          'patientName': name,
+                          'diagnosis': diagnosis,
+                        },
+                      );
+                      if (mounted) {
+                        _loadData(); // Refresh timeline with new analysis
+                      }
+                    },
                   ),
                   const SizedBox(height: 16),
                   PatientInfoCard(

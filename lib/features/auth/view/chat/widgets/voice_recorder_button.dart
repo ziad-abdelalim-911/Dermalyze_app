@@ -130,11 +130,11 @@ class _VoiceRecorderButtonState extends State<VoiceRecorderButton>
     if (!_isRecording) {
       // Normal mic button (not recording)
       return GestureDetector(
-        onLongPressStart: (_) => _startRecording(),
-        onLongPressMoveUpdate: (details) {
+        onPanDown: (_) => _startRecording(),
+        onPanUpdate: (details) {
           setState(() {
-            _dragDx = details.offsetFromOrigin.dx;
-            _dragDy = details.offsetFromOrigin.dy;
+            _dragDx += details.delta.dx;
+            _dragDy += details.delta.dy;
           });
           if (_dragDy < _lockThreshold && !_isLocked) {
             setState(() => _isLocked = true);
@@ -144,10 +144,10 @@ class _VoiceRecorderButtonState extends State<VoiceRecorderButton>
             HapticFeedback.lightImpact();
           }
         },
-        onLongPressEnd: (_) {
+        onPanEnd: (_) {
           if (!_isLocked) _stopRecording(cancelled: _isCancelled);
         },
-        onLongPressCancel: () {
+        onPanCancel: () {
           if (!_isLocked) _stopRecording(cancelled: true);
         },
         child: Container(

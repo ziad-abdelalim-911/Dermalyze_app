@@ -480,7 +480,7 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
             backgroundColor: Color(0xFF4ECDC4),
           ),
         );
-        Navigator.pop(context); // ارجع للشاشة السابقة بعد الحفظ
+        Navigator.popUntil(context, ModalRoute.withName(AppRoutes.patientDetails)); // ارجع لشاشة المريض عشان يعمل ريفريش
       }
     } catch (e) {
       if (mounted) {
