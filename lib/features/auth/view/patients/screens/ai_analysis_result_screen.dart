@@ -28,13 +28,6 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
   bool get _isFirstScan =>
       _result?['isFirstScan'] == true || _result?['previousScan'] == null;
 
-  String get _confidence {
-    final raw = _result?['confidence'];
-    if (raw == null) return 'N/A';
-    final num val = raw is num ? raw : num.tryParse(raw.toString()) ?? 0;
-    return '${(val * 100).toStringAsFixed(0)}%';
-  }
-
   String get _diagnosis    => _result?['diagnosis'] ?? 'Analysis Complete';
   String get _severity     => _result?['severity'] ?? 'N/A';
   String get _recommendation => _result?['recommendation'] ?? 'Continue current treatment plan.';
@@ -66,13 +59,7 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
         newValue: _severity,
       ));
     }
-    if (_result?['confidence'] != null) {
-      items.add(DetailedAnalysisItem(
-        label: 'Confidence',
-        oldValue: '—',
-        newValue: _confidence,
-      ));
-    }
+
     if (_result?['affectedArea'] != null || _result?['currentArea'] != null) {
       items.add(DetailedAnalysisItem(
         label: 'Affected Area',
@@ -184,7 +171,7 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
                         // 2. Improvement + Comparison — بس لو في صورة قديمة
                         if (!_isFirstScan) ...[
                           ImprovementDetectedCard(
-                            percentage: _confidence,
+                            percentage: _improvement,
                             message: _recommendation,
                           ),
                           const SizedBox(height: 16),
@@ -334,11 +321,7 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
                         color: AppColors.Turqouoise,
                       ),
                     ),
-                    Text(
-                      'Confidence: $_confidence',
-                      style: TextStyle(
-                          fontSize: 12, color: context.dynamicTextColorSecondary),
-                    ),
+
                   ],
                 ),
               ],
@@ -469,7 +452,7 @@ class _AiAnalysisResultScreenState extends State<AiAnalysisResultScreen> {
     try {
       // نستخدم ReviewRepository لحفظ ملاحظة تلخيصية بالتحليل
       final summary =
-          'AI Analysis: $_diagnosis | Severity: $_severity | Confidence: $_confidence';
+          'AI Analysis: $_diagnosis | Severity: $_severity | Improvement: $_improvement';
       await ReviewRepository().saveReview(
         patientId: patientId,
         review: summary,

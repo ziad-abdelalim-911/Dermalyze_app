@@ -93,12 +93,14 @@ class AppRouter {
         // PatientEntity يتمرر من الـ patients list
         final patient = settings.arguments as PatientEntity?;
         return MaterialPageRoute(
+          settings: settings,
           builder: (_) => PatientDetailsScreen(initialPatient: patient),
         );
 
       case AppRoutes.uploadAnalyze:
         final uploadArgs = settings.arguments as Map<String, dynamic>? ?? {};
         return MaterialPageRoute(
+          settings: settings,
           builder: (_) => UploadAnalyzeScreen(
             patientId: uploadArgs['patientId'] as String? ?? '',
             patientName: uploadArgs['patientName'] as String?,
@@ -112,7 +114,7 @@ class AppRouter {
             builder: (_) => const AiAnalysisResultScreen());
 
       case AppRoutes.doctorHome:
-        return MaterialPageRoute(builder: (_) => const DoctorHomeScreen());
+        return MaterialPageRoute(settings: settings, builder: (_) => const DoctorHomeScreen());
 
       case AppRoutes.allPatients:
         return MaterialPageRoute(
