@@ -9,6 +9,7 @@ import 'package:dermalyze/features/auth/view/patients/widgets/improvement_detect
 import 'package:dermalyze/features/auth/view/patients/widgets/progress_statistics_card.dart';
 import 'package:dermalyze/features/auth/view/patients/widgets/slider_comparison_card.dart';
 import 'package:flutter/material.dart';
+import 'package:dermalyze/core/routes/app_routes.dart';
 
 
 class AiAnalysisResultScreen extends StatefulWidget {
