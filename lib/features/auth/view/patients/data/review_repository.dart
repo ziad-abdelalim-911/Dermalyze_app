@@ -27,18 +27,24 @@ class ReviewRepository {
   }
 
   /// POST /api/patient/{patientId}/appointments
-  Future<void> scheduleFollowup({
+  Future<Map<String, dynamic>> scheduleFollowup({
     required String patientId,
     required String patientName,
     required String diagnosis,
     required String date,
     required String time,
   }) async {
-    await _api.post('doctor/patients/$patientId/appointments', {
+    final response = await _api.post('doctor/patients/$patientId/appointments', {
       'patientName': patientName,
       'diagnosis': diagnosis,
       'appointmentDate': date,
       'appointmentTime': time,
     });
+    
+    // According to backend update, response returns a 'patient' object
+    if (response is Map<String, dynamic>) {
+      return response;
+    }
+    return {'patient': response};
   }
 }

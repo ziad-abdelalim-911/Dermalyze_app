@@ -2,6 +2,9 @@ import 'package:dermalyze/core/constants/app_colors.dart';
 import 'package:dermalyze/features/auth/view/patients/data/review_repository.dart';
 import 'package:dermalyze/features/shared/custom_date_textformfield.dart';
 import 'package:flutter/material.dart';
+import 'package:dermalyze/features/auth/view/home/doctor/presentation/bloc/doctor_home_bloc.dart';
+import 'package:dermalyze/features/auth/view/home/doctor/presentation/bloc/doctor_home_event.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ScheduleFollowupBottomSheet extends StatefulWidget {
   final String patientName;
@@ -92,7 +95,7 @@ class _ScheduleFollowupBottomSheetState
             const SizedBox(height: 6),
             CustomDateTextformfield(
               controller: _dateController,
-              hint: 'dd/mm/yy',
+              hint: 'YYYY-MM-DD',
               validatorText: 'Please select appointment date',
             ),
             const SizedBox(height: 14),
@@ -143,7 +146,9 @@ class _ScheduleFollowupBottomSheetState
                 );
                 if (picked != null) {
                   setState(() {
-                    _timeController.text = picked.format(context);
+                    final hh = picked.hour.toString().padLeft(2, '0');
+                    final mm = picked.minute.toString().padLeft(2, '0');
+                    _timeController.text = '$hh:$mm';
                   });
                 }
               },
@@ -237,7 +242,7 @@ class _ScheduleFollowupBottomSheetState
                             if (_formKey.currentState!.validate()) {
                               setState(() => _isSaving = true);
                               try {
-                                await _repo.scheduleFollowup(
+                                final response = await _repo.scheduleFollowup(
                                   patientId: widget.patientId,
                                   patientName: widget.patientName,
                                   diagnosis: widget.diagnosis,
@@ -245,7 +250,19 @@ class _ScheduleFollowupBottomSheetState
                                   time: _timeController.text,
                                 );
                                 if (context.mounted) {
-                                  Navigator.pop(context);
+                                  // Update the state immediately
+                                  if (response.containsKey('patient')) {
+                                    final patientData = response['patient'] as Map<String, dynamic>;
+                                    patientData['patientId'] = widget.patientId; // ensure ID is present for bloc logic
+                                    
+                                    try {
+                                      context.read<DoctorHomeBloc>().add(UpdatePatientEvent(patientData));
+                                    } catch (e) {
+                                      // If bloc not found in context, ignore
+                                    }
+                                  }
+
+                                  Navigator.pop(context, response.containsKey('patient') ? response['patient'] as Map<String, dynamic> : null);
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       content: Text('Follow-up scheduled ✓'),

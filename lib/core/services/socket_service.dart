@@ -11,8 +11,14 @@ class SocketService {
 
   IO.Socket? _socket;
   final _profileUpdateController = StreamController<Map<String, dynamic>>.broadcast();
+  final _patientUpdateController = StreamController<Map<String, dynamic>>.broadcast();
+  final _chatMessageController = StreamController<Map<String, dynamic>>.broadcast();
+  final _chatTypingController = StreamController<Map<String, dynamic>>.broadcast();
 
   Stream<Map<String, dynamic>> get profileStream => _profileUpdateController.stream;
+  Stream<Map<String, dynamic>> get patientUpdateStream => _patientUpdateController.stream;
+  Stream<Map<String, dynamic>> get chatMessageStream => _chatMessageController.stream;
+  Stream<Map<String, dynamic>> get chatTypingStream => _chatTypingController.stream;
 
   Future<void> connect() async {
     if (_socket != null && _socket!.connected) return;
@@ -40,6 +46,38 @@ class SocketService {
       print('🔄 Real-time Profile Update Received: $data');
       if (data is Map<String, dynamic>) {
         _profileUpdateController.add(data);
+      }
+    });
+
+    _socket?.on('patient_updated', (data) {
+      print('🔄 Real-time Patient Update Received: $data');
+      if (data is Map<String, dynamic>) {
+        _patientUpdateController.add(data);
+      }
+    });
+
+    // Chat Events
+    _socket?.on('receive_message', (data) {
+      print('💬 Real-time Message Received: $data');
+      if (data is Map<String, dynamic>) {
+        _chatMessageController.add(data);
+      }
+    });
+
+    _socket?.on('message_sent', (data) {
+      print('📤 Real-time Message Sent Confirmed: $data');
+      if (data is Map<String, dynamic>) {
+        // You can use a specific key to differentiate or just pass it through
+        final eventData = Map<String, dynamic>.from(data);
+        eventData['isConfirmation'] = true;
+        _chatMessageController.add(eventData);
+      }
+    });
+
+    _socket?.on('user_typing', (data) {
+      print('⌨️ User Typing Event: $data');
+      if (data is Map<String, dynamic>) {
+        _chatTypingController.add(data);
       }
     });
 

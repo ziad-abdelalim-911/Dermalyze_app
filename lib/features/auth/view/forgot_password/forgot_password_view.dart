@@ -206,6 +206,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
 
                         TextField(
                           controller: _controller,
+                          style: const TextStyle(color: Colors.black),
                           keyboardType: isEmailSelected
                               ? TextInputType.emailAddress
                               : TextInputType.phone,

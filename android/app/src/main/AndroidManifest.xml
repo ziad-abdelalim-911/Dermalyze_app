@@ -33,6 +33,25 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
 
+            <!-- App Links / Universal Links (HTTPS) -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Accepts URLs like: https://dermalyze.com/activate -->
+                <data android:scheme="https" android:host="dermalyze.com" android:pathPrefix="/activate" />
+                <data android:scheme="http" android:host="dermalyze.com" android:pathPrefix="/activate" />
+            </intent-filter>
+
+            <!-- Custom URL Scheme for fallback / easy local testing -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Accepts URLs like: dermalyze://activate -->
+                <data android:scheme="dermalyze" android:host="activate" />
+            </intent-filter>
+
         </activity>
 
         <meta-data

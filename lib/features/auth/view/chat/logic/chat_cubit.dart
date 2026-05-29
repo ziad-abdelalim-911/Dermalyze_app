@@ -4,6 +4,7 @@ import 'package:dermalyze/features/auth/view/chat/data/repositories/chat_reposit
 import 'package:dermalyze/features/auth/view/chat/model/message_model.dart';
 import 'package:dermalyze/features/auth/view/chat/model/message_type.dart';
 import 'package:dermalyze/core/storage/token_storage.dart';
+import 'package:dermalyze/core/services/socket_service.dart';
 
 // ─────────────────────────────────── States ──────────────────────────────────
 
@@ -33,6 +34,7 @@ class ChatCubit extends Cubit<ChatState> {
   Timer? _pollingTimer;
 
   final List<MessageModel> _localMessages = [];
+  StreamSubscription? _chatMessageSub;
 
   ChatCubit(this._chatRepository, {required this.receiverId})
       : super(ChatInitial()) {
@@ -43,7 +45,50 @@ class ChatCubit extends Cubit<ChatState> {
     final user = await TokenStorage().getUser();
     currentUserId = user?['_id']?.toString() ?? '';
     await loadMessages();
-    _startPolling();
+    
+    // Listen to real-time chat messages from SocketService
+    _chatMessageSub = SocketService().chatMessageStream.listen((data) {
+      if (isClosed) return;
+      
+      // We expect the backend to send the formatted Message JSON
+      final message = MessageModel.fromJson(data, currentUserId ?? '');
+      
+      // Filter out messages that don't belong to this conversation
+      final isRelevant = (message.senderId == receiverId && message.receiverId == currentUserId) || 
+                         (message.senderId == currentUserId && message.receiverId == receiverId);
+                         
+      if (isRelevant) {
+        // If it's a confirmation of our own sent message, we might just update status
+        if (data['isConfirmation'] == true) {
+           final idx = _localMessages.indexWhere((m) => m.status == MessageStatus.pending && m.content == message.content);
+           if (idx != -1) {
+             _localMessages[idx] = message.copyWith(status: MessageStatus.sent);
+             _emitLoaded();
+           } else {
+             // Just add if not found
+             _appendMessage(message);
+           }
+        } else {
+           // Incoming message from the other person
+           _appendMessage(message);
+        }
+      }
+    });
+  }
+
+  void _appendMessage(MessageModel message) {
+    // Check if it already exists to avoid duplicates
+    final exists = _localMessages.any((m) => m.id == message.id && m.id != null);
+    if (!exists) {
+      _localMessages.add(message);
+      // Re-sort
+      _localMessages.sort((a, b) {
+        final ta = DateTime.tryParse(a.timestamp ?? '') ?? DateTime(0);
+        final tb = DateTime.tryParse(b.timestamp ?? '') ?? DateTime(0);
+        return ta.compareTo(tb);
+      });
+      _emitLoaded();
+    }
   }
 
   // ─────────────────────────────────────────────────────────────────
@@ -220,18 +265,48 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 
-  void setRecording(bool recording) {
-    if (state is ChatLoaded) _emitLoaded(isRecording: recording);
+  // ─────────────────────────────────────────────────────────────────
+  // Delete conversation
+  // ─────────────────────────────────────────────────────────────────
+  Future<void> deleteConversation() async {
+    // Optimistic UI update
+    final previousMessages = List<MessageModel>.from(_localMessages);
+    _localMessages.clear();
+    _emitLoaded();
+
+    try {
+      await _chatRepository.deleteConversation(receiverId);
+    } catch (e) {
+      if (isClosed) return;
+      // Revert if failed
+      _localMessages.addAll(previousMessages);
+      _emitLoaded();
+      emit(ChatError('Failed to delete conversation.'));
+    }
   }
 
-  void _startPolling() {
-    _pollingTimer =
-        Timer.periodic(const Duration(seconds: 5), (_) => loadMessages());
+  // ─────────────────────────────────────────────────────────────────
+  // React to message
+  // ─────────────────────────────────────────────────────────────────
+  void reactToMessage(String messageId, String emoji) {
+    final index = _localMessages.indexWhere((m) => m.id == messageId);
+    if (index == -1) return;
+
+    _localMessages[index] = _localMessages[index].copyWith(reaction: emoji);
+    _emitLoaded();
+    
+    // Note: Backend integration for reactions can be added here in the future
+    // await _chatRepository.reactToMessage(messageId, emoji);
+  }
+
+  void setRecording(bool recording) {
+    if (state is ChatLoaded) _emitLoaded(isRecording: recording);
   }
 
   @override
   Future<void> close() {
     _pollingTimer?.cancel();
+    _chatMessageSub?.cancel();
     return super.close();
   }
 }

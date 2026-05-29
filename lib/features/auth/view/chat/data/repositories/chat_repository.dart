@@ -3,6 +3,7 @@ import 'package:dermalyze/core/network/api_service.dart';
 import 'package:dermalyze/features/auth/view/chat/model/message_model.dart';
 import 'package:dermalyze/features/auth/view/chat/model/conversation_model.dart';
 import 'package:dermalyze/core/storage/token_storage.dart';
+import 'package:hive/hive.dart';
 import 'package:dio/dio.dart';
 
 class ChatRepository {
@@ -92,17 +93,54 @@ class ChatRepository {
   // ─────────────────────────────────────────────────────────────────
   Future<List<MessageModel>> getMessages(
       String receiverId, String currentUserId) async {
+    final box = Hive.box('offline_chats');
+    final cacheKey = 'chat_${currentUserId}_$receiverId';
+
     try {
       final response =
           await _apiService.get(ApiEndpoints.chatMessages(receiverId));
       final rawList = _extractList(response, ['messages', 'data']);
 
-      return rawList
+      final messages = rawList
           .whereType<Map<String, dynamic>>()
           .map((json) => MessageModel.fromJson(json, currentUserId))
           .toList();
+
+      // Save to Hive
+      final List<Map<String, dynamic>> jsonList = messages.map((m) => {
+        'id': m.id,
+        'senderId': m.senderId,
+        'receiverId': m.receiverId,
+        'content': m.content,
+        'timestamp': m.timestamp,
+        'status': m.status.name,
+        'type': m.type.name,
+        'mediaUrl': m.mediaUrl,
+        'durationMs': m.durationMs,
+        'isMe': m.isMe,
+      }).toList();
+      await box.put(cacheKey, jsonList);
+
+      return messages;
     } catch (e) {
       debugLog('[ChatRepo] getMessages error: $e');
+      
+      // Fallback to Hive cache
+      final cachedData = box.get(cacheKey);
+      if (cachedData != null && cachedData is List) {
+        return cachedData.map((e) {
+          final map = Map<String, dynamic>.from(e as Map);
+          // Simple reconstruction from cache
+          return MessageModel(
+            id: map['id'],
+            senderId: map['senderId'] ?? '',
+            receiverId: map['receiverId'] ?? '',
+            content: map['content'] ?? '',
+            timestamp: map['timestamp'],
+            isMe: map['isMe'] ?? false,
+          );
+        }).toList();
+      }
       return [];
     }
   }

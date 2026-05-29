@@ -6,4 +6,9 @@ abstract class LoginRepository {
     required String email,
     required String password,
   });
+
+  Future<LoginResponseModel> activateAccount({
+    required String token,
+    required String password,
+  });
 }

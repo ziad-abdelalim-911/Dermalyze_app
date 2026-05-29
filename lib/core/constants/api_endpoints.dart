@@ -13,6 +13,9 @@ class ApiEndpoints {
   /// POST  { idToken }
   static const String verifyIdentity = 'auth/verify-identity';
 
+  /// GET   /me  → returns logged in user profile
+  static const String me = 'me';
+
   // ─── Doctor ────────────────────────────────────────────
   /// POST  { doctorCode }  — ربط مريض بطبيب
   static const String linkDoctor = 'link-doctor';
@@ -52,9 +55,9 @@ class ApiEndpoints {
   /// GET   → list of conversations for the current user
   static const String conversations = 'chat/conversations';
 
-  /// GET   /chat/messages/{receiverId}
+  /// GET   /chat/messages/{receiverId}?page=1&limit=50
   static String chatMessages(String receiverId) =>
-      'chat/messages/$receiverId';
+      'chat/messages/$receiverId?page=1&limit=50';
 
   /// POST  { receiverId, content }
   static const String sendMessage = 'chat/send';

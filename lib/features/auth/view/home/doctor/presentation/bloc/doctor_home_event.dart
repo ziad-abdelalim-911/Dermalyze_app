@@ -11,3 +11,8 @@ class FilterPatientsEvent extends DoctorHomeEvent {
   final String filter;
   FilterPatientsEvent(this.filter);
 }
+
+class UpdatePatientEvent extends DoctorHomeEvent {
+  final Map<String, dynamic> updatedPatientData;
+  UpdatePatientEvent(this.updatedPatientData);
+}

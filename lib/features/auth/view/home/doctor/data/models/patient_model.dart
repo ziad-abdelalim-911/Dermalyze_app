@@ -14,13 +14,18 @@ class PatientModel extends PatientEntity {
     super.phone,
     super.currentSymptoms,
     super.nextAppointment,
+    super.improvement,
   });
 
   factory PatientModel.fromJson(Map<String, dynamic> json) {
     final status = (json['status'] ?? 'Stable').toString();
-    final recovery =
-        ((json['recoveryProgress'] ?? json['recovery'] ?? 0) as num)
-            .toDouble();
+    final recoveryVal = json['recoveryProgress'] ?? json['recovery'] ?? 0;
+    double recovery = 0.0;
+    if (recoveryVal is num) {
+      recovery = recoveryVal.toDouble();
+    } else if (recoveryVal is String) {
+      recovery = double.tryParse(recoveryVal) ?? 0.0;
+    }
 
     // الباك أند بيرجع updatedAt كـ ISO date - نحولها لـ "X days ago"
     final updatedAt = json['updatedAt'] ?? '';
@@ -48,6 +53,7 @@ class PatientModel extends PatientEntity {
       phone: json['phone'] ?? '',
       currentSymptoms: symptoms,
       nextAppointment: nextAppt,
+      improvement: (json['improvement'] ?? '').toString(),
     );
   }
 

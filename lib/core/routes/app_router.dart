@@ -17,6 +17,7 @@ import 'package:dermalyze/features/settings/view/settings_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dermalyze/features/auth/view/login/Patient_SignUp.dart';
 import 'package:dermalyze/features/auth/view/login/doctor_SignUp.dart';
+import 'package:dermalyze/features/auth/view/login/set_password_view.dart';
 import 'package:dermalyze/features/auth/view/login/register_view.dart';
 import 'package:dermalyze/features/auth/view/login/signup_view.dart';
 import 'package:dermalyze/features/auth/view/navigation/custom_bottom_nav_bar.dart';
@@ -25,6 +26,7 @@ import 'package:dermalyze/features/auth/view/patients/screens/add_new_patient_sc
 import 'package:dermalyze/features/auth/view/patients/screens/ai_analysis_result_screen.dart';
 import 'package:dermalyze/features/auth/view/patients/screens/patient_details_screen.dart';
 import 'package:dermalyze/features/auth/view/patients/screens/upload_analyze_screen.dart';
+import 'package:dermalyze/features/auth/view/appointments/patient_appointments_screen.dart';
 import 'package:dermalyze/splash.dart';
 import 'package:flutter/material.dart';
 
@@ -57,6 +59,10 @@ class AppRouter {
 
       case AppRoutes.register:
         return MaterialPageRoute(builder: (_) => const RegisterView());
+
+      case AppRoutes.setPassword:
+        final token = settings.arguments as String? ?? '';
+        return MaterialPageRoute(builder: (_) => SetPasswordView(token: token));
 
       case AppRoutes.patientSignup:
         return MaterialPageRoute(builder: (_) => const PatientSignup());
@@ -145,6 +151,9 @@ class AppRouter {
 
       case AppRoutes.smartHistory:
         return MaterialPageRoute(builder: (_) => const SmartHistoryScreen());
+        
+      case AppRoutes.patientAppointments:
+        return MaterialPageRoute(builder: (_) => const PatientAppointmentsScreen());
         
       case AppRoutes.medicationsGuide:
         return MaterialPageRoute(builder: (_) => const MedicationsGuideScreen());

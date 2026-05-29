@@ -12,6 +12,8 @@ class PatientEntity {
   final String currentSymptoms;
   final String nextAppointment;
 
+  final String improvement;
+
   const PatientEntity({
     required this.id,
     required this.name,
@@ -25,6 +27,7 @@ class PatientEntity {
     this.phone = '',
     this.currentSymptoms = '',
     this.nextAppointment = '',
+    this.improvement = '',
   });
 
   PatientEntity copyWith({
@@ -40,6 +43,7 @@ class PatientEntity {
     String? phone,
     String? currentSymptoms,
     String? nextAppointment,
+    String? improvement,
   }) {
     return PatientEntity(
       id: id ?? this.id,
@@ -54,6 +58,7 @@ class PatientEntity {
       phone: phone ?? this.phone,
       currentSymptoms: currentSymptoms ?? this.currentSymptoms,
       nextAppointment: nextAppointment ?? this.nextAppointment,
+      improvement: improvement ?? this.improvement,
     );
   }
 }

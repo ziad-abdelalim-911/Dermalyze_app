@@ -8,6 +8,8 @@ class PatientInfoCard extends StatelessWidget {
   final String lastVisit;
   final String recoveryRate;
 
+  final String improvement;
+
   const PatientInfoCard({
     super.key,
     required this.name,
@@ -15,6 +17,7 @@ class PatientInfoCard extends StatelessWidget {
     required this.quality,
     required this.lastVisit,
     required this.recoveryRate,
+    this.improvement = '',
   });
 
   Color _qualityColor(String quality) {
@@ -113,6 +116,20 @@ class PatientInfoCard extends StatelessWidget {
                   valueColor: AppColors.Turqouoise,
                 ),
               ),
+              if (improvement.isNotEmpty) ...[
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildStat(
+                    context: context,
+                    icon: Icons.trending_up,
+                    label: 'Improvement',
+                    value: improvement.contains('+') || improvement.contains('-') 
+                        ? improvement 
+                        : '+$improvement',
+                    valueColor: AppColors.SkyBlue,
+                  ),
+                ),
+              ],
             ],
           ),
         ],

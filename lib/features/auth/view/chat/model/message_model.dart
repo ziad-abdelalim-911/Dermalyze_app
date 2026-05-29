@@ -11,6 +11,7 @@ class MessageModel {
   final String? mediaUrl;
   final MessageStatus status;
   final int durationMs; // for audio messages
+  final String? reaction;
 
   MessageModel({
     this.id,
@@ -23,6 +24,7 @@ class MessageModel {
     this.mediaUrl,
     this.status = MessageStatus.sent,
     this.durationMs = 0,
+    this.reaction,
   });
 
   /// Parse from backend response.
@@ -78,6 +80,7 @@ class MessageModel {
       mediaUrl: json['mediaUrl']?.toString(),
       status: status,
       durationMs: json['durationMs'] as int? ?? 0,
+      reaction: json['reaction']?.toString(),
     );
   }
 
@@ -110,7 +113,7 @@ class MessageModel {
     };
   }
 
-  MessageModel copyWith({MessageStatus? status}) {
+  MessageModel copyWith({MessageStatus? status, String? reaction}) {
     return MessageModel(
       id: id,
       senderId: senderId,
@@ -122,6 +125,7 @@ class MessageModel {
       mediaUrl: mediaUrl,
       status: status ?? this.status,
       durationMs: durationMs,
+      reaction: reaction ?? this.reaction,
     );
   }
 }

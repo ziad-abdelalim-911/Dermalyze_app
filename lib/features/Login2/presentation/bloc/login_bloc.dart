@@ -22,5 +22,20 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         emit(LoginFailure(e.toString()));
       }
     });
+
+    on<ActivateAccountPressed>((event, emit) async {
+      emit(LoginLoading());
+
+      try {
+        final result = await repository.activateAccount(
+          token: event.token,
+          password: event.password,
+        );
+
+        emit(LoginSuccess(role: result.user.role));
+      } catch (e) {
+        emit(LoginFailure(e.toString()));
+      }
+    });
   }
 }

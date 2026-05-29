@@ -10,6 +10,7 @@ class AppRoutes {
 
   static const login = "/login";
   static const register = "/register";
+  static const setPassword = "/setPassword";
   static const patientSignup = "/patientSignup";
   static const doctorSignup = "/doctorSignup";
   static const forgotPassword = "/forgotPassword";
@@ -37,5 +38,6 @@ class AppRoutes {
   static const medicationsGuide = "/medicationsGuide";
   static const diseasesLibrary = "/diseasesLibrary";
   static const chat = "/chat";
+  static const patientAppointments = "/patientAppointments";
 
 }

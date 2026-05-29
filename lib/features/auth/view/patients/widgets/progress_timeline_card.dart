@@ -6,12 +6,14 @@ class TimelineItem {
   final String badge;
   final String date;
   final String? improvement;
+  final String? imageUrl;
 
   const TimelineItem({
     required this.label,
     required this.badge,
     required this.date,
     this.improvement,
+    this.imageUrl,
   });
 }
 
@@ -72,15 +74,23 @@ class ProgressTimelineCard extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          // Image Placeholder
+          // Image Placeholder or Actual Image
           Container(
             width: 56,
             height: 56,
             decoration: BoxDecoration(
               color: Theme.of(context).brightness == Brightness.dark ? Colors.white10 : AppColors.Gray2.withOpacity(0.4),
               borderRadius: BorderRadius.circular(10),
+              image: item.imageUrl != null && item.imageUrl!.isNotEmpty
+                  ? DecorationImage(
+                      image: NetworkImage(item.imageUrl!),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
             ),
-            child: Icon(Icons.show_chart, color: Theme.of(context).iconTheme.color ?? AppColors.Gray, size: 24),
+            child: (item.imageUrl == null || item.imageUrl!.isEmpty)
+                ? Icon(Icons.show_chart, color: Theme.of(context).iconTheme.color ?? AppColors.Gray, size: 24)
+                : null,
           ),
           const SizedBox(width: 14),
           // Info

@@ -1,5 +1,7 @@
+import 'package:dermalyze/core/constants/api_endpoints.dart';
 import 'package:dermalyze/core/constants/app_colors.dart';
 import 'package:dermalyze/core/routes/app_routes.dart';
+import 'package:dermalyze/core/network/api_service.dart';
 import 'package:dermalyze/core/storage/token_storage.dart';
 import 'package:dermalyze/features/auth/view/chat/view/messages_view.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +21,8 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
   String _doctorCode = '—';
   bool _isLoading = true;
 
+  final _api = ApiService();
+
   @override
   void initState() {
     super.initState();
@@ -27,6 +31,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
 
   Future<void> _loadProfile() async {
     try {
+      // First load from local storage
       final user = await _tokenStorage.getUser();
       if (mounted && user != null) {
         setState(() {
@@ -34,8 +39,37 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
           _email = user['email'] ?? '—';
           _phone = user['phone'] ?? '—';
           _doctorCode = user['doctorCode'] ?? '—';
+        });
+      }
+
+      // Then fetch fresh data from backend
+      final freshUser = await _api.get(ApiEndpoints.me);
+      if (mounted && freshUser != null && freshUser is Map<String, dynamic>) {
+        Map<String, dynamic> profile = {};
+        if (freshUser.containsKey('data') && freshUser['data'] is Map) {
+          final data = freshUser['data'];
+          if (data.containsKey('user')) {
+            profile = Map<String, dynamic>.from(data['user']);
+          } else {
+            profile = Map<String, dynamic>.from(data);
+          }
+        } else if (freshUser.containsKey('user') && freshUser['user'] is Map) {
+          profile = Map<String, dynamic>.from(freshUser['user']);
+        } else {
+          profile = Map<String, dynamic>.from(freshUser);
+        }
+
+        final oldUser = await _tokenStorage.getUser() ?? {};
+        final mergedUser = { ...oldUser, ...profile };
+
+        setState(() {
+          _name = mergedUser['name'] ?? 'Doctor';
+          _email = mergedUser['email'] ?? '—';
+          _phone = mergedUser['phone'] ?? '—';
+          _doctorCode = mergedUser['doctorCode'] ?? '—';
           _isLoading = false;
         });
+        await _tokenStorage.saveUser(mergedUser);
       } else {
         if (mounted) setState(() => _isLoading = false);
       }

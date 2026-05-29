@@ -1,32 +1,36 @@
 import 'package:flutter/material.dart';
 
 class WhatsAppStyles {
-  // Light mode colors
-  static const Color lightChatBg      = Color(0xFFEEF2F6);
-  static const Color sentBubbleLight  = Color(0xFFDCF8C6);
-  static const Color recvBubbleLight  = Color(0xFFFFFFFF);
+  // --- Colors (Blue Identity) ---
+  static const Color lightSentBubble = Color(0xFFE3F2FD); // Very light blue
+  static const Color darkSentBubble = Color(0xFF1565C0);   // Deeper blue
+  
+  static const Color lightReceivedBubble = Colors.white;
+  static const Color darkReceivedBubble = Color(0xFF1E293B);
 
-  // Dark mode colors
-  static const Color darkChatBg       = Color(0xFF0D1117);
-  static const Color sentBubbleDark   = Color(0xFF2B5278);
-  static const Color recvBubbleDark   = Color(0xFF1E2D3D);
+  static const Color lightChatBg = Color(0xFFF0F4F8); // Very light grey-blue
+  static const Color darkChatBg = Color(0xFF0F172A);
 
-  static Color getChatBg(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return isDark ? darkChatBg : lightChatBg;
+  // --- Helpers ---
+  static Color getSentBubbleColor(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark 
+        ? const Color(0xFF005C4B).withOpacity(0.8) // WhatsApp dark sent green but let's use blue
+        : const Color(0xFFE7FFDB); // WhatsApp light sent green
   }
-
+  
+  // Actually, user wants Blue identity. Let's stick to blue-ish variants.
   static Color getAppSentBubbleColor(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return isDark ? sentBubbleDark : sentBubbleLight;
+    return isDark ? const Color(0xFF1E3A8A) : const Color(0xFFDBEAFE);
   }
 
   static Color getAppReceivedBubbleColor(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return isDark ? recvBubbleDark : recvBubbleLight;
+    return isDark ? const Color(0xFF1E293B) : Colors.white;
   }
 }
 
+/// A CustomPainter to draw the WhatsApp bubble "nip" (the triangle tip).
 class BubblePainter extends CustomPainter {
   final Color color;
   final bool isMe;
@@ -41,11 +45,13 @@ class BubblePainter extends CustomPainter {
 
     final path = Path();
     if (isMe) {
+      // Right side tip (Sent message)
       path.moveTo(size.width - 15, 0);
       path.lineTo(size.width, 0);
       path.lineTo(size.width - 15, 15);
       path.close();
     } else {
+      // Left side tip (Received message)
       path.moveTo(15, 0);
       path.lineTo(0, 0);
       path.lineTo(15, 15);

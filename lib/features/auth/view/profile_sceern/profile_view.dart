@@ -35,13 +35,13 @@ class _ProfileViewState extends State<ProfileView> {
       final user = await _tokenStorage.getUser();
       if (mounted && user != null) {
         setState(() {
-          _name = user['name'] ?? 'Patient';
-          _email = user['email'] ?? '—';
-          _phone = user['phone'] ?? '—';
-          _birthDate = user['birthDate'] ?? user['dateOfBirth'] ?? '—';
-          _nationalId = user['nationalId'] ?? '—';
-          _diagnosis = user['diagnosis'] ?? '—';
-          _allergies = user['allergies'] ?? '—';
+          _name = _getValue(user, 'name', 'Patient');
+          _email = _getValue(user, 'email', '—');
+          _phone = _getValue(user, 'phone', '—');
+          _birthDate = _getValue(user, 'dateOfBirth', _getValue(user, 'birthDate', '—'));
+          _nationalId = _getValue(user, 'nationalId', '—');
+          _diagnosis = _getValue(user, 'diagnosis', '—');
+          _allergies = _getValue(user, 'allergies', '—');
           _isLoading = false;
         });
       } else {
@@ -52,19 +52,26 @@ class _ProfileViewState extends State<ProfileView> {
       try {
         final api = ApiService();
         final response = await api.get('user/profile');
-        final profile = (response is Map && response.containsKey('profile'))
-            ? response['profile'] as Map<String, dynamic>
-            : response as Map<String, dynamic>? ?? {};
+        Map<String, dynamic> profile = {};
+        if (response is Map) {
+          if (response.containsKey('profile') && response['profile'] is Map) {
+            profile = Map<String, dynamic>.from(response['profile']);
+          } else if (response.containsKey('data') && response['data'] is Map) {
+            profile = Map<String, dynamic>.from(response['data']);
+          } else {
+            profile = Map<String, dynamic>.from(response);
+          }
+        }
 
         if (mounted && profile.isNotEmpty) {
           setState(() {
-            _name       = profile['name']        ?? _name;
-            _email      = profile['email']       ?? _email;
-            _phone      = profile['phone']       ?? _phone;
-            _birthDate  = profile['dateOfBirth'] ?? _birthDate;
-            _nationalId = profile['nationalId']  ?? _nationalId;
-            _diagnosis  = profile['diagnosis']   ?? _diagnosis;
-            _allergies  = profile['allergies']   ?? _allergies;
+            _name       = _getValue(profile, 'name', _name);
+            _email      = _getValue(profile, 'email', _email);
+            _phone      = _getValue(profile, 'phone', _phone);
+            _birthDate  = _getValue(profile, 'dateOfBirth', _birthDate);
+            _nationalId = _getValue(profile, 'nationalId', _nationalId);
+            _diagnosis  = _getValue(profile, 'diagnosis', _diagnosis);
+            _allergies  = _getValue(profile, 'allergies', _allergies);
           });
         }
       } catch (_) {
@@ -73,6 +80,12 @@ class _ProfileViewState extends State<ProfileView> {
     } catch (_) {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  String _getValue(Map<String, dynamic> data, String key, String fallback) {
+    final val = data[key];
+    if (val == null || val.toString().trim().isEmpty) return fallback;
+    return val.toString();
   }
 
   Future<void> _logout() async {

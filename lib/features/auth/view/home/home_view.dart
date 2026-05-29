@@ -30,6 +30,7 @@ class _HomeViewState extends State<HomeView> {
 
   // نسبة التعافي
   double _recoveryRate = 0.0;
+  String _improvement = '';
 
   // الأدوية
   List<Map<String, dynamic>> _medications = [];
@@ -64,6 +65,19 @@ class _HomeViewState extends State<HomeView> {
         }
         if (data.containsKey('status')) {
           // If status changes, you might update it here if displayed
+        }
+        if (data.containsKey('recoveryProgress')) {
+          final recovery = data['recoveryProgress'];
+          double parsedRecovery = 0.0;
+          if (recovery is num) {
+            parsedRecovery = recovery.toDouble();
+          } else if (recovery is String) {
+            parsedRecovery = double.tryParse(recovery) ?? 0.0;
+          }
+          _recoveryRate = parsedRecovery > 1.0 ? parsedRecovery / 100.0 : parsedRecovery.clamp(0.0, 1.0);
+        }
+        if (data.containsKey('improvement')) {
+          _improvement = data['improvement'].toString();
         }
       });
 
@@ -103,11 +117,25 @@ class _HomeViewState extends State<HomeView> {
         _diagnosis = profile['diagnosis'] ?? profile['currentDiagnosis'] ?? '—';
         _quality = profile['quality'] ?? profile['recoveryQuality'] ?? '—';
 
-        final recovery = profile['recoveryProgress'] ?? profile['recoveryRate'];
+        var recovery = profile['recoveryProgress'] ?? profile['recoveryRate'];
+        if (recovery == null || recovery == 0 || recovery == '0') {
+           recovery = profile['improvementPercent'] ?? profile['improvement'];
+        }
         if (recovery != null) {
-          _recoveryRate = (recovery is int)
-              ? recovery / 100.0
-              : (recovery as double).clamp(0.0, 1.0);
+          double parsedRecovery = 0.0;
+          if (recovery is num) {
+            parsedRecovery = recovery.toDouble();
+          } else if (recovery is String) {
+            final cleanStr = recovery.replaceAll('%', '').replaceAll('+', '').trim();
+            parsedRecovery = double.tryParse(cleanStr) ?? 0.0;
+          }
+          _recoveryRate = parsedRecovery > 1.0 ? parsedRecovery / 100.0 : parsedRecovery.clamp(0.0, 1.0);
+        }
+
+        if (profile['improvement'] != null) {
+          _improvement = profile['improvement'].toString();
+        } else if (profile['improvementPercent'] != null) {
+          _improvement = profile['improvementPercent'].toString() + '%';
         }
 
         _lastCheckup = profile['lastCheckup'] ?? profile['lastVisit'] ?? '—';
@@ -161,6 +189,7 @@ class _HomeViewState extends State<HomeView> {
                   const SizedBox(height: 16),
                   RecoveryProgressCard(
                     recoveryRate: _recoveryRate,
+                    improvement: _improvement,
                   ),
                   const SizedBox(height: 16),
                   MedicationListCard(

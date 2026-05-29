@@ -4,6 +4,7 @@ import '../../domain/entities/patient_entity.dart';
 import '../../domain/repositories/doctor_home_repository.dart';
 import '../models/doctor_stats_model.dart';
 import '../models/patient_model.dart';
+import 'package:hive/hive.dart';
 
 class DoctorHomeRepositoryImpl implements DoctorHomeRepository {
   final ApiService _apiService = ApiService();
@@ -16,9 +17,23 @@ class DoctorHomeRepositoryImpl implements DoctorHomeRepository {
 
   @override
   Future<List<PatientEntity>> getPatients() async {
-    final response = await _apiService.get('doctor/patients');
-    final List list = response is List ? response : (response['patients'] ?? []);
-    return list.map((e) => PatientModel.fromJson(e)).toList();
+    final box = Hive.box('offline_patients');
+    try {
+      final response = await _apiService.get('doctor/patients');
+      final List list = response is List ? response : (response['patients'] ?? []);
+      
+      // Cache for offline
+      await box.put('doctor_patients_list', list);
+      
+      return list.map((e) => PatientModel.fromJson(e)).toList();
+    } catch (e) {
+      // Fallback to cache
+      final cachedList = box.get('doctor_patients_list');
+      if (cachedList != null && cachedList is List) {
+        return cachedList.map((e) => PatientModel.fromJson(Map<String, dynamic>.from(e))).toList();
+      }
+      return [];
+    }
   }
 
   @override

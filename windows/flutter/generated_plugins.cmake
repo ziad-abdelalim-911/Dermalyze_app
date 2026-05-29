@@ -3,11 +3,13 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  app_links
   audioplayers_windows
   emoji_picker_flutter
   file_selector_windows
   firebase_core
   flutter_secure_storage_windows
+  local_auth_windows
   record_windows
   url_launcher_windows
 )

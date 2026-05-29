@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import 'package:dermalyze/core/routes/app_routes.dart';
 
 class HomeHeader extends StatefulWidget {
   final String userName;
@@ -112,6 +113,15 @@ class _HomeHeaderState extends State<HomeHeader> {
                             ),
                         ],
                       );
+                    },
+                  ),
+
+                  const SizedBox(width: 10),
+
+                  _circleIcon(
+                    Icons.calendar_month_outlined,
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.patientAppointments);
                     },
                   ),
 

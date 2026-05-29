@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 
 class RecoveryProgressCard extends StatefulWidget {
   final double recoveryRate;
+  final String improvement;
 
   const RecoveryProgressCard({
     super.key,
     this.recoveryRate = 0.0,
+    this.improvement = '',
   });
 
   @override
@@ -111,17 +113,22 @@ class _RecoveryProgressCardState extends State<RecoveryProgressCard> {
               const SizedBox(height: 8),
 
               /// ===== Trending Text
-              Row(
-                children: [
-                  Icon(Icons.trending_up, size: 16, color: AppColors.Turqouoise),
-                  const SizedBox(width: 4),
-                  Text(
-                    "+12% from last month",
-                    style: TextStyle(fontSize: 12, color: AppColors.Turqouoise),
+              if (widget.improvement.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 32),
+                  child: Row(
+                    children: [
+                      Icon(Icons.trending_up, size: 16, color: AppColors.Turqouoise),
+                      const SizedBox(width: 4),
+                      Text(
+                        widget.improvement,
+                        style: TextStyle(fontSize: 12, color: AppColors.Turqouoise),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              const SizedBox(height: 32),
+                )
+              else
+                const SizedBox(height: 32),
 
               /// ===== Circle Progress
               Center(
@@ -144,6 +151,7 @@ class _RecoveryProgressCardState extends State<RecoveryProgressCard> {
                         width: 140,
                         height: 140,
                         child: ShaderMask(
+                          blendMode: BlendMode.srcIn,
                           shaderCallback: (bounds) => AppColors.primaryGradient2
                               .createShader(bounds),
                           child: CircularProgressIndicator(
@@ -151,6 +159,7 @@ class _RecoveryProgressCardState extends State<RecoveryProgressCard> {
                             strokeWidth: 14,
                             backgroundColor: Colors.transparent,
                             color: Colors.white,
+                            strokeCap: StrokeCap.round,
                           ),
                         ),
                       ),

@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'package:dermalyze/core/constants/app_colors.dart';
 import 'package:dermalyze/core/routes/app_routes.dart';
+import 'package:dermalyze/core/network/api_service.dart';
+import 'package:dermalyze/core/services/socket_service.dart';
 import 'package:dermalyze/core/theme/theme_extensions.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/domain/entities/patient_entity.dart';
 import 'package:dermalyze/features/auth/view/patients/data/analysis_repository.dart';
@@ -33,6 +36,56 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
   List<dynamic> _medications = [];
   bool _isLoading = true;
   bool _isSavingReview = false;
+  StreamSubscription? _socketSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _socketSubscription = SocketService().patientUpdateStream.listen((data) {
+      if (!mounted || _patient == null) return;
+      if (data['patientId']?.toString() == _patient!.id) {
+        bool needsUpdate = false;
+        double? newRate;
+        String? newImprovement;
+        String? newNextAppt;
+        String? newLastVisit;
+
+        if (data.containsKey('recoveryProgress')) {
+          final recovery = data['recoveryProgress'];
+          double parsedRecovery = 0.0;
+          if (recovery is num) {
+            parsedRecovery = recovery.toDouble();
+          } else if (recovery is String) {
+            parsedRecovery = double.tryParse(recovery) ?? 0.0;
+          }
+          newRate = parsedRecovery > 1.0 ? parsedRecovery / 100.0 : parsedRecovery.clamp(0.0, 1.0);
+          newImprovement = data['improvement']?.toString() ?? _patient!.improvement;
+          needsUpdate = true;
+        }
+
+        if (data.containsKey('nextAppointment')) {
+          newNextAppt = data['nextAppointment']?.toString();
+          needsUpdate = true;
+        }
+        
+        if (data.containsKey('lastVisit')) {
+          newLastVisit = data['lastVisit']?.toString();
+          needsUpdate = true;
+        }
+
+        if (needsUpdate) {
+          setState(() {
+            _patient = _patient!.copyWith(
+              recoveryRate: newRate ?? _patient!.recoveryRate,
+              improvement: newImprovement ?? _patient!.improvement,
+              nextAppointment: newNextAppt ?? _patient!.nextAppointment,
+              lastVisit: newLastVisit ?? _patient!.lastVisit,
+            );
+          });
+        }
+      }
+    });
+  }
 
   @override
   void didChangeDependencies() {
@@ -53,14 +106,41 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
     if (_patient == null) return;
     setState(() => _isLoading = true);
     try {
+      final apiService = ApiService();
+      
       final results = await Future.wait([
         _analysisRepo.getPatientAnalyses(_patient!.id),
         _medicationRepo.getMedications(_patient!.id),
+        apiService.get('patients/${_patient!.id}'),
       ]);
       if (mounted) {
         setState(() {
-          _analyses = results[0];
-          _medications = results[1];
+          _analyses = results[0] as List<dynamic>;
+          _medications = results[1] as List<dynamic>;
+          
+          final detailedPatientData = results[2];
+          if (detailedPatientData is Map<String, dynamic> && detailedPatientData.containsKey('patient')) {
+            final patientData = detailedPatientData['patient'] as Map<String, dynamic>;
+            final nextAppt = patientData['nextAppointment'] ?? patientData['next_appointment'] ?? _patient!.nextAppointment;
+            final status = patientData['status'] ?? _patient!.statusBadge;
+            final lastVisit = patientData['lastVisit'] ?? _patient!.lastVisit;
+            final recovery = patientData['recoveryProgress'] ?? 0;
+            double parsedRecovery = 0.0;
+            if (recovery is num) {
+              parsedRecovery = recovery.toDouble();
+            } else if (recovery is String) {
+              parsedRecovery = double.tryParse(recovery) ?? 0.0;
+            }
+            final newRate = parsedRecovery > 1.0 ? parsedRecovery / 100.0 : parsedRecovery.clamp(0.0, 1.0);
+            
+            _patient = _patient!.copyWith(
+              nextAppointment: nextAppt,
+              lastVisit: lastVisit,
+              statusBadge: status,
+              recoveryRate: newRate,
+            );
+          }
+          
           _isLoading = false;
         });
       }
@@ -71,6 +151,7 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
 
   @override
   void dispose() {
+    _socketSubscription?.cancel();
     _reviewController.dispose();
     super.dispose();
   }
@@ -154,6 +235,7 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
         badge: map['severity'] ?? 'Medium',
         date: _formatDateStr(map['createdAt'] ?? map['date']),
         improvement: map['improvement'],
+        imageUrl: map['imageUrl'] ?? map['image'] ?? map['photoUrl'],
       ));
     }
 
@@ -221,6 +303,7 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
                     lastVisit: _patient?.lastVisit ?? '—',
                     recoveryRate:
                         '${((_patient?.recoveryRate ?? 0) * 100).toInt()}%',
+                    improvement: _patient?.improvement ?? '',
                   ),
                   const SizedBox(height: 16),
                   ProgressTimelineCard(items: _timelineItems),
@@ -333,8 +416,8 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
             child: SizedBox(
               height: 48,
               child: OutlinedButton(
-                onPressed: () {
-                  showModalBottomSheet(
+                onPressed: () async {
+                  final newPatientData = await showModalBottomSheet<Map<String, dynamic>>(
                     context: context,
                     isScrollControlled: true,
                     shape: const RoundedRectangleBorder(
@@ -352,6 +435,33 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
                       ),
                     ),
                   );
+
+                  if (newPatientData != null && _patient != null) {
+                    final nextAppt = newPatientData['nextAppointment'] ?? newPatientData['next_appointment'] ?? _patient!.nextAppointment;
+                    final status = newPatientData['status'] ?? _patient!.statusBadge;
+                    
+                    String? newLastVisit;
+                    final updatedAt = newPatientData['updatedAt']?.toString() ?? '';
+                    if (updatedAt.isNotEmpty) {
+                      try {
+                        final date = DateTime.parse(updatedAt);
+                        final diff = DateTime.now().difference(date);
+                        if (diff.inHours < 24) newLastVisit = '${diff.inHours} hours ago';
+                        else if (diff.inDays == 1) newLastVisit = '1 day ago';
+                        else if (diff.inDays < 7) newLastVisit = '${diff.inDays} days ago';
+                        else newLastVisit = '${(diff.inDays / 7).floor()} weeks ago';
+                      } catch (_) {}
+                    }
+                    newLastVisit ??= newPatientData['lastVisit']?.toString();
+                    
+                    setState(() {
+                      _patient = _patient!.copyWith(
+                        nextAppointment: nextAppt,
+                        lastVisit: newLastVisit ?? _patient!.lastVisit,
+                        statusBadge: status,
+                      );
+                    });
+                  }
                 },
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: AppColors.Turqouoise, width: 1.5),

@@ -60,16 +60,30 @@ class _ProgressReportViewState extends State<ProgressReportView> {
 
       setState(() {
         // Recovery
-        final recovery = profile['recoveryProgress'] ?? profile['recoveryRate'];
-        _recoveryPercent = recovery != null
-            ? (recovery is double
-                ? (recovery * 100).toInt()
-                : (recovery as int))
-            : 0;
+        var recovery = profile['recoveryProgress'] ?? profile['recoveryRate'];
+        if (recovery == null || recovery == 0 || recovery == '0') {
+           recovery = profile['improvementPercent'] ?? profile['improvement'];
+        }
+        if (recovery != null) {
+          if (recovery is num) {
+             _recoveryPercent = (recovery <= 1.0 && recovery > 0) ? (recovery * 100).toInt() : recovery.toInt();
+          } else if (recovery is String) {
+             final parsed = double.tryParse(recovery) ?? 0.0;
+             _recoveryPercent = (parsed <= 1.0 && parsed > 0) ? (parsed * 100).toInt() : parsed.toInt();
+          }
+        } else {
+          _recoveryPercent = 0;
+        }
 
-        _improvementPercent = profile['improvementPercent'] ??
-            profile['improvement'] ??
-            0;
+        final improvementRaw = profile['improvementPercent'] ?? profile['improvement'] ?? 0;
+        if (improvementRaw is num) {
+           _improvementPercent = improvementRaw.toInt();
+        } else if (improvementRaw is String) {
+           final cleanStr = improvementRaw.replaceAll('%', '').replaceAll('+', '').trim();
+           _improvementPercent = (double.tryParse(cleanStr) ?? 0.0).toInt();
+        } else {
+           _improvementPercent = 0;
+        }
 
         // Quality
         _currentQuality = _capitalize(
@@ -187,9 +201,19 @@ class _ProgressReportViewState extends State<ProgressReportView> {
       return raw.map((s) {
         if (s == null) return null;
         final m = s as Map<String, dynamic>;
+        
+        final rawPercent = m['improvement'] ?? m['percent'] ?? 0;
+        int finalPercent = 0;
+        if (rawPercent is num) {
+           finalPercent = rawPercent.toInt();
+        } else if (rawPercent is String) {
+           final cleanStr = rawPercent.replaceAll('%', '').replaceAll('+', '').trim();
+           finalPercent = (double.tryParse(cleanStr) ?? 0.0).toInt();
+        }
+
         return SymptomModel(
           name: m['name'] ?? 'Symptom',
-          percent: (m['improvement'] ?? m['percent'] ?? 0) as int,
+          percent: finalPercent,
         );
       }).whereType<SymptomModel>().toList();
     }

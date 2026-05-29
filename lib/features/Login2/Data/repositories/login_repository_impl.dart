@@ -32,4 +32,28 @@ class LoginRepositoryImpl implements LoginRepository {
 
     return model;
   }
+
+  @override
+  Future<LoginResponseModel> activateAccount({
+    required String token,
+    required String password,
+  }) async {
+    final response = await _apiService.post(
+      'auth/activate',
+      {'token': token, 'password': password},
+    );
+
+    final model = LoginResponseModel.fromJson(response);
+
+    // Save token and user data
+    await _tokenStorage.saveToken(model.token);
+    final userMap = model.user.toJson();
+    await _tokenStorage.saveUser(userMap);
+
+    // Register FCM Token & Connect to Socket.IO after successful activation
+    await dermalyze_push.PushNotificationService.registerFcmToken();
+    await dermalyze_socket.SocketService().connect();
+
+    return model;
+  }
 }
