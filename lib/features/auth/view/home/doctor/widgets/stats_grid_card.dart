@@ -19,6 +19,7 @@ class StatsGridCard extends StatelessWidget {
 
   const StatsGridCard({super.key, required this.stats});
 
+  @override
   Widget build(BuildContext context) {
     if (stats.length != 4) return const SizedBox();
     return Column(

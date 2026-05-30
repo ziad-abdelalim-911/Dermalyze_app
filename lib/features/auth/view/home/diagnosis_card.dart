@@ -1,4 +1,4 @@
-import 'package:dermalyze/features/auth/view/disease_details_view/disease_details_view.dart';
+import 'package:dermalyze/features/auth/view/patients/screens/patient_report_screen.dart';
 import 'package:flutter/material.dart';
 
 class DiagnosisCard extends StatelessWidget {
@@ -32,7 +32,7 @@ class DiagnosisCard extends StatelessWidget {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const DiseaseDetailsView(diseaseName: 'Skin Condition')),
+            MaterialPageRoute(builder: (context) => const PatientReportScreen()),
           );
         },
         child: Container(

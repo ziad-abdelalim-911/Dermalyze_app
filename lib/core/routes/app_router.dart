@@ -27,6 +27,7 @@ import 'package:dermalyze/features/auth/view/patients/screens/ai_analysis_result
 import 'package:dermalyze/features/auth/view/patients/screens/patient_details_screen.dart';
 import 'package:dermalyze/features/auth/view/patients/screens/upload_analyze_screen.dart';
 import 'package:dermalyze/features/auth/view/appointments/patient_appointments_screen.dart';
+import 'package:dermalyze/features/auth/view/patients/screens/patient_report_screen.dart';
 import 'package:dermalyze/splash.dart';
 import 'package:flutter/material.dart';
 
@@ -154,6 +155,10 @@ class AppRouter {
         
       case AppRoutes.patientAppointments:
         return MaterialPageRoute(builder: (_) => const PatientAppointmentsScreen());
+        
+      case AppRoutes.patientReport:
+        final patientId = settings.arguments as String;
+        return MaterialPageRoute(builder: (_) => PatientReportScreen(patientId: patientId));
         
       case AppRoutes.medicationsGuide:
         return MaterialPageRoute(builder: (_) => const MedicationsGuideScreen());

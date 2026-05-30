@@ -157,7 +157,8 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                             ),
                             const SizedBox(height: 14),
                             Text(
-                              'Dr. $_name',
+                              _name,
+                              textAlign: TextAlign.center,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 20,

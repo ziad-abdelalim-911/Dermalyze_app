@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:dermalyze/core/constants/app_colors.dart';
 import 'package:dermalyze/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class SliderComparisonCard extends StatefulWidget {
   final File? currentImageFile;
@@ -186,12 +187,13 @@ class _SliderComparisonCardState extends State<SliderComparisonCard> {
       final fullUrl = widget.previousImageUrl!.startsWith('http')
           ? widget.previousImageUrl!
           : 'https://dermalyze-backend-final-main-production.up.railway.app/${widget.previousImageUrl}';
-      return Image.network(
-        fullUrl,
+      return CachedNetworkImage(
+        imageUrl: fullUrl,
         width: double.infinity,
         height: 180,
         fit: BoxFit.cover,
-        errorBuilder: (c, e, s) => _buildPreviousFallback(context),
+        placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+        errorWidget: (context, url, error) => _buildPreviousFallback(context),
       );
     }
     return _buildPreviousFallback(context);

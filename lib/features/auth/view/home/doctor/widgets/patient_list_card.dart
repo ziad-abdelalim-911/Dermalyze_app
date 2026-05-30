@@ -1,5 +1,6 @@
 import 'package:dermalyze/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
 class PatientListItem {
   final String id;
@@ -63,35 +64,38 @@ class PatientListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.blueGrey.withOpacity(0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return AnimationLimiter(
       child: Column(
-        children: patients
-            .map(
-              (p) => Column(
-                children: [
-                  _buildPatientItem(context, p),
-                  if (p != patients.last)
-                    Divider(
-                      height: 1,
-                      color: AppColors.Gray2.withOpacity(0.5),
-                      indent: 16,
-                      endIndent: 16,
+        children: patients.asMap().entries.map((entry) {
+          final int index = entry.key;
+          final PatientListItem p = entry.value;
+          return AnimationConfiguration.staggeredList(
+            position: index,
+            duration: const Duration(milliseconds: 375),
+            child: SlideAnimation(
+              verticalOffset: 50.0,
+              child: FadeInAnimation(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.blueGrey.withOpacity(0.08),
+                          blurRadius: 12,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
-                ],
+                    child: _buildPatientItem(context, p),
+                  ),
+                ),
               ),
-            )
-            .toList(),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
@@ -105,26 +109,20 @@ class PatientListCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Name + Badges Row
+            // Name + Chat Row
             Row(
               children: [
-                Text(
-                  patient.name,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.onSurface,
+                Expanded(
+                  child: Text(
+                    patient.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                _buildBadge(
-                  patient.qualityBadge,
-                  _qualityColor(patient.qualityBadge),
-                ),
-                const Spacer(),
-                _buildStatusBadge(
-                  patient.statusBadge,
-                  _statusColor(patient.statusBadge),
                 ),
                 if (onChatTap != null) ...[
                   const SizedBox(width: 8),
@@ -155,7 +153,22 @@ class PatientListCard extends StatelessWidget {
                 ],
               ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
+            // Badges Row
+            Row(
+              children: [
+                _buildBadge(
+                  patient.qualityBadge,
+                  _qualityColor(patient.qualityBadge),
+                ),
+                const SizedBox(width: 8),
+                _buildStatusBadge(
+                  patient.statusBadge,
+                  _statusColor(patient.statusBadge),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
             Text(
               patient.diagnosis,
               style: TextStyle(fontSize: 12, color: AppColors.Gray),

@@ -6,9 +6,18 @@ class ClinicalResourcesRepository {
   /// جلب البيانات والإحصائيات الخاصة بالمرض للسجل الذكي
   Future<Map<String, dynamic>> getSmartHistoryInsights(String diseaseName) async {
     try {
-      final response = await _api.get('doctor/history?disease=$diseaseName');
-      return response is Map<String, dynamic> ? response : {};
-    } catch (_) {
+      final treatmentsFuture = _api.get('smart-history/treatments?disease=$diseaseName');
+      final patientsFuture = _api.get('smart-history/patients?disease=$diseaseName');
+
+      final results = await Future.wait([treatmentsFuture, patientsFuture]);
+
+      return {
+        'disease': diseaseName,
+        'treatments': results[0] is List ? results[0] : [],
+        'patients': results[1] is List ? results[1] : [],
+      };
+    } catch (e) {
+      print('Error in getSmartHistoryInsights: $e');
       return {};
     }
   }

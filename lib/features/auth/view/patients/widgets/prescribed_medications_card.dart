@@ -2,25 +2,33 @@ import 'package:dermalyze/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class MedicationItem {
+  final String id;
   final String name;
   final String dosage;
   final String schedule;
+  final String? notes;
 
   const MedicationItem({
+    required this.id,
     required this.name,
     required this.dosage,
     required this.schedule,
+    this.notes,
   });
 }
 
 class PrescribedMedicationsCard extends StatelessWidget {
   final List<MedicationItem> medications;
   final VoidCallback onAddMedication;
+  final Function(MedicationItem) onEditMedication;
+  final Function(MedicationItem) onDeleteMedication;
 
   const PrescribedMedicationsCard({
     super.key,
     required this.medications,
     required this.onAddMedication,
+    required this.onEditMedication,
+    required this.onDeleteMedication,
   });
 
   @override
@@ -100,37 +108,57 @@ class PrescribedMedicationsCard extends StatelessWidget {
   Widget _buildMedicationItem(BuildContext context, MedicationItem med) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            med.name,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.onSurface,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  med.name,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  med.dosage,
+                  style: TextStyle(fontSize: 13, color: AppColors.Gray),
+                ),
+                const SizedBox(height: 5),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.SkyBlue.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    med.schedule,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.SkyBlue,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 3),
-          Text(
-            med.dosage,
-            style: TextStyle(fontSize: 13, color: AppColors.Gray),
+          IconButton(
+            icon: Icon(Icons.edit_outlined, color: AppColors.Gray3, size: 20),
+            onPressed: () => onEditMedication(med),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
           ),
-          const SizedBox(height: 5),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.SkyBlue.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              med.schedule,
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.SkyBlue,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+          const SizedBox(width: 16),
+          IconButton(
+            icon: Icon(Icons.delete_outline, color: Colors.red.shade300, size: 20),
+            onPressed: () => onDeleteMedication(med),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
           ),
         ],
       ),

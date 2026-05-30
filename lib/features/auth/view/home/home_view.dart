@@ -135,7 +135,7 @@ class _HomeViewState extends State<HomeView> {
         if (profile['improvement'] != null) {
           _improvement = profile['improvement'].toString();
         } else if (profile['improvementPercent'] != null) {
-          _improvement = profile['improvementPercent'].toString() + '%';
+          _improvement = '${profile['improvementPercent']}%';
         }
 
         _lastCheckup = profile['lastCheckup'] ?? profile['lastVisit'] ?? '—';

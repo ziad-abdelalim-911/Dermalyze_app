@@ -8,6 +8,7 @@ import 'package:dermalyze/features/auth/view/home/doctor/domain/entities/patient
 import 'package:dermalyze/features/auth/view/patients/data/analysis_repository.dart';
 import 'package:dermalyze/features/auth/view/patients/data/review_repository.dart';
 import 'package:dermalyze/features/auth/view/medication_list/medication_repository.dart';
+import 'package:dermalyze/features/auth/view/patients/widgets/add_medication_bottom_sheet.dart';
 import 'package:dermalyze/features/auth/view/patients/widgets/doctors_review_card.dart';
 import 'package:dermalyze/features/auth/view/patients/widgets/followup_image_card.dart';
 import 'package:dermalyze/features/auth/view/patients/widgets/patient_info_card.dart';
@@ -253,14 +254,15 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
     }
   }
 
-  // Build medications from real data
   List<MedicationItem> get _medicationItems {
     return _medications.map((m) {
       final map = m as Map<String, dynamic>;
       return MedicationItem(
-        name: map['name'] ?? '',
-        dosage: map['dosage'] ?? '',
-        schedule: map['frequency'] ?? '',
+        id: (map['_id'] ?? map['id'] ?? '').toString(),
+        name: (map['name'] ?? '').toString(),
+        dosage: (map['dosage'] ?? '').toString(),
+        schedule: (map['frequency'] ?? '').toString(),
+        notes: map['notes']?.toString(),
       );
     }).toList();
   }
@@ -315,8 +317,70 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
                   const SizedBox(height: 16),
                   PrescribedMedicationsCard(
                     medications: _medicationItems,
-                    onAddMedication: () =>
-                        Navigator.pushNamed(context, AppRoutes.medicationList),
+                    onAddMedication: () async {
+                      final success = await showModalBottomSheet<bool>(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (ctx) => AddMedicationBottomSheet(
+                          patientId: _patient!.id,
+                        ),
+                      );
+
+                      if (success == true && mounted) {
+                        _loadData();
+                      }
+                    },
+                    onEditMedication: (med) async {
+                      final success = await showModalBottomSheet<bool>(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (ctx) => AddMedicationBottomSheet(
+                          patientId: _patient!.id,
+                          initialMedication: med,
+                        ),
+                      );
+
+                      if (success == true && mounted) {
+                        _loadData();
+                      }
+                    },
+                    onDeleteMedication: (med) async {
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: const Text('Remove Medication'),
+                          content: Text('Are you sure you want to remove ${med.name}?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx, false),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx, true),
+                              style: TextButton.styleFrom(foregroundColor: Colors.red),
+                              child: const Text('Remove'),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (confirm == true && mounted) {
+                        setState(() => _isLoading = true);
+                        try {
+                          await _medicationRepo.deleteMedication(med.id);
+                          _loadData();
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+                            );
+                            setState(() => _isLoading = false);
+                          }
+                        }
+                      }
+                    },
                   ),
                 ],
               ),
@@ -352,10 +416,36 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
       ),
       actions: [
         if (_patient != null)
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: Center(
-              child: GestureDetector(
+          Row(
+            children: [
+              GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.patientReport,
+                    arguments: _patient!.id,
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF4ECDC4).withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.assignment, size: 18, color: Color(0xFF3B9B94)),
+                      const SizedBox(width: 6),
+                      const Text(
+                        'Report',
+                        style: TextStyle(color: Color(0xFF3B9B94), fontWeight: FontWeight.w600, fontSize: 13),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
                 onTap: () {
                   Navigator.pushNamed(
                     context,
@@ -390,7 +480,8 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
                   ),
                 ),
               ),
-            ),
+              const SizedBox(width: 16),
+            ],
           ),
       ],
     );
@@ -446,8 +537,9 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
                       try {
                         final date = DateTime.parse(updatedAt);
                         final diff = DateTime.now().difference(date);
-                        if (diff.inHours < 24) newLastVisit = '${diff.inHours} hours ago';
-                        else if (diff.inDays == 1) newLastVisit = '1 day ago';
+                        if (diff.inHours < 24) {
+                          newLastVisit = '${diff.inHours} hours ago';
+                        } else if (diff.inDays == 1) newLastVisit = '1 day ago';
                         else if (diff.inDays < 7) newLastVisit = '${diff.inDays} days ago';
                         else newLastVisit = '${(diff.inDays / 7).floor()} weeks ago';
                       } catch (_) {}

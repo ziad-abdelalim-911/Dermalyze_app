@@ -35,8 +35,9 @@ class DioClient {
           return handler.next(options);
         },
         onError: (DioException error, handler) async {
-          final isAuthRoute = error.requestOptions.path.contains('/auth/login') || 
-                              error.requestOptions.path.contains('/auth/register');
+          final path = error.requestOptions.path;
+          final isAuthRoute = path.contains('auth/login') || 
+                              path.contains('auth/register');
 
           if (error.response?.statusCode == 401 && !isAuthRoute) {
             final currentToken = await tokenStorage.getToken();

@@ -17,7 +17,10 @@ class ChatLoading extends ChatState {}
 class ChatLoaded extends ChatState {
   final List<MessageModel> messages;
   final bool isRecording;
-  ChatLoaded(this.messages, {this.isRecording = false});
+  final bool isTyping;
+  final bool hasReachedMax;
+  final int page;
+  ChatLoaded(this.messages, {this.isRecording = false, this.isTyping = false, this.hasReachedMax = false, this.page = 1});
 }
 
 class ChatError extends ChatState {
@@ -31,10 +34,18 @@ class ChatCubit extends Cubit<ChatState> {
   final ChatRepository _chatRepository;
   final String receiverId;
   String? currentUserId;
-  Timer? _pollingTimer;
 
   final List<MessageModel> _localMessages = [];
   StreamSubscription? _chatMessageSub;
+  StreamSubscription? _chatTypingSub;
+  StreamSubscription? _chatDeliveredSub;
+  StreamSubscription? _chatReadSub;
+
+  int _currentPage = 1;
+  bool _hasReachedMax = false;
+  bool _isTyping = false;
+  Timer? _typingIndicatorTimer;
+  Timer? _emitTypingDebouncer;
 
   ChatCubit(this._chatRepository, {required this.receiverId})
       : super(ChatInitial()) {
@@ -46,34 +57,123 @@ class ChatCubit extends Cubit<ChatState> {
     currentUserId = user?['_id']?.toString() ?? '';
     await loadMessages();
     
+    // Emit mark as read when we open the chat
+    SocketService().markAsRead(receiverId, currentUserId ?? '');
+
+    // Listen to messages read (Blue ticks)
+    _chatReadSub = SocketService().chatReadStream.listen((data) {
+      if (isClosed) return;
+      final readReceiverId = data['receiverId'];
+      if (readReceiverId == receiverId) {
+        _markAllSentAsReadLocally();
+      }
+    });
+
+    // Listen to messages delivered (Double grey ticks)
+    _chatDeliveredSub = SocketService().chatDeliveredStream.listen((data) {
+      if (isClosed) return;
+      final deliveredReceiverId = data['receiverId'];
+      final messageId = data['messageId'];
+      
+      if (deliveredReceiverId == receiverId) {
+        if (messageId != null) {
+          final idx = _localMessages.indexWhere((m) => m.id == messageId);
+          if (idx != -1 && _localMessages[idx].status == MessageStatus.sent) {
+            _localMessages[idx] = _localMessages[idx].copyWith(status: MessageStatus.delivered);
+            _emitLoaded();
+          }
+        } else {
+           // Fallback: mark all sent as delivered
+           bool changed = false;
+           for (int i = 0; i < _localMessages.length; i++) {
+             if (_localMessages[i].isMe && _localMessages[i].status == MessageStatus.sent) {
+               _localMessages[i] = _localMessages[i].copyWith(status: MessageStatus.delivered);
+               changed = true;
+             }
+           }
+           if (changed) _emitLoaded();
+        }
+      }
+    });
+    
     // Listen to real-time chat messages from SocketService
     _chatMessageSub = SocketService().chatMessageStream.listen((data) {
       if (isClosed) return;
       
       // We expect the backend to send the formatted Message JSON
-      final message = MessageModel.fromJson(data, currentUserId ?? '');
+      // Unwrap if backend sends { "message": { ... } } or { "data": { ... } }
+      final msgJson = (data['message'] ?? data['data'] ?? data) as Map<String, dynamic>;
+      final message = MessageModel.fromJson(msgJson, currentUserId ?? '');
       
       // Filter out messages that don't belong to this conversation
-      final isRelevant = (message.senderId == receiverId && message.receiverId == currentUserId) || 
-                         (message.senderId == currentUserId && message.receiverId == receiverId);
+      final msgReceiver = message.receiverId ?? currentUserId;
+      final isRelevant = (message.senderId == receiverId && msgReceiver == currentUserId) || 
+                         (message.senderId == currentUserId && (msgReceiver == receiverId || message.receiverId == null));
                          
       if (isRelevant) {
-        // If it's a confirmation of our own sent message, we might just update status
-        if (data['isConfirmation'] == true) {
-           final idx = _localMessages.indexWhere((m) => m.status == MessageStatus.pending && m.content == message.content);
+        // If it's an echo of our own message (or confirmation)
+        if (message.senderId == currentUserId || data['isConfirmation'] == true) {
+           final idx = _localMessages.indexWhere((m) => 
+               (m.status == MessageStatus.pending || m.id == null) && 
+               m.content == message.content && 
+               m.type == message.type
+           );
+           
            if (idx != -1) {
+             // Replace pending message with the real one from socket
              _localMessages[idx] = message.copyWith(status: MessageStatus.sent);
              _emitLoaded();
            } else {
-             // Just add if not found
+             // If not found as pending (maybe HTTP already replaced it), just append securely
              _appendMessage(message);
            }
         } else {
            // Incoming message from the other person
            _appendMessage(message);
+           
+           // Since we are currently in the chat, we immediately read it
+           SocketService().markAsRead(receiverId, currentUserId ?? '');
+           
+           // If they replied, they definitely saw our previous messages!
+           _markAllSentAsReadLocally();
         }
       }
     });
+
+    // Listen to typing events to update read receipts instantly
+    _chatTypingSub = SocketService().chatTypingStream.listen((data) {
+      if (isClosed) return;
+      final typingSenderId = data['senderId'] ?? data['userId'] ?? data['receiverId'];
+      // If the other person is typing
+      if (typingSenderId == receiverId) {
+        _markAllSentAsReadLocally();
+        final isTypingAction = data['action'] == 'typing' || data['action'] == null; // default to typing
+        
+        _isTyping = isTypingAction;
+        _emitLoaded();
+        
+        _typingIndicatorTimer?.cancel();
+        if (_isTyping) {
+          _typingIndicatorTimer = Timer(const Duration(seconds: 4), () {
+            if (!isClosed) {
+              _isTyping = false;
+              _emitLoaded();
+            }
+          });
+        }
+      }
+    });
+  }
+
+  void _markAllSentAsReadLocally() {
+    bool statusChanged = false;
+    for (int i = 0; i < _localMessages.length; i++) {
+      if (_localMessages[i].isMe && _localMessages[i].status != MessageStatus.read) {
+        _localMessages[i] = _localMessages[i].copyWith(status: MessageStatus.read);
+        statusChanged = true;
+      }
+    }
+    if (statusChanged) _emitLoaded();
   }
 
   void _appendMessage(MessageModel message) {
@@ -81,11 +181,11 @@ class ChatCubit extends Cubit<ChatState> {
     final exists = _localMessages.any((m) => m.id == message.id && m.id != null);
     if (!exists) {
       _localMessages.add(message);
-      // Re-sort
+      // Re-sort DESCENDING (newest first for reversed ListView)
       _localMessages.sort((a, b) {
         final ta = DateTime.tryParse(a.timestamp ?? '') ?? DateTime(0);
         final tb = DateTime.tryParse(b.timestamp ?? '') ?? DateTime(0);
-        return ta.compareTo(tb);
+        return tb.compareTo(ta);
       });
       _emitLoaded();
     }
@@ -94,18 +194,26 @@ class ChatCubit extends Cubit<ChatState> {
   // ─────────────────────────────────────────────────────────────────
   // Load messages from backend
   // ─────────────────────────────────────────────────────────────────
-  Future<void> loadMessages() async {
+  Future<void> loadMessages({bool loadMore = false}) async {
     if (isClosed) return;
-    if (state is ChatInitial) emit(ChatLoading());
+    if (_hasReachedMax && loadMore) return;
+    
+    if (state is ChatInitial && !loadMore) emit(ChatLoading());
 
     try {
+      if (loadMore) _currentPage++;
       final messages =
-          await _chatRepository.getMessages(receiverId, currentUserId ?? '');
+          await _chatRepository.getMessages(receiverId, currentUserId ?? '', page: _currentPage, limit: 30);
+
+      if (messages.isEmpty) {
+        _hasReachedMax = true;
+      }
 
       // Merge backend messages with local optimistic messages
       _mergeMessages(messages);
       _emitLoaded();
     } catch (e) {
+      if (loadMore) _currentPage--; // revert page on fail
       // Keep showing local messages on error, don't flash error screen
       if (_localMessages.isEmpty) {
         if (!isClosed) emit(ChatError('Failed to load messages. Please try again.'));
@@ -136,17 +244,30 @@ class ChatCubit extends Cubit<ChatState> {
       ..addAll(fetched)
       ..addAll(optimistic);
 
-    // Sort by timestamp
+    // Sort by timestamp DESCENDING (newest first for reversed ListView)
     _localMessages.sort((a, b) {
       final ta = DateTime.tryParse(a.timestamp ?? '') ?? DateTime(0);
       final tb = DateTime.tryParse(b.timestamp ?? '') ?? DateTime(0);
-      return ta.compareTo(tb);
+      return tb.compareTo(ta);
     });
   }
 
   void _emitLoaded({bool isRecording = false}) {
     if (isClosed) return;
-    emit(ChatLoaded(List.from(_localMessages), isRecording: isRecording));
+    emit(ChatLoaded(List.from(_localMessages), isRecording: isRecording, isTyping: _isTyping, hasReachedMax: _hasReachedMax, page: _currentPage));
+  }
+
+  // ─────────────────────────────────────────────────────────────────
+  // Send Typing Indicator
+  // ─────────────────────────────────────────────────────────────────
+  void sendTyping() {
+    if (_emitTypingDebouncer?.isActive ?? false) return;
+    
+    SocketService().emitTyping(receiverId);
+    
+    _emitTypingDebouncer = Timer(const Duration(seconds: 3), () {
+      SocketService().emitStopTyping(receiverId);
+    });
   }
 
   // ─────────────────────────────────────────────────────────────────
@@ -183,6 +304,31 @@ class ChatCubit extends Cubit<ChatState> {
         _localMessages[idx] = optimistic.copyWith(status: MessageStatus.failed);
         _emitLoaded();
       }
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────
+  // Retry failed message
+  // ─────────────────────────────────────────────────────────────────
+  Future<void> retryMessage(MessageModel failedMsg) async {
+    // 1. Remove the failed message
+    final idx = _localMessages.indexWhere((m) => 
+      m.status == MessageStatus.failed && 
+      m.content == failedMsg.content && 
+      m.timestamp == failedMsg.timestamp
+    );
+    
+    if (idx != -1) {
+      _localMessages.removeAt(idx);
+    }
+    
+    // 2. Resend based on type
+    if (failedMsg.type == MessageType.text) {
+      await sendMessage(failedMsg.content, type: failedMsg.type);
+    } else if (failedMsg.type == MessageType.audio) {
+      await sendVoice(failedMsg.mediaUrl ?? '', failedMsg.durationMs);
+    } else {
+      await sendMedia(failedMsg.mediaUrl ?? '', failedMsg.type);
     }
   }
 
@@ -305,8 +451,12 @@ class ChatCubit extends Cubit<ChatState> {
 
   @override
   Future<void> close() {
-    _pollingTimer?.cancel();
     _chatMessageSub?.cancel();
+    _chatTypingSub?.cancel();
+    _chatDeliveredSub?.cancel();
+    _chatReadSub?.cancel();
+    _typingIndicatorTimer?.cancel();
+    _emitTypingDebouncer?.cancel();
     return super.close();
   }
 }

@@ -6,6 +6,7 @@ import 'package:dermalyze/features/auth/view/chat/widgets/voice_recorder_button.
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dermalyze/core/constants/app_colors.dart';
 import 'package:dermalyze/features/auth/view/chat/view/whatsapp_styles.dart';
 import 'package:flutter/material.dart';
@@ -37,14 +38,20 @@ class _ChatViewState extends State<ChatView> {
   final ScrollController _scrollController = ScrollController();
   bool _showEmoji = false;
   final FocusNode _focusNode = FocusNode();
-  // Track the last message count to avoid jumping when polling adds 0 messages
-  int _lastMessageCount = 0;
 
   @override
   void initState() {
     super.initState();
     _focusNode.addListener(() {
       if (_focusNode.hasFocus) setState(() => _showEmoji = false);
+    });
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+        if (mounted) {
+          context.read<ChatCubit>().loadMessages(loadMore: true);
+        }
+      }
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -60,23 +67,6 @@ class _ChatViewState extends State<ChatView> {
     _scrollController.dispose();
     _focusNode.dispose();
     super.dispose();
-  }
-
-  void scrollToBottom({bool animated = true}) {
-    Future.delayed(const Duration(milliseconds: 80), () {
-      if (_scrollController.hasClients) {
-        if (animated) {
-          _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-          );
-        } else {
-          _scrollController.jumpTo(
-              _scrollController.position.maxScrollExtent);
-        }
-      }
-    });
   }
 
   @override
@@ -125,15 +115,7 @@ class _ChatViewState extends State<ChatView> {
               Expanded(
                 child: BlocConsumer<ChatCubit, ChatState>(
                   listenWhen: (prev, curr) => curr is ChatLoaded,
-                  listener: (context, state) {
-                    if (state is ChatLoaded) {
-                      final msgs = state.messages;
-                      if (msgs.length != _lastMessageCount) {
-                        _lastMessageCount = msgs.length;
-                        scrollToBottom(animated: msgs.length > 1);
-                      }
-                    }
-                  },
+                  listener: (context, state) {},
                   builder: (context, state) {
                     if (state is ChatLoading) {
                       return const Center(child: CircularProgressIndicator());
@@ -183,25 +165,50 @@ class _ChatViewState extends State<ChatView> {
                         );
                       }
 
-                      return ListView.builder(
-                        controller: _scrollController,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 20),
-                        itemCount: messages.length,
-                        itemBuilder: (context, index) {
-                          final msg = messages[index];
-                          final showDate = index == 0 ||
-                              !_isSameDay(
-                                messages[index - 1].timestamp,
-                                msg.timestamp,
-                              );
-                          return Column(
-                            children: [
-                              if (showDate) _DateSeparator(timestamp: msg.timestamp),
-                              MessageBubble(message: msg),
-                            ],
-                          );
-                        },
+                      return Column(
+                        children: [
+                          Expanded(
+                            child: ListView.builder(
+                              controller: _scrollController,
+                              reverse: true, // Newest messages at bottom
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 20),
+                              itemCount: messages.length,
+                              itemBuilder: (context, index) {
+                                final msg = messages[index];
+                                final isLastItem = index == messages.length - 1;
+                                final showDate = isLastItem ||
+                                    !_isSameDay(
+                                      messages[index + 1].timestamp,
+                                      msg.timestamp,
+                                    );
+                                return Column(
+                                  children: [
+                                    if (showDate && isLastItem) _DateSeparator(timestamp: msg.timestamp),
+                                    MessageBubble(message: msg),
+                                    // Render DateSeparator after (visually above) if it's a new day
+                                    if (showDate && !isLastItem) _DateSeparator(timestamp: messages[index].timestamp),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                          if (state.isTyping)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 16, bottom: 8, top: 4),
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  '${widget.receiverName} is typing...',
+                                  style: TextStyle(
+                                    color: isDark ? Colors.white54 : Colors.black54,
+                                    fontSize: 12,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
                       );
                     }
 
@@ -342,8 +349,9 @@ class ChatAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final topPadding = MediaQuery.of(context).padding.top + 10;
     return Container(
-      padding: const EdgeInsets.fromLTRB(10, 50, 10, 10),
+      padding: EdgeInsets.fromLTRB(10, topPadding, 10, 10),
       decoration: BoxDecoration(gradient: AppColors.primaryGradient2),
       child: Row(
         children: [
@@ -442,18 +450,27 @@ class MessageBubble extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Align(
-      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: isMe ? AlignmentDirectional.centerEnd : AlignmentDirectional.centerStart,
       child: GestureDetector(
         onLongPress: () => _showMessageOptions(context, message),
+        onTap: () {
+          if (message.status == MessageStatus.failed) {
+            // Show a quick dialog or just retry
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Retrying message...'), duration: Duration(seconds: 1)),
+            );
+            context.read<ChatCubit>().retryMessage(message);
+          }
+        },
         child: Padding(
           padding: const EdgeInsets.only(bottom: 6),
           child: Stack(
             clipBehavior: Clip.none,
             children: [
               Container(
-                margin: EdgeInsets.only(
-                  left: isMe ? 20 : 10,
-                  right: isMe ? 10 : 20,
+                margin: EdgeInsetsDirectional.only(
+                  start: isMe ? 20 : 10,
+                  end: isMe ? 10 : 20,
                 ),
                 padding: const EdgeInsets.all(4),
                 constraints: BoxConstraints(
@@ -468,11 +485,11 @@ class MessageBubble extends StatelessWidget {
                       offset: const Offset(0, 3),
                     ),
                   ],
-                  borderRadius: BorderRadius.only(
-                    topLeft: const Radius.circular(16),
-                    topRight: const Radius.circular(16),
-                    bottomLeft: isMe ? const Radius.circular(16) : const Radius.circular(4),
-                    bottomRight: isMe ? const Radius.circular(4) : const Radius.circular(16),
+                  borderRadius: BorderRadiusDirectional.only(
+                    topStart: const Radius.circular(16),
+                    topEnd: const Radius.circular(16),
+                    bottomStart: isMe ? const Radius.circular(16) : const Radius.circular(4),
+                    bottomEnd: isMe ? const Radius.circular(4) : const Radius.circular(16),
                   ),
                 ),
                 child: Column(
@@ -503,10 +520,10 @@ class MessageBubble extends StatelessWidget {
                 ),
               ),
               if (message.reaction != null)
-                Positioned(
+                PositionedDirectional(
                   bottom: -10,
-                  right: isMe ? 20 : null,
-                  left: isMe ? null : 20,
+                  end: isMe ? 20 : null,
+                  start: isMe ? null : 20,
                   child: Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
@@ -644,9 +661,15 @@ class MessageBubble extends StatelessWidget {
               fit: BoxFit.cover,
               errorBuilder: (_, __, ___) => _imagePlaceholder())
           : message.mediaUrl != null && message.mediaUrl!.startsWith('http')
-              ? Image.network(message.mediaUrl!,
+              ? CachedNetworkImage(
+                  imageUrl: message.mediaUrl!,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => _imagePlaceholder())
+                  placeholder: (context, url) => Container(
+                    color: Colors.grey[200],
+                    child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                  ),
+                  errorWidget: (context, url, error) => _imagePlaceholder(),
+                )
               : _imagePlaceholder(),
     );
   }
@@ -773,6 +796,9 @@ class _MessageInputBarState extends State<MessageInputBar> {
     super.initState();
     widget.controller.addListener(() {
       setState(() => _isTextEmpty = widget.controller.text.trim().isEmpty);
+      if (!_isTextEmpty) {
+        context.read<ChatCubit>().sendTyping();
+      }
     });
   }
 

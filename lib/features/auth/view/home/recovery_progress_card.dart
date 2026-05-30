@@ -141,25 +141,12 @@ class _RecoveryProgressCardState extends State<RecoveryProgressCard> {
                       SizedBox(
                         width: 140,
                         height: 140,
-                        child: CircularProgressIndicator(
-                          value: 1.0,
-                          strokeWidth: 14,
-                          color: isDark ? Colors.white12 : Colors.grey.shade200,
-                        ),
-                      ),
-                      SizedBox(
-                        width: 140,
-                        height: 140,
-                        child: ShaderMask(
-                          blendMode: BlendMode.srcIn,
-                          shaderCallback: (bounds) => AppColors.primaryGradient2
-                              .createShader(bounds),
-                          child: CircularProgressIndicator(
+                        child: CustomPaint(
+                          painter: GradientCircularProgressPainter(
                             value: widget.recoveryRate,
                             strokeWidth: 14,
-                            backgroundColor: Colors.transparent,
-                            color: Colors.white,
-                            strokeCap: StrokeCap.round,
+                            gradient: AppColors.primaryGradient2,
+                            backgroundColor: isDark ? Colors.white12 : Colors.grey.shade200,
                           ),
                         ),
                       ),
@@ -201,5 +188,58 @@ class _RecoveryProgressCardState extends State<RecoveryProgressCard> {
         ),
       ),
     );
+  }
+}
+
+class GradientCircularProgressPainter extends CustomPainter {
+  final double value;
+  final double strokeWidth;
+  final Gradient gradient;
+  final Color backgroundColor;
+
+  GradientCircularProgressPainter({
+    required this.value,
+    required this.strokeWidth,
+    required this.gradient,
+    required this.backgroundColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    final center = rect.center;
+    final radius = (size.width - strokeWidth) / 2;
+
+    // 1. Draw background circle
+    final bgPaint = Paint()
+      ..color = backgroundColor
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawCircle(center, radius, bgPaint);
+
+    // 2. Draw progress arc with gradient
+    final progressPaint = Paint()
+      ..shader = gradient.createShader(rect)
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    final startAngle = -3.141592653589793 / 2; // -90 degrees
+    final sweepAngle = 2 * 3.141592653589793 * value;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      startAngle,
+      sweepAngle,
+      false,
+      progressPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant GradientCircularProgressPainter oldDelegate) {
+    return oldDelegate.value != value || oldDelegate.backgroundColor != backgroundColor;
   }
 }

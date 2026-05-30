@@ -311,11 +311,17 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
 
   Widget _buildResults() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bestDrug   = _insights!['bestPerformingDrug'] as Map<String, dynamic>? ?? {};
-    final drugName   = bestDrug['name']     as String? ?? 'N/A';
-    final drugRecovery = (bestDrug['avgRecovery'] as num? ?? 0).toDouble();
-    final casesUsed  = bestDrug['casesUsed'] ?? 0;
-    final patients   = (_insights!['patientEvidence'] as List?) ?? [];
+    final treatments = (_insights!['treatments'] as List?) ?? [];
+    final patients   = (_insights!['patients'] as List?) ?? [];
+
+    double sumRates = 0;
+    double highestRate = 0;
+    for (var t in treatments) {
+      final rate = (t['average_rate'] as num?)?.toDouble() ?? 0.0;
+      sumRates += rate;
+      if (rate > highestRate) highestRate = rate;
+    }
+    final avgRate = treatments.isNotEmpty ? (sumRates / treatments.length).toStringAsFixed(1) : '0';
 
     return Column(
       children: [
@@ -376,7 +382,7 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${_insights!['totalPatientsTreated'] ?? 0} Patients',
+                      '${patients.length} Patients',
                       style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                   ],
@@ -387,7 +393,7 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
         ),
         const SizedBox(height: 20),
         
-        // Best Performing Drug
+        // Top Treatments List
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(20),
@@ -408,7 +414,7 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
               Row(
                 children: [
                   Container(
-                    padding: EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(10),
@@ -420,7 +426,7 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Best Performing Drug',
+                        'Top Treatments',
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87),
                       ),
                       Text(
@@ -432,63 +438,9 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
                 ],
               ),
               const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.white12 : const Color(0xFFFFFDF5),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: isDark ? Colors.white24 : Color(0xFFFFEAA7)),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.medication, color: Theme.of(context).cardColor, size: 24),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                drugName,
-                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87),
-                              ),
-                              Text(
-                                'Used in $casesUsed case(s)',
-                                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              '$drugRecovery%',
-                              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF00C853)),
-                            ),
-                            Text(
-                              'Avg\nRecovery',
-                              textAlign: TextAlign.right,
-                              style: TextStyle(fontSize: 10, color: Colors.grey.shade500),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: (drugRecovery / 100).clamp(0.0, 1.0),
-                        backgroundColor: Colors.grey.shade200,
-                        color: const Color(0xFF00C853),
-                        minHeight: 8,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              if (treatments.isEmpty)
+                Text('No treatment data found.', style: TextStyle(color: Colors.grey.shade500)),
+              ...treatments.map((t) => _buildTreatmentCard(t, isDark)),
             ],
           ),
         ),
@@ -517,18 +469,20 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
                   const Icon(Icons.person_outline, color: Color(0xFF4A90E2), size: 22),
                   const SizedBox(width: 8),
                   Text(
-                    'Patient Evidence',
+                       'Patient Evidence',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87),
                   ),
                 ],
               ),
               const SizedBox(height: 6),
               Text(
-                '${patients.length} patient(s) treated with $drugName',
+                '${patients.length} patient(s) found',
                 style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
               ),
               const SizedBox(height: 16),
-              ...patients.map((p) => _buildPatientEvidenceCard(p)),
+              if (patients.isEmpty)
+                Text('No patient records found.', style: TextStyle(color: Colors.grey.shade500)),
+              ...patients.map((p) => _buildPatientEvidenceCard(p, isDark)),
             ],
           ),
         ),
@@ -571,7 +525,7 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '${_insights!['highestRecovery'] ?? 0}%',
+                            '${highestRate.toStringAsFixed(1)}%',
                             style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
                           ),
                         ],
@@ -596,7 +550,7 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '${_insights!['averageRecovery'] ?? 0}%',
+                            '$avgRate%',
                             style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
                           ),
                         ],
@@ -612,110 +566,120 @@ class _SmartHistoryScreenState extends State<SmartHistoryScreen> {
     );
   }
 
-  Widget _buildPatientEvidenceCard(dynamic patientData) {
+  Widget _buildTreatmentCard(dynamic treatmentData, bool isDark) {
+    final t = treatmentData as Map<String, dynamic>? ?? {};
+    final name = t['treatment_name'] as String? ?? 'Unknown';
+    final dosage = t['dosage'] as String? ?? '';
+    final rate = (t['average_rate'] as num?)?.toDouble() ?? 0.0;
+    final count = t['patient_count'] ?? 0;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white12 : const Color(0xFFFFFDF5),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: isDark ? Colors.white24 : const Color(0xFFFFEAA7)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Icon(Icons.medication, color: Theme.of(context).cardColor, size: 24),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$name $dosage',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87),
+                    ),
+                    Text(
+                      'Used in $count case(s)',
+                      style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '${rate.toStringAsFixed(1)}%',
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF00C853)),
+                  ),
+                  Text(
+                    'Avg Recovery',
+                    style: TextStyle(fontSize: 10, color: Colors.grey.shade500),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: (rate / 100).clamp(0.0, 1.0),
+              backgroundColor: Colors.grey.shade200,
+              color: const Color(0xFF00C853),
+              minHeight: 6,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPatientEvidenceCard(dynamic patientData, bool isDark) {
     final patient = patientData as Map<String, dynamic>? ?? {};
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final recoveryRate = (patient['recoveryRate'] as num? ?? 0).toDouble();
-    bool isBest = recoveryRate > 92;
+    final firstName = patient['first_name'] as String? ?? '';
+    final lastName = patient['last_name'] as String? ?? '';
+    final fullName = '$firstName $lastName'.trim();
+    final age = patient['age']?.toString() ?? '';
+    final gender = patient['gender']?.toString() ?? '';
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF0F172A) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isBest ? const Color(0xFF6EE7B7) : (isDark ? Colors.white12 : const Color(0xFF93C5FD))),
+        border: Border.all(color: isDark ? Colors.white12 : const Color(0xFF93C5FD)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-               Container(
-                 width: 40,
-                 height: 40,
-                 decoration: BoxDecoration(
-                   color: Color(0xFF5BAED0),
-                   shape: BoxShape.circle,
-                 ),
-                  child: Center(
-                    child: Text(
-                      _getInitials(patient['patientName'] as String?),
-                      style: TextStyle(color: Theme.of(context).cardColor, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-               ),
-               const SizedBox(width: 12),
-               Expanded(
-                 child: Column(
-                   crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        patient['patientName'] as String? ?? 'Unknown',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87),
-                      ),
-                      Text(
-                        patient['treatmentDuration'] as String? ?? '',
-                        style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
-                      ),
-                    ],
-                 ),
-               ),
-               Container(
-                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                 decoration: BoxDecoration(
-                   color: const Color(0xFFD1FAE5),
-                   borderRadius: BorderRadius.circular(20),
-                 ),
-                  child: Text(
-                    '${recoveryRate.toStringAsFixed(0)}%',
-                    style: const TextStyle(color: Color(0xFF059669), fontSize: 12, fontWeight: FontWeight.bold),
-                  ),
-               ),
-            ],
-          ),
-          Padding(
-             padding: const EdgeInsets.symmetric(vertical: 12),
-             child: Divider(height: 1, color: isDark ? Colors.white24 : const Color(0xFFF3F4F6)),
-          ),
-          Row(
-            children: [
-              const Icon(Icons.link, color: Color(0xFF4A90E2), size: 16),
-              const SizedBox(width: 8),
-              RichText(
-                text: TextSpan(
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
-                  children: [
-                    const TextSpan(text: 'Treated with: '),
-                     TextSpan(
-                      text: patient['drugUsed'] as String? ?? 'N/A',
-                      style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black),
-                     ),
-                  ],
+           Container(
+             width: 40,
+             height: 40,
+             decoration: const BoxDecoration(
+               color: Color(0xFF5BAED0),
+               shape: BoxShape.circle,
+             ),
+              child: Center(
+                child: Text(
+                  _getInitials(fullName.isNotEmpty ? fullName : 'Unknown'),
+                  style: TextStyle(color: Theme.of(context).cardColor, fontWeight: FontWeight.bold),
                 ),
               ),
-            ],
-          ),
-          if (isBest) ...[
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFF6EE7B7)),
-              ),
-              child: Row(
-                children: const [
-                  Icon(Icons.military_tech, color: Color(0xFF10B981), size: 16),
-                  SizedBox(width: 6),
+           ),
+           const SizedBox(width: 12),
+           Expanded(
+             child: Column(
+               crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    'Best Result',
-                    style: TextStyle(color: Color(0xFF059669), fontSize: 12, fontWeight: FontWeight.w600),
+                    fullName.isNotEmpty ? fullName : 'Unknown',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87),
+                  ),
+                  Text(
+                    '$age years old, $gender',
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
                   ),
                 ],
-              ),
-            ),
-          ]
+             ),
+           ),
         ],
       ),
     );

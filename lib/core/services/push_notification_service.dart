@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:dermalyze/core/routes/app_routes.dart';
 import 'package:dermalyze/core/network/api_service.dart' as dermalyze_api;
+import 'package:dermalyze/core/storage/token_storage.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -74,11 +75,30 @@ class PushNotificationService {
         ?.createNotificationChannel(channel);
 
     // Handle foreground messages
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
       RemoteNotification? notification = message.notification;
       AndroidNotification? android = message.notification?.android;
 
       if (notification != null && android != null) {
+        // Prevent showing notification to ourselves if we are testing multiple accounts on the same device
+        final senderId = message.data['senderId'];
+        
+        final user = await TokenStorage().getUser();
+        final currentUserId = user?['_id']?.toString() ?? '';
+        final currentUserName = user?['name']?.toString() ?? user?['firstName']?.toString() ?? '';
+        
+        bool isFromMe = false;
+        if (senderId != null && senderId == currentUserId) {
+          isFromMe = true;
+        } else if (notification.title != null && notification.title!.contains(currentUserName) && currentUserName.isNotEmpty) {
+          // Fallback check by name if backend doesn't send senderId in data
+          isFromMe = true;
+        }
+
+        if (isFromMe) {
+          return; // Ignore echo notifications from ourselves
+        }
+
         _localNotificationsPlugin.show(
           id: notification.hashCode,
           title: notification.title,
@@ -133,8 +153,8 @@ class PushNotificationService {
       final fcmToken = token ?? await _fcm.getToken();
       if (fcmToken == null) return;
 
-      final _apiService = dermalyze_api.ApiService(); // need to import
-      await _apiService.put(
+      final apiService = dermalyze_api.ApiService(); // need to import
+      await apiService.put(
         'user/fcm-token',
         {'fcmToken': fcmToken},
       );

@@ -138,7 +138,7 @@ class _VoiceMessagePlayerState extends State<VoiceMessagePlayer>
               children: [
                 // Waveform / progress bar
                 Stack(
-                  alignment: Alignment.centerLeft,
+                  alignment: AlignmentDirectional.centerStart,
                   children: [
                     // Background waveform bars
                     _buildWaveformBars(progress, sliderActive, sliderInactive),
@@ -167,7 +167,7 @@ class _VoiceMessagePlayerState extends State<VoiceMessagePlayer>
                 ),
                 // Time
                 Padding(
-                  padding: const EdgeInsets.only(left: 4),
+                  padding: const EdgeInsetsDirectional.only(start: 4),
                   child: Text(
                     isPlaying
                         ? _fmt(_position)

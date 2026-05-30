@@ -37,25 +37,29 @@ class DoctorHomeHeader extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Welcome, Dr.',
-                        style: TextStyle(
-                          color: Theme.of(context).cardColor.withOpacity(0.85),
-                          fontSize: 13,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Welcome, Dr.',
+                          style: TextStyle(
+                            color: Theme.of(context).cardColor.withOpacity(0.85),
+                            fontSize: 13,
+                          ),
                         ),
-                      ),
-                      Text(
-                        doctorName,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
+                        Text(
+                          doctorName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   Row(
                     children: [

@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:dermalyze/core/constants/app_colors.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/data/repositories/clinical_resources_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class DiseasesLibraryScreen extends StatefulWidget {
   const DiseasesLibraryScreen({super.key});
@@ -16,6 +18,7 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
   List<Map<String, dynamic>> _allDiseases = [];
   List<Map<String, dynamic>> _filteredDiseases = [];
   bool _isLoading = true;
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -27,6 +30,7 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
@@ -42,14 +46,17 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
   }
 
   void _onSearch() {
-    final query = _searchController.text.toLowerCase();
-    setState(() {
-      _filteredDiseases = _allDiseases.where((disease) {
-        final tags = (disease['tags'] as List? ?? []);
-        return (disease['name'] as String? ?? '').toLowerCase().contains(query) ||
-               (disease['type'] as String? ?? '').toLowerCase().contains(query) ||
-               tags.any((tag) => tag.toString().toLowerCase().contains(query));
-      }).toList();
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      final query = _searchController.text.toLowerCase();
+      setState(() {
+        _filteredDiseases = _allDiseases.where((disease) {
+          final tags = (disease['tags'] as List? ?? []);
+          return (disease['name'] as String? ?? '').toLowerCase().contains(query) ||
+                 (disease['type'] as String? ?? '').toLowerCase().contains(query) ||
+                 tags.any((tag) => tag.toString().toLowerCase().contains(query));
+        }).toList();
+      });
     });
   }
 
@@ -207,10 +214,14 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
                   height: 160,
                   width: double.infinity,
                   child: disease['imageUrl'] != null && disease['imageUrl'].toString().isNotEmpty
-                    ? Image.network(
-                        disease['imageUrl'] as String,
+                    ? CachedNetworkImage(
+                        imageUrl: disease['imageUrl'] as String,
                         fit: BoxFit.cover,
-                        errorBuilder: (ctx, err, stack) => Container(
+                        placeholder: (context, url) => Container(
+                          color: Colors.grey.shade300,
+                          child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                        ),
+                        errorWidget: (context, url, error) => Container(
                           color: Colors.grey.shade300,
                           child: const Center(child: Icon(Icons.image_not_supported, color: Colors.grey)),
                         ),
@@ -322,10 +333,13 @@ class _DiseasesLibraryScreenState extends State<DiseasesLibraryScreen> {
                           height: 200,
                           width: double.infinity,
                           child: disease['imageUrl'] != null && disease['imageUrl'].toString().isNotEmpty
-                            ? Image.network(
-                                disease['imageUrl'] as String,
+                            ? CachedNetworkImage(
+                                imageUrl: disease['imageUrl'] as String,
                                 fit: BoxFit.cover,
-                                errorBuilder: (ctx, err, stack) => Container(
+                                placeholder: (context, url) => Container(
+                                  color: Colors.grey.shade300,
+                                ),
+                                errorWidget: (context, url, error) => Container(
                                   color: Colors.grey.shade300,
                                 ),
                               )

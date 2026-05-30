@@ -69,6 +69,7 @@ class _LoginViewState extends State<LoginView> {
             }
           }
           if (state is LoginFailure) {
+            ScaffoldMessenger.of(context).clearSnackBars();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),

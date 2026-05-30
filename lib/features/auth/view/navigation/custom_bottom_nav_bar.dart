@@ -8,7 +8,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/screens/doctor_profile_screen.dart';
 import 'package:dermalyze/features/auth/view/home/home_view.dart';
 import 'package:dermalyze/features/auth/view/profile_sceern/profile_view.dart';
-import 'package:dermalyze/core/routes/app_router.dart';
 import 'package:flutter/material.dart';
 
 class CustomBottomNavBar extends StatefulWidget {

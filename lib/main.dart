@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 import 'package:app_links/app_links.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 import 'package:dermalyze/core/routes/app_router.dart';
 import 'package:dermalyze/core/routes/app_routes.dart';
@@ -20,6 +22,7 @@ import 'package:dermalyze/features/auth/view/chat/data/repositories/chat_reposit
 import 'package:dermalyze/core/network/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dermalyze/core/services/biometric_service.dart' as dermalyze_bio;
+import 'package:dermalyze/core/widgets/offline_banner.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -69,12 +72,25 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   
   late AppLinks _appLinks;
   StreamSubscription<Uri>? _linkSubscription;
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+  bool _isOffline = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _initDeepLinks();
+    _initConnectivity();
+  }
+
+  void _initConnectivity() {
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> results) {
+      if (mounted) {
+        setState(() {
+          _isOffline = results.contains(ConnectivityResult.none) && results.length == 1;
+        });
+      }
+    });
   }
 
   Future<void> _initDeepLinks() async {
@@ -117,6 +133,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _linkSubscription?.cancel();
+    _connectivitySubscription?.cancel();
     super.dispose();
   }
 
@@ -135,7 +152,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   Future<void> _authenticate() async {
     final canAuth = await _biometricService.isBiometricAvailable();
     if (!canAuth) {
-      _isLocked = false;
+      if (mounted) {
+        setState(() {
+          _isLocked = false;
+        });
+      }
       return;
     }
 
@@ -179,8 +200,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             supportedLocales: context.supportedLocales,
             locale: context.locale,
             builder: (context, child) {
+              Widget mainContent = child ?? const SizedBox.shrink();
+              
               if (_isLocked) {
-                return Scaffold(
+                mainContent = Scaffold(
                   body: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -198,7 +221,22 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   ),
                 );
               }
-              return child ?? const SizedBox.shrink();
+              
+              return Directionality(
+                textDirection: ui.TextDirection.ltr,
+                child: Stack(
+                  children: [
+                    mainContent,
+                    if (_isOffline)
+                      const Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        child: Material(child: OfflineBanner()),
+                      ),
+                  ],
+                ),
+              );
             },
             onUnknownRoute: (settings) {
               return MaterialPageRoute(

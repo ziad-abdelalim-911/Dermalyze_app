@@ -39,5 +39,6 @@ class AppRoutes {
   static const diseasesLibrary = "/diseasesLibrary";
   static const chat = "/chat";
   static const patientAppointments = "/patientAppointments";
+  static const patientReport = "/patientReport";
 
 }

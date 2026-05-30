@@ -92,13 +92,13 @@ class ChatRepository {
   // GET chat/messages/{receiverId}
   // ─────────────────────────────────────────────────────────────────
   Future<List<MessageModel>> getMessages(
-      String receiverId, String currentUserId) async {
+      String receiverId, String currentUserId, {int page = 1, int limit = 30}) async {
     final box = Hive.box('offline_chats');
-    final cacheKey = 'chat_${currentUserId}_$receiverId';
+    final cacheKey = 'chat_${currentUserId}_${receiverId}_page_$page';
 
     try {
       final response =
-          await _apiService.get(ApiEndpoints.chatMessages(receiverId));
+          await _apiService.get('${ApiEndpoints.chatMessages(receiverId)}?page=$page&limit=$limit');
       final rawList = _extractList(response, ['messages', 'data']);
 
       final messages = rawList
@@ -222,6 +222,13 @@ class ChatRepository {
     if (response is Map<String, dynamic>) {
       for (final key in keys) {
         if (response[key] is List) return response[key] as List;
+      }
+      // Check for nested pagination structures like { data: { messages: [...] } }
+      if (response.containsKey('data') && response['data'] is Map<String, dynamic>) {
+        final nestedData = response['data'] as Map<String, dynamic>;
+        for (final key in keys) {
+          if (nestedData[key] is List) return nestedData[key] as List;
+        }
       }
     }
     return [];

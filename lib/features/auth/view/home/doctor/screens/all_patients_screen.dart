@@ -6,8 +6,11 @@ import 'package:dermalyze/features/auth/view/home/doctor/presentation/bloc/docto
 import 'package:dermalyze/features/auth/view/home/doctor/presentation/bloc/doctor_home_state.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/widgets/patient_item_card.dart';
 import 'package:dermalyze/features/auth/view/home/doctor/widgets/patients_filter_tabs.dart';
+import 'package:dermalyze/core/widgets/shimmer_patient_card.dart';
+import 'package:dermalyze/core/widgets/empty_state_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
 class AllPatientsScreen extends StatefulWidget {
   const AllPatientsScreen({super.key});
@@ -139,8 +142,11 @@ class _AllPatientsScreenState extends State<AllPatientsScreen> {
                 const SizedBox(height: 16),
                 // Patients List
                 if (state is DoctorHomeLoading)
-                  const Expanded(
-                    child: Center(child: CircularProgressIndicator()),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: 5,
+                      itemBuilder: (_, __) => const ShimmerPatientCard(),
+                    ),
                   )
                 else if (state is DoctorHomeError)
                   Expanded(
@@ -168,47 +174,72 @@ class _AllPatientsScreenState extends State<AllPatientsScreen> {
                       ),
                     ),
                   )
+                else if (filtered.isEmpty)
+                  const Expanded(
+                    child: EmptyStateView(
+                      icon: Icons.group_off_outlined,
+                      title: 'No Patients Found',
+                      subtitle: 'We could not find any patients matching your search or filter criteria.',
+                    ),
+                  )
                 else
                   Expanded(
-                    child: ListView.builder(
-                      itemCount: filtered.length,
-                      itemBuilder: (_, i) {
-                        final p = filtered[i];
-                        return PatientItemCard(
-                          id: p.id,
-                          name: p.name,
-                          diagnosis: p.diagnosis,
-                          statusBadge: p.statusBadge,
-                          qualityBadge: p.qualityBadge,
-                          recoveryRate: p.recoveryRate,
-                          lastVisit: p.lastVisit,
-                          age: p.age,
-                          onChatTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              AppRoutes.chat,
-                              arguments: {
-                                'receiverId': p.id,
-                                'receiverName': p.name,
-                                'receiverRole': 'patient',
-                              },
-                            );
-                          },
-                          // ✅ يمرر الـ PatientEntity الحقيقي
-                          onTap: () async {
-                            await Navigator.pushNamed(
-                              context,
-                              AppRoutes.patientDetails,
-                              arguments: p,
-                            );
-                            if (context.mounted) {
-                              context.read<DoctorHomeBloc>().add(LoadDoctorHomeEvent());
-                            }
-                          },
-                        );
+                    child: RefreshIndicator(
+                      onRefresh: () async {
+                        context.read<DoctorHomeBloc>().add(LoadDoctorHomeEvent());
+                        // Give it a tiny delay for visual effect since API might be too fast
+                        await Future.delayed(const Duration(milliseconds: 500));
                       },
+                      child: AnimationLimiter(
+                        child: ListView.builder(
+                        itemCount: filtered.length,
+                        itemBuilder: (_, i) {
+                          final p = filtered[i];
+                          return AnimationConfiguration.staggeredList(
+                            position: i,
+                            duration: const Duration(milliseconds: 375),
+                            child: SlideAnimation(
+                              verticalOffset: 50.0,
+                              child: FadeInAnimation(
+                                child: PatientItemCard(
+                                  id: p.id,
+                                  name: p.name,
+                                  diagnosis: p.diagnosis,
+                                  statusBadge: p.statusBadge,
+                                  qualityBadge: p.qualityBadge,
+                                  recoveryRate: p.recoveryRate,
+                                  lastVisit: p.lastVisit,
+                                  age: p.age,
+                                  onChatTap: () {
+                                    Navigator.pushNamed(
+                                      context,
+                                      AppRoutes.chat,
+                                      arguments: {
+                                        'receiverId': p.id,
+                                        'receiverName': p.name,
+                                        'receiverRole': 'patient',
+                                      },
+                                    );
+                                  },
+                                  onTap: () async {
+                                    await Navigator.pushNamed(
+                                      context,
+                                      AppRoutes.patientDetails,
+                                      arguments: p,
+                                    );
+                                    if (context.mounted) {
+                                      context.read<DoctorHomeBloc>().add(LoadDoctorHomeEvent());
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
+                ),
               ],
             ),
           ),
